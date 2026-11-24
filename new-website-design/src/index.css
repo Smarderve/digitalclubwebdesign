@@ -3,237 +3,76 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
-   Theme tokens. Every colour used by the interface resolves through these
-   variables, so switching the `data-theme` attribute repaints the whole app.
-   Values are space-separated RGB channels for Tailwind's `rgb(var(--x) / a)`.
+   Theme tokens. Every colour resolves through these variables, so switching the
+   data-theme attribute repaints the whole application. Four light themes and
+   four dark themes; values are space-separated RGB channels.
+
+   `--accent` is the theme default. A user-selected accent replaces the accent
+   tokens and the brand ramp at runtime (see features/settings/preferences.ts),
+   so primary buttons, active navigation, links, focus rings and progress all
+   follow the chosen accent.
    --------------------------------------------------------------------------- */
-:root,
-html[data-theme='fresh'] {
-  --canvas: 238 246 241;
+:root {
+  /* Canonical brand green. Every green surface, control and shade in the
+     application derives from these channels; the primary green is never
+     re-tinted, warmed or replaced by a theme. */
+  --brand-green: 58 182 88;
+  --brand-green-hex: #3ab658;
+  --brand-green-hover: 50 157 76;
+  --brand-green-soft: 222 243 227;
+  --focus-ring: 0 0 0 3px rgb(58 182 88 / 0.22);
+}
+
+/* --- Clean White -----------------------------------------------------------
+   Crisp neutral paper: white panels on a light grey page. Green is confined to
+   controls, links and indicators so the surface itself stays neutral. */
+html[data-theme='clean'] {
+  color-scheme: light;
+  --canvas: 243 244 246;
   --surface: 255 255 255;
-  --line: 227 234 229;
-  --mint: 234 247 239;
-  --brand-50: 241 250 244;
-  --brand-100: 221 243 230;
-  --brand-200: 186 230 204;
-  --brand-300: 138 214 169;
-  --brand-400: 86 196 134;
-  --brand-500: 51 172 105;
-  --brand-600: 37 143 85;
-  --brand-700: 30 116 70;
-  --brand-800: 27 94 59;
-  --brand-900: 22 75 48;
-  --brand-950: 11 42 28;
-  --ink-50: 244 246 245;
-  --ink-100: 231 236 233;
-  --ink-200: 214 222 217;
-  --ink-300: 186 197 191;
-  --ink-400: 147 161 154;
-  --ink-500: 107 122 114;
-  --ink-600: 85 99 91;
-  --ink-700: 60 72 66;
-  --ink-800: 42 54 48;
-  --ink-900: 27 38 32;
-  --ink-950: 18 26 22;
-}
-
-html[data-theme='dark-green'] {
-  --canvas: 8 20 14;
-  --surface: 13 28 21;
-  --line: 31 56 43;
-  --mint: 18 42 30;
-  --brand-50: 17 43 29;
-  --brand-100: 21 55 37;
-  --brand-200: 27 72 48;
-  --brand-300: 35 95 63;
-  --brand-400: 46 122 81;
-  --brand-500: 62 152 101;
-  --brand-600: 82 180 122;
-  --brand-700: 111 205 148;
-  --brand-800: 145 224 175;
-  --brand-900: 190 240 210;
-  --brand-950: 235 251 242;
-  --ink-50: 24 38 30;
-  --ink-100: 38 54 45;
-  --ink-200: 55 73 63;
-  --ink-300: 82 100 90;
-  --ink-400: 105 124 113;
-  --ink-500: 128 147 136;
-  --ink-600: 153 172 161;
-  --ink-700: 180 197 186;
-  --ink-800: 207 220 212;
-  --ink-900: 227 236 231;
-  --ink-950: 242 247 244;
-}
-
-html[data-theme='light'] {
-  --canvas: 255 255 255;
-  --surface: 255 255 255;
-  --line: 222 223 227;
-  --mint: 241 246 243;
-  --brand-50: 241 250 244;
-  --brand-100: 221 243 230;
-  --brand-200: 186 230 204;
-  --brand-300: 138 214 169;
-  --brand-400: 86 196 134;
-  --brand-500: 51 172 105;
-  --brand-600: 37 143 85;
-  --brand-700: 30 116 70;
-  --brand-800: 27 94 59;
-  --brand-900: 22 75 48;
-  --brand-950: 11 42 28;
-  --ink-50: 247 248 249;
-  --ink-100: 236 238 241;
-  --ink-200: 218 222 227;
-  --ink-300: 190 195 202;
-  --ink-400: 158 163 171;
-  --ink-500: 128 133 141;
-  --ink-600: 102 106 114;
-  --ink-700: 77 80 87;
-  --ink-800: 55 57 62;
-  --ink-900: 36 37 41;
-  --ink-950: 23 23 26;
-}
-
-html[data-theme='midnight'] {
-  --canvas: 10 12 15;
-  --surface: 17 20 25;
-  --line: 38 43 51;
-  --mint: 20 30 26;
-  --brand-50: 16 35 29;
-  --brand-100: 22 49 40;
-  --brand-200: 30 70 56;
-  --brand-300: 40 96 76;
-  --brand-400: 54 128 100;
-  --brand-500: 72 158 123;
-  --brand-600: 96 188 148;
-  --brand-700: 124 211 169;
-  --brand-800: 158 228 190;
-  --brand-900: 198 242 218;
-  --brand-950: 236 252 244;
-  --ink-50: 23 26 31;
-  --ink-100: 34 38 45;
-  --ink-200: 48 54 63;
-  --ink-300: 70 78 89;
-  --ink-400: 100 109 122;
-  --ink-500: 126 136 150;
-  --ink-600: 151 161 174;
-  --ink-700: 178 187 198;
-  --ink-800: 205 212 221;
-  --ink-900: 228 233 239;
-  --ink-950: 244 247 250;
-}
-
-html[data-theme='yellow'] {
-  --canvas: 250 247 238;
-  --surface: 255 253 249;
-  --line: 234 226 208;
-  --mint: 250 244 226;
-  --brand-50: 253 248 227;
-  --brand-100: 250 240 199;
-  --brand-200: 246 226 156;
-  --brand-300: 240 208 103;
-  --brand-400: 228 184 65;
-  --brand-500: 202 155 42;
-  --brand-600: 168 124 30;
-  --brand-700: 135 98 23;
-  --brand-800: 106 76 17;
-  --brand-900: 78 56 12;
-  --brand-950: 45 33 8;
-  --ink-50: 246 242 232;
-  --ink-100: 235 229 215;
-  --ink-200: 216 209 192;
-  --ink-300: 187 179 160;
-  --ink-400: 153 145 127;
-  --ink-500: 124 115 98;
-  --ink-600: 100 92 77;
-  --ink-700: 79 73 60;
-  --ink-800: 61 56 45;
-  --ink-900: 45 41 33;
-  --ink-950: 33 30 24;
-}
-
-html[data-theme='glass'] {
-  --canvas: 232 241 236;
-  --surface: 252 254 253;
-  --line: 210 226 217;
-  --mint: 228 243 235;
-  --brand-50: 241 250 244;
-  --brand-100: 221 243 230;
-  --brand-200: 186 230 204;
-  --brand-300: 138 214 169;
-  --brand-400: 86 196 134;
-  --brand-500: 51 172 105;
-  --brand-600: 37 143 85;
-  --brand-700: 30 116 70;
-  --brand-800: 27 94 59;
-  --brand-900: 22 75 48;
-  --brand-950: 11 42 28;
-  --ink-50: 240 246 242;
-  --ink-100: 228 237 232;
-  --ink-200: 211 223 216;
-  --ink-300: 183 198 189;
-  --ink-400: 145 161 152;
-  --ink-500: 105 122 113;
-  --ink-600: 83 99 90;
-  --ink-700: 59 74 66;
-  --ink-800: 41 55 47;
-  --ink-900: 26 40 32;
-  --ink-950: 17 28 22;
-}
-
-html[data-theme='ocean'] {
-  --canvas: 241 247 252;
-  --surface: 255 255 255;
-  --line: 219 232 242;
-  --mint: 235 245 252;
-  --brand-50: 235 246 255;
-  --brand-100: 214 237 254;
-  --brand-200: 178 219 251;
-  --brand-300: 128 195 245;
-  --brand-400: 77 168 233;
-  --brand-500: 42 139 209;
-  --brand-600: 24 112 178;
-  --brand-700: 20 91 145;
-  --brand-800: 21 74 117;
-  --brand-900: 20 59 92;
-  --brand-950: 12 35 55;
-  --ink-50: 242 247 250;
-  --ink-100: 228 236 242;
-  --ink-200: 206 219 229;
-  --ink-300: 172 189 202;
-  --ink-400: 133 151 165;
-  --ink-500: 101 119 133;
-  --ink-600: 78 96 110;
-  --ink-700: 56 74 88;
-  --ink-800: 39 55 68;
-  --ink-900: 25 39 50;
-  --ink-950: 15 27 36;
-}
-
-/* ---------------------------------------------------------------------------
-   Semantic tokens. Components read these names (surfaces, navigation states,
-   accent, status colours) instead of hardcoding a palette per theme, so every
-   floating block, card, form and state repaints together.
-   --------------------------------------------------------------------------- */
-:root,
-html[data-theme='fresh'] {
-  --surface-2: 246 251 248;
+  --surface-2: 246 247 249;
   --surface-3: 255 255 255;
+  --line: 221 224 228;
+  --mint: 242 246 243;
+  --brand-50: 239 249 242;
+  --brand-100: 222 243 227;
+  --brand-200: 188 230 198;
+  --brand-300: 149 216 165;
+  --brand-400: 105 200 128;
+  --brand-500: 74 188 101;
+  --brand-600: 58 182 88;
+  --brand-700: 50 157 76;
+  --brand-800: 42 133 64;
+  --brand-900: 35 109 53;
+  --brand-950: 24 76 37;
+  --ink-50: 249 250 251;
+  --ink-100: 240 242 244;
+  --ink-200: 224 227 231;
+  --ink-300: 197 201 207;
+  --ink-400: 158 163 170;
+  --ink-500: 122 127 135;
+  --ink-600: 94 99 107;
+  --ink-700: 70 75 82;
+  --ink-800: 50 54 60;
+  --ink-900: 32 35 40;
+  --ink-950: 18 20 24;
   --nav-surface: 255 255 255;
-  --nav-hover: 241 250 244;
-  --nav-active: 221 243 230;
-  --nav-active-text: 22 75 48;
-  --accent: 37 143 85;
-  --accent-hover: 30 116 70;
-  --accent-fg: 255 255 255;
-  --ring: 37 143 85;
-  --panel-shadow: 18 26 22;
+  --nav-hover: 244 246 248;
+  --nav-active: 227 245 232;
+  --nav-active-text: 24 76 37;
+  --accent: 58 182 88;
+  --accent-hover: 50 157 76;
+  --accent-fg: 9 32 18;
+  --ring: 58 182 88;
+  --btn-primary: 58 182 88;
+  --btn-primary-hover: 50 157 76;
+  --btn-primary-fg: 9 32 18;
+  --panel-shadow: 18 20 24;
   --success: 22 121 74;
-  --success-soft: 236 248 241;
+  --success-soft: 238 248 243;
   --warning: 161 92 7;
-  --warning-soft: 255 248 235;
-  --warning-line: 245 217 168;
+  --warning-soft: 255 249 238;
+  --warning-line: 238 220 188;
   --danger: 180 35 24;
   --danger-strong: 150 21 12;
   --danger-soft: 254 243 242;
@@ -244,147 +83,456 @@ html[data-theme='fresh'] {
   --info-line: 199 218 248;
 }
 
-/* Genuinely dark forest green: green page, green surfaces, green borders. */
-html[data-theme='dark-green'] {
-  --surface-2: 16 34 24;
-  --surface-3: 19 41 29;
-  --nav-surface: 19 41 29;
-  --nav-hover: 25 50 36;
-  --nav-active: 27 72 48;
-  --nav-active-text: 190 240 210;
-  --accent: 82 180 122;
-  --accent-hover: 111 205 148;
-  --accent-fg: 8 20 14;
-  --ring: 111 205 148;
-  --panel-shadow: 0 0 0;
-  --success: 111 205 148;
-  --success-soft: 17 43 29;
-  --warning: 232 186 98;
-  --warning-soft: 43 35 18;
-  --warning-line: 91 73 32;
-  --danger: 241 138 126;
-  --danger-strong: 247 172 163;
-  --danger-soft: 45 23 21;
-  --danger-soft-strong: 58 29 26;
-  --danger-line: 92 47 41;
-  --info: 141 182 247;
-  --info-soft: 20 32 47;
-  --info-line: 44 64 90;
-}
-
-/* Neutral light: white and grey, green kept to controls only. */
-html[data-theme='light'] {
-  --surface-2: 248 248 250;
-  --surface-3: 255 255 255;
-  --nav-surface: 255 255 255;
-  --nav-hover: 245 245 247;
-  --nav-active: 235 236 239;
-  --nav-active-text: 30 116 70;
-  --accent: 37 143 85;
-  --accent-hover: 30 116 70;
-  --accent-fg: 255 255 255;
-  --ring: 37 143 85;
-  --panel-shadow: 18 26 22;
-}
-
-/* Charcoal dark, not another green. */
-html[data-theme='midnight'] {
-  --surface-2: 22 26 32;
-  --surface-3: 26 31 38;
-  --nav-surface: 26 31 38;
-  --nav-hover: 33 39 47;
-  --nav-active: 30 70 56;
-  --nav-active-text: 198 242 218;
-  --accent: 96 188 148;
-  --accent-hover: 124 211 169;
-  --accent-fg: 10 12 15;
-  --ring: 124 211 169;
-  --panel-shadow: 0 0 0;
-  --success: 124 211 169;
-  --success-soft: 16 35 29;
-  --warning: 230 184 100;
-  --warning-soft: 40 33 20;
-  --warning-line: 80 66 34;
-  --danger: 240 138 126;
-  --danger-strong: 246 170 161;
-  --danger-soft: 44 24 24;
-  --danger-soft-strong: 56 30 29;
-  --danger-line: 88 48 44;
-  --info: 140 178 240;
-  --info-soft: 20 30 44;
-  --info-line: 44 60 82;
-}
-
-/* Warm paper with amber controls; never a yellow wash. */
-html[data-theme='yellow'] {
-  --surface-2: 253 250 243;
-  --surface-3: 255 253 249;
-  --nav-surface: 255 253 249;
-  --nav-hover: 250 244 226;
-  --nav-active: 250 240 199;
-  --nav-active-text: 78 56 12;
-  --accent: 168 124 30;
-  --accent-hover: 135 98 23;
-  --accent-fg: 255 253 249;
-  --ring: 202 155 42;
-  --panel-shadow: 61 51 30;
-  --success: 22 121 74;
-  --success-soft: 240 247 232;
-  --warning: 138 96 10;
-  --warning-soft: 253 245 220;
-  --warning-line: 238 219 160;
-  --danger: 170 40 28;
-  --danger-strong: 140 30 20;
+/* --- Fresh Green -----------------------------------------------------------
+   Mint and soft green surfaces throughout: the page, panels, inputs and
+   navigation are all tinted, not white panels with a green button. */
+html[data-theme='fresh'] {
+  color-scheme: light;
+  --canvas: 228 243 234;
+  --surface: 246 253 249;
+  --surface-2: 231 246 238;
+  --surface-3: 251 255 253;
+  --line: 199 227 211;
+  --mint: 217 242 229;
+  --brand-50: 239 249 242;
+  --brand-100: 222 243 227;
+  --brand-200: 188 230 198;
+  --brand-300: 149 216 165;
+  --brand-400: 105 200 128;
+  --brand-500: 74 188 101;
+  --brand-600: 58 182 88;
+  --brand-700: 50 157 76;
+  --brand-800: 42 133 64;
+  --brand-900: 35 109 53;
+  --brand-950: 24 76 37;
+  --ink-50: 240 250 244;
+  --ink-100: 224 240 231;
+  --ink-200: 203 226 212;
+  --ink-300: 172 203 185;
+  --ink-400: 138 168 151;
+  --ink-500: 105 135 118;
+  --ink-600: 82 110 94;
+  --ink-700: 62 88 74;
+  --ink-800: 44 68 55;
+  --ink-900: 29 48 38;
+  --ink-950: 15 32 23;
+  --nav-surface: 238 251 244;
+  --nav-hover: 223 245 233;
+  --nav-active: 206 237 213;
+  --nav-active-text: 24 76 37;
+  --accent: 58 182 88;
+  --accent-hover: 50 157 76;
+  --accent-fg: 9 32 18;
+  --ring: 58 182 88;
+  --btn-primary: 58 182 88;
+  --btn-primary-hover: 50 157 76;
+  --btn-primary-fg: 9 32 18;
+  --panel-shadow: 12 44 28;
+  --success: 20 124 76;
+  --success-soft: 224 246 234;
+  --warning: 156 95 8;
+  --warning-soft: 251 246 226;
+  --warning-line: 230 214 170;
+  --danger: 176 43 30;
+  --danger-strong: 146 26 15;
   --danger-soft: 253 240 236;
-  --danger-soft-strong: 251 226 220;
-  --danger-line: 240 200 190;
-  --info: 30 90 170;
-  --info-soft: 238 245 252;
-  --info-line: 205 224 240;
+  --danger-soft-strong: 250 224 218;
+  --danger-line: 239 195 186;
+  --info: 26 94 158;
+  --info-soft: 231 243 250;
+  --info-line: 197 222 238;
 }
 
-/* Glass: translucent floating navigation over a mint page, opaque content. */
-html[data-theme='glass'] {
-  --surface-2: 246 252 249;
-  --surface-3: 252 254 253;
-  --nav-surface: 252 254 253;
-  --nav-hover: 238 248 242;
-  --nav-active: 221 243 230;
-  --nav-active-text: 22 75 48;
-  --accent: 37 143 85;
-  --accent-hover: 30 116 70;
-  --accent-fg: 255 255 255;
-  --ring: 37 143 85;
-  --panel-shadow: 12 40 28;
-  --nav-alpha: 0.66;
+/* --- Warm Sand -------------------------------------------------------------
+   Cream and beige surfaces with an earthy terracotta accent. Clearly warmer
+   than Clean White in the page, panels and every border. */
+html[data-theme='sand'] {
+  color-scheme: light;
+  --canvas: 239 229 212;
+  --surface: 250 244 232;
+  --surface-2: 242 232 215;
+  --surface-3: 253 248 238;
+  --line: 221 205 181;
+  --mint: 244 234 216;
+  --brand-50: 250 244 237;
+  --brand-100: 245 232 221;
+  --brand-200: 236 211 191;
+  --brand-300: 224 184 155;
+  --brand-400: 206 154 120;
+  --brand-500: 193 124 82;
+  --brand-600: 176 98 51;
+  --brand-700: 145 78 38;
+  --brand-800: 116 61 28;
+  --brand-900: 89 46 21;
+  --brand-950: 55 28 14;
+  --ink-50: 244 239 231;
+  --ink-100: 238 231 221;
+  --ink-200: 228 219 205;
+  --ink-300: 212 200 183;
+  --ink-400: 186 170 148;
+  --ink-500: 158 140 116;
+  --ink-600: 130 112 90;
+  --ink-700: 104 88 69;
+  --ink-800: 78 65 50;
+  --ink-900: 57 47 36;
+  --ink-950: 39 31 23;
+  --nav-surface: 248 241 228;
+  --nav-hover: 242 231 213;
+  --nav-active: 234 216 191;
+  --nav-active-text: 88 44 19;
+  --accent: 176 98 51;
+  --accent-hover: 145 78 38;
+  --accent-fg: 253 248 238;
+  --ring: 176 98 51;
+  --btn-primary: 176 98 51;
+  --btn-primary-hover: 145 78 38;
+  --btn-primary-fg: 253 248 238;
+  --panel-shadow: 56 38 20;
+  --success: 40 112 68;
+  --success-soft: 236 243 227;
+  --warning: 144 92 12;
+  --warning-soft: 250 241 216;
+  --warning-line: 233 212 164;
+  --danger: 170 48 32;
+  --danger-strong: 139 34 21;
+  --danger-soft: 252 239 232;
+  --danger-soft-strong: 249 223 214;
+  --danger-line: 238 197 184;
+  --info: 40 84 142;
+  --info-soft: 235 241 247;
+  --info-line: 204 219 233;
 }
 
-/* Ocean: cool blue page, cool borders, blue carrying every action. */
+/* --- Ocean Light -----------------------------------------------------------
+   Cool blue-grey page and soft blue panels; the distinct visual identity here
+   is blue, not green. */
 html[data-theme='ocean'] {
-  --surface-2: 246 251 255;
-  --surface-3: 255 255 255;
-  --nav-surface: 255 255 255;
-  --nav-hover: 235 246 255;
-  --nav-active: 214 237 254;
-  --nav-active-text: 21 74 117;
-  --accent: 24 112 178;
-  --accent-hover: 20 91 145;
+  color-scheme: light;
+  --canvas: 226 237 246;
+  --surface: 244 250 255;
+  --surface-2: 229 240 250;
+  --surface-3: 250 253 255;
+  --line: 199 219 234;
+  --mint: 232 243 252;
+  --brand-50: 234 246 255;
+  --brand-100: 213 236 253;
+  --brand-200: 177 218 250;
+  --brand-300: 127 194 244;
+  --brand-400: 74 165 231;
+  --brand-500: 40 135 205;
+  --brand-600: 24 108 170;
+  --brand-700: 18 88 140;
+  --brand-800: 17 71 113;
+  --brand-900: 16 57 89;
+  --brand-950: 10 34 53;
+  --ink-50: 238 246 251;
+  --ink-100: 223 235 244;
+  --ink-200: 203 220 233;
+  --ink-300: 173 195 211;
+  --ink-400: 138 163 183;
+  --ink-500: 105 132 154;
+  --ink-600: 80 106 128;
+  --ink-700: 58 82 103;
+  --ink-800: 39 60 78;
+  --ink-900: 24 42 57;
+  --ink-950: 12 27 40;
+  --nav-surface: 240 248 254;
+  --nav-hover: 226 240 251;
+  --nav-active: 207 229 246;
+  --nav-active-text: 15 66 108;
+  --accent: 24 108 170;
+  --accent-hover: 18 88 140;
   --accent-fg: 255 255 255;
-  --ring: 42 139 209;
-  --panel-shadow: 16 32 48;
-  --success: 22 121 74;
-  --success-soft: 236 248 243;
-  --warning: 161 92 7;
-  --warning-soft: 255 249 236;
-  --warning-line: 240 218 176;
-  --danger: 180 35 24;
-  --danger-strong: 150 21 12;
-  --danger-soft: 254 243 242;
-  --danger-soft-strong: 254 228 226;
-  --danger-line: 243 192 187;
-  --info: 24 112 178;
-  --info-soft: 235 246 255;
-  --info-line: 178 219 251;
+  --ring: 24 108 170;
+  --btn-primary: 24 108 170;
+  --btn-primary-hover: 18 88 140;
+  --btn-primary-fg: 255 255 255;
+  --panel-shadow: 12 36 56;
+  --success: 20 118 78;
+  --success-soft: 230 245 238;
+  --warning: 156 96 6;
+  --warning-soft: 253 246 231;
+  --warning-line: 238 217 176;
+  --danger: 178 38 30;
+  --danger-strong: 148 24 17;
+  --danger-soft: 253 240 239;
+  --danger-soft-strong: 251 226 224;
+  --danger-line: 241 194 190;
+  --info: 22 94 168;
+  --info-soft: 231 243 252;
+  --info-line: 189 218 243;
+}
+
+/* --- Midnight Black --------------------------------------------------------
+   Genuinely near-black surfaces with a black → charcoal hierarchy and a
+   restrained green accent. */
+html[data-theme='midnight'] {
+  color-scheme: dark;
+  --canvas: 5 6 7;
+  --surface: 11 12 14;
+  --surface-2: 17 19 22;
+  --surface-3: 21 24 27;
+  --line: 33 36 41;
+  --mint: 14 25 20;
+  --brand-50: 16 51 25;
+  --brand-100: 22 69 33;
+  --brand-200: 29 91 44;
+  --brand-300: 37 116 56;
+  --brand-400: 45 142 69;
+  --brand-500: 52 164 79;
+  --brand-600: 58 182 88;
+  --brand-700: 90 194 115;
+  --brand-800: 121 205 141;
+  --brand-900: 157 219 172;
+  --brand-950: 188 230 198;
+  --ink-50: 24 27 31;
+  --ink-100: 36 40 45;
+  --ink-200: 51 56 63;
+  --ink-300: 73 79 88;
+  --ink-400: 99 106 116;
+  --ink-500: 124 132 143;
+  --ink-600: 148 157 168;
+  --ink-700: 175 184 195;
+  --ink-800: 202 210 220;
+  --ink-900: 226 232 239;
+  --ink-950: 243 246 249;
+  --nav-surface: 16 18 21;
+  --nav-hover: 23 26 30;
+  --nav-active: 17 55 26;
+  --nav-active-text: 188 230 198;
+  --accent: 58 182 88;
+  --accent-hover: 90 194 115;
+  --accent-fg: 6 20 12;
+  --ring: 90 194 115;
+  --btn-primary: 58 182 88;
+  --btn-primary-hover: 90 194 115;
+  --btn-primary-fg: 6 20 12;
+  --panel-shadow: 0 0 0;
+  --success: 124 214 172;
+  --success-soft: 14 34 27;
+  --warning: 232 186 104;
+  --warning-soft: 38 32 20;
+  --warning-line: 76 64 34;
+  --danger: 242 140 128;
+  --danger-strong: 248 172 163;
+  --danger-soft: 42 23 23;
+  --danger-soft-strong: 55 29 28;
+  --danger-line: 86 46 43;
+  --info: 142 178 240;
+  --info-soft: 18 28 42;
+  --info-line: 42 58 80;
+}
+
+/* --- Forest Dark -----------------------------------------------------------
+   Deep forest green throughout: canvas, panels, secondary surfaces, borders
+   and the navigation all carry the green tint. */
+html[data-theme='forest'] {
+  color-scheme: dark;
+  --canvas: 4 18 11;
+  --surface: 8 29 18;
+  --surface-2: 11 38 24;
+  --surface-3: 14 45 29;
+  --line: 25 60 40;
+  --mint: 14 45 29;
+  --brand-50: 16 51 25;
+  --brand-100: 22 69 33;
+  --brand-200: 29 91 44;
+  --brand-300: 37 116 56;
+  --brand-400: 45 142 69;
+  --brand-500: 52 164 79;
+  --brand-600: 58 182 88;
+  --brand-700: 90 194 115;
+  --brand-800: 121 205 141;
+  --brand-900: 157 219 172;
+  --brand-950: 188 230 198;
+  --ink-50: 23 38 29;
+  --ink-100: 35 54 43;
+  --ink-200: 50 72 59;
+  --ink-300: 68 92 77;
+  --ink-400: 91 116 100;
+  --ink-500: 114 139 123;
+  --ink-600: 138 163 147;
+  --ink-700: 164 188 172;
+  --ink-800: 192 214 199;
+  --ink-900: 218 235 224;
+  --ink-950: 238 248 242;
+  --nav-surface: 12 36 23;
+  --nav-hover: 17 47 30;
+  --nav-active: 22 69 33;
+  --nav-active-text: 188 230 198;
+  --accent: 58 182 88;
+  --accent-hover: 90 194 115;
+  --accent-fg: 5 25 13;
+  --ring: 90 194 115;
+  --btn-primary: 58 182 88;
+  --btn-primary-hover: 90 194 115;
+  --btn-primary-fg: 5 25 13;
+  --panel-shadow: 0 0 0;
+  --success: 106 206 145;
+  --success-soft: 15 40 27;
+  --warning: 234 190 102;
+  --warning-soft: 41 34 19;
+  --warning-line: 84 69 34;
+  --danger: 243 140 128;
+  --danger-strong: 249 174 165;
+  --danger-soft: 43 23 21;
+  --danger-soft-strong: 56 29 26;
+  --danger-line: 88 46 40;
+  --info: 143 184 246;
+  --info-soft: 18 32 46;
+  --info-line: 42 62 88;
+}
+
+/* --- Ocean Dark ------------------------------------------------------------
+   Deep navy and blue surfaces; the identity here is unmistakably blue. */
+html[data-theme='ocean-dark'] {
+  color-scheme: dark;
+  --canvas: 3 11 20;
+  --surface: 7 20 33;
+  --surface-2: 11 28 44;
+  --surface-3: 14 34 52;
+  --line: 26 48 69;
+  --mint: 13 32 47;
+  --brand-50: 12 34 51;
+  --brand-100: 17 44 66;
+  --brand-200: 24 60 88;
+  --brand-300: 32 82 118;
+  --brand-400: 43 110 155;
+  --brand-500: 56 142 191;
+  --brand-600: 74 172 219;
+  --brand-700: 106 196 235;
+  --brand-800: 146 218 246;
+  --brand-900: 189 236 253;
+  --brand-950: 232 249 255;
+  --ink-50: 21 34 47;
+  --ink-100: 32 47 63;
+  --ink-200: 46 64 83;
+  --ink-300: 64 84 105;
+  --ink-400: 87 109 132;
+  --ink-500: 111 133 156;
+  --ink-600: 136 158 180;
+  --ink-700: 162 183 203;
+  --ink-800: 190 208 225;
+  --ink-900: 217 231 243;
+  --ink-950: 238 246 252;
+  --nav-surface: 11 29 46;
+  --nav-hover: 16 40 60;
+  --nav-active: 19 57 86;
+  --nav-active-text: 198 232 253;
+  --accent: 74 172 219;
+  --accent-hover: 106 196 235;
+  --accent-fg: 3 11 20;
+  --ring: 106 196 235;
+  --btn-primary: 74 172 219;
+  --btn-primary-hover: 106 196 235;
+  --btn-primary-fg: 3 11 20;
+  --panel-shadow: 0 0 0;
+  --success: 116 214 170;
+  --success-soft: 13 36 30;
+  --warning: 236 192 112;
+  --warning-soft: 37 33 20;
+  --warning-line: 76 66 38;
+  --danger: 243 146 136;
+  --danger-strong: 249 178 168;
+  --danger-soft: 43 25 25;
+  --danger-soft-strong: 56 31 30;
+  --danger-line: 87 49 45;
+  --info: 122 186 246;
+  --info-soft: 15 30 45;
+  --info-line: 40 62 90;
+}
+
+/* --- Graphite Dark ---------------------------------------------------------
+   Neutral graphite and charcoal with a steel-grey hierarchy. The accent is
+   copper, so this theme reads neither green nor blue. */
+html[data-theme='slate'] {
+  color-scheme: dark;
+  --canvas: 18 19 21;
+  --surface: 27 29 32;
+  --surface-2: 36 39 43;
+  --surface-3: 42 45 50;
+  --line: 57 61 67;
+  --mint: 40 33 26;
+  --brand-50: 253 245 234;
+  --brand-100: 250 232 208;
+  --brand-200: 246 211 172;
+  --brand-300: 240 187 137;
+  --brand-400: 231 164 104;
+  --brand-500: 221 143 82;
+  --brand-600: 208 122 60;
+  --brand-700: 181 100 45;
+  --brand-800: 148 80 35;
+  --brand-900: 113 62 28;
+  --brand-950: 74 41 19;
+  --ink-50: 34 36 39;
+  --ink-100: 48 51 55;
+  --ink-200: 65 69 74;
+  --ink-300: 86 91 97;
+  --ink-400: 110 116 123;
+  --ink-500: 134 140 147;
+  --ink-600: 158 164 171;
+  --ink-700: 183 188 194;
+  --ink-800: 207 211 216;
+  --ink-900: 229 232 235;
+  --ink-950: 245 246 248;
+  --nav-surface: 32 34 38;
+  --nav-hover: 40 43 48;
+  --nav-active: 63 45 29;
+  --nav-active-text: 250 221 190;
+  --accent: 208 122 60;
+  --accent-hover: 181 100 45;
+  --accent-fg: 18 19 21;
+  --ring: 208 122 60;
+  --btn-primary: 208 122 60;
+  --btn-primary-hover: 181 100 45;
+  --btn-primary-fg: 18 19 21;
+  --panel-shadow: 0 0 0;
+  --success: 124 210 164;
+  --success-soft: 20 37 30;
+  --warning: 234 190 112;
+  --warning-soft: 40 34 22;
+  --warning-line: 80 69 40;
+  --danger: 243 144 134;
+  --danger-strong: 248 174 166;
+  --danger-soft: 44 25 25;
+  --danger-soft-strong: 57 31 30;
+  --danger-line: 89 49 45;
+  --info: 142 184 238;
+  --info-soft: 20 31 44;
+  --info-line: 44 62 86;
+}
+
+/* ---------------------------------------------------------------------------
+   Scrollbars. A green thumb that follows the active accent, on a quiet track.
+   Standard properties are set for Firefox and current Chromium, with the
+   -webkit- rules for Safari and older Blink builds.
+   --------------------------------------------------------------------------- */
+html {
+  scrollbar-color: rgb(var(--brand-green)) rgb(var(--surface-2));
+  scrollbar-width: auto;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgb(var(--surface-2));
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--brand-green));
+  border: 3px solid rgb(var(--surface-2));
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--brand-green-hover));
+}
+
+::-webkit-scrollbar-corner {
+  background-color: rgb(var(--surface-2));
 }
 
 /* High contrast strengthens separators and secondary text without changing hue. */
@@ -394,8 +542,10 @@ html[data-contrast='high'] {
   --ink-500: 78 90 84;
 }
 
-html[data-theme='dark-green'][data-contrast='high'],
-html[data-theme='midnight'][data-contrast='high'] {
+html[data-theme='midnight'][data-contrast='high'],
+html[data-theme='forest'][data-contrast='high'],
+html[data-theme='slate'][data-contrast='high'],
+html[data-theme='ocean-dark'][data-contrast='high'] {
   --line: 110 130 119;
   --ink-400: 185 199 190;
   --ink-500: 200 213 204;
@@ -434,7 +584,7 @@ html[data-theme='midnight'][data-contrast='high'] {
   }
 
   :focus-visible {
-    outline: 2px solid theme('colors.brand.600');
+    outline: 2px solid rgb(var(--ring));
     outline-offset: 2px;
   }
 
@@ -472,6 +622,10 @@ html[data-theme='midnight'][data-contrast='high'] {
       animation-duration: 0.001ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.001ms !important;
+    }
+    .press:hover,
+    .media-zoom:hover img {
+      transform: none !important;
     }
   }
 }
@@ -537,7 +691,7 @@ html[data-theme='midnight'][data-contrast='high'] {
 
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: theme('colors.ink.200') transparent;
+    scrollbar-color: rgb(var(--brand-green)) rgb(var(--surface-2));
   }
 }
 
@@ -599,6 +753,12 @@ html[data-theme='midnight'][data-contrast='high'] {
 
   .kb-msg-in {
     animation: kb-msg-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .kb-panel-out {
+    animation: kb-panel-out 170ms cubic-bezier(0.4, 0, 1, 1) both;
+    transform-origin: bottom right;
+    pointer-events: none;
   }
 
   .kb-dot {
@@ -720,9 +880,11 @@ html[data-theme='midnight'][data-contrast='high'] {
     animation-play-state: paused;
   }
 
-  /* Media settles in rather than popping */
+  /* Media settles in rather than popping. `backwards` keeps the intro but
+     releases the transform afterwards, so it never pins the image (which
+     would block the hover zoom) or holds a compositing layer open. */
   .media-reveal {
-    animation: media-settle 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: media-settle 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
 
   /* Meaningful icon feedback, not decorative animation */
@@ -794,6 +956,7 @@ html[data-theme='midnight'][data-contrast='high'] {
     --drift-scale: 1;
     animation: hero-drift 3.4s ease-in-out infinite;
     will-change: transform;
+    backface-visibility: hidden;
   }
 
   .hero-backing {
@@ -810,20 +973,28 @@ html[data-theme='midnight'][data-contrast='high'] {
   }
 
   /* Dark themes invert the ramps, so the blocks pick deeper accents there. */
-  html[data-theme='dark-green'] .hero-backing,
-  html[data-theme='midnight'] .hero-backing {
+  html[data-theme='forest'] .hero-backing,
+  html[data-theme='midnight'] .hero-backing,
+  html[data-theme='slate'] .hero-backing,
+  html[data-theme='ocean-dark'] .hero-backing {
     background-color: rgb(var(--ink-200));
   }
-  html[data-theme='dark-green'] .hero-backing-green,
-  html[data-theme='midnight'] .hero-backing-green {
+  html[data-theme='forest'] .hero-backing-green,
+  html[data-theme='midnight'] .hero-backing-green,
+  html[data-theme='slate'] .hero-backing-green,
+  html[data-theme='ocean-dark'] .hero-backing-green {
     background-color: rgb(var(--brand-200));
   }
-  html[data-theme='dark-green'] .hero-backing-moss,
-  html[data-theme='midnight'] .hero-backing-moss {
+  html[data-theme='forest'] .hero-backing-moss,
+  html[data-theme='midnight'] .hero-backing-moss,
+  html[data-theme='slate'] .hero-backing-moss,
+  html[data-theme='ocean-dark'] .hero-backing-moss {
     background-color: rgb(var(--brand-300));
   }
-  html[data-theme='dark-green'] .hero-backing-slate,
-  html[data-theme='midnight'] .hero-backing-slate {
+  html[data-theme='forest'] .hero-backing-slate,
+  html[data-theme='midnight'] .hero-backing-slate,
+  html[data-theme='slate'] .hero-backing-slate,
+  html[data-theme='ocean-dark'] .hero-backing-slate {
     background-color: rgb(var(--ink-300));
   }
 
@@ -996,6 +1167,17 @@ html[data-theme='midnight'][data-contrast='high'] {
   }
 }
 
+@keyframes kb-panel-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
 @keyframes kb-dot {
   0%,
   60%,
@@ -1109,14 +1291,10 @@ html[data-theme='midnight'][data-contrast='high'] {
       0 16px 30px -24px rgb(var(--panel-shadow) / 0.32);
   }
 
-  html[data-theme='glass'] .rail-block {
-    background-color: rgb(var(--nav-surface) / var(--nav-alpha, 0.7));
-    -webkit-backdrop-filter: blur(20px) saturate(1.15);
-    backdrop-filter: blur(20px) saturate(1.15);
-  }
-
-  html[data-theme='dark-green'] .rail-block,
-  html[data-theme='midnight'] .rail-block {
+  html[data-theme='forest'] .rail-block,
+  html[data-theme='midnight'] .rail-block,
+  html[data-theme='slate'] .rail-block,
+  html[data-theme='ocean-dark'] .rail-block {
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.04),
       0 16px 32px -24px rgb(0 0 0 / 0.85);
@@ -1132,16 +1310,26 @@ html[data-theme='midnight'][data-contrast='high'] {
 
   /* On dark themes the accent scale is inverted for text; buttons that pair a
      bright accent with white text switch to dark text for contrast. */
-  html[data-theme='dark-green'] .bg-brand-700.text-white,
-  html[data-theme='dark-green'] .bg-brand-800.text-white,
+  html[data-theme='forest'] .bg-brand-700.text-white,
+  html[data-theme='forest'] .bg-brand-800.text-white,
   html[data-theme='midnight'] .bg-brand-700.text-white,
-  html[data-theme='midnight'] .bg-brand-800.text-white {
+  html[data-theme='midnight'] .bg-brand-800.text-white,
+  html[data-theme='slate'] .bg-brand-700.text-white,
+  html[data-theme='slate'] .bg-brand-800.text-white,
+  html[data-theme='ocean-dark'] .bg-brand-700.text-white,
+  html[data-theme='ocean-dark'] .bg-brand-800.text-white {
     color: rgb(var(--ink-950));
   }
 
   .dash-surface {
     background-color: rgb(var(--surface));
     border: 1px solid rgb(var(--line));
+  }
+
+  /* Primary button label. A plain utility rather than an arbitrary Tailwind
+     colour, so the size class (`text-small`) cannot merge it away. */
+  .btn-primary-fg {
+    color: rgb(var(--btn-primary-fg));
   }
 
   .floating-panel {
@@ -1152,22 +1340,10 @@ html[data-theme='midnight'][data-contrast='high'] {
     backdrop-filter: blur(14px) saturate(1.05);
   }
 
-  html[data-theme='glass'] body {
-    background-image:
-      radial-gradient(60rem 40rem at 12% -10%, rgba(120, 200, 158, 0.26), transparent 62%),
-      radial-gradient(50rem 36rem at 100% 0%, rgba(120, 180, 220, 0.2), transparent 60%),
-      linear-gradient(180deg, #eaf3ee 0%, #e2eee8 100%);
-    background-attachment: fixed;
-  }
-
-  html[data-theme='glass'] .floating-panel {
-    background-color: rgba(252, 254, 253, 0.72);
-    -webkit-backdrop-filter: blur(20px) saturate(1.15);
-    backdrop-filter: blur(20px) saturate(1.15);
-  }
-
-  html[data-theme='dark-green'] .floating-panel,
-  html[data-theme='midnight'] .floating-panel {
+  html[data-theme='forest'] .floating-panel,
+  html[data-theme='midnight'] .floating-panel,
+  html[data-theme='slate'] .floating-panel,
+  html[data-theme='ocean-dark'] .floating-panel {
     background-color: rgb(var(--surface) / 0.94);
     box-shadow: 0 26px 60px -30px rgba(0, 0, 0, 0.8), 0 0 0 1px rgb(var(--line) / 0.5);
   }
@@ -1180,8 +1356,138 @@ html[data-theme='midnight'][data-contrast='high'] {
   }
 
   .settings-rail {
-    scrollbar-width: thin;
-    scrollbar-color: rgb(var(--ink-200)) transparent;
+    scrollbar-color: rgb(var(--brand-green)) transparent;
+  }
+
+  /* -------------------------------------------------------------------------
+     Floating surfaces. The public navbar and its menus are the only places
+     that carry a strong glass treatment; the dashboard search uses a lighter
+     version of the same recipe.
+     ------------------------------------------------------------------------- */
+  .glass-nav {
+    position: relative;
+    background-color: rgb(var(--surface) / 0.72);
+    border: 1px solid rgb(255 255 255 / 0.45);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.65) inset,
+      0 1px 2px rgb(var(--panel-shadow) / 0.06),
+      0 12px 28px -18px rgb(var(--panel-shadow) / 0.45),
+      0 30px 60px -40px rgb(var(--panel-shadow) / 0.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.7);
+    backdrop-filter: blur(18px) saturate(1.7);
+  }
+
+  html[data-theme='midnight'] .glass-nav,
+  html[data-theme='forest'] .glass-nav,
+  html[data-theme='slate'] .glass-nav,
+  html[data-theme='ocean-dark'] .glass-nav {
+    background-color: rgb(var(--surface) / 0.62);
+    border-color: rgb(255 255 255 / 0.08);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.06) inset,
+      0 18px 40px -24px rgb(0 0 0 / 0.9),
+      0 1px 2px rgb(0 0 0 / 0.5);
+  }
+
+  .glass-search {
+    background-color: rgb(var(--surface-3) / 0.55);
+    border: 1px solid rgb(var(--line) / 0.7);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.35) inset,
+      0 10px 24px -20px rgb(var(--panel-shadow) / 0.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
+  }
+
+  .glass-search:hover {
+    border-color: rgb(var(--line));
+    background-color: rgb(var(--surface) / 0.75);
+  }
+
+  .glass-search:focus-visible {
+    border-color: rgb(var(--ring) / 0.7);
+    box-shadow: 0 0 0 3px rgb(var(--ring) / 0.18);
+  }
+
+  .glass-pop {
+    background-color: rgb(var(--surface) / 0.9);
+    border: 1px solid rgb(var(--line) / 0.9);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.4) inset,
+      0 18px 44px -22px rgb(var(--panel-shadow) / 0.45),
+      0 2px 8px -4px rgb(var(--panel-shadow) / 0.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    backdrop-filter: blur(20px) saturate(1.6);
+  }
+
+  html[data-theme='midnight'] .glass-pop,
+  html[data-theme='forest'] .glass-pop,
+  html[data-theme='slate'] .glass-pop,
+  html[data-theme='ocean-dark'] .glass-pop {
+    border-color: rgb(var(--line) / 0.8);
+    box-shadow:
+      0 18px 44px -22px rgb(0 0 0 / 0.9),
+      0 0 0 1px rgb(var(--line) / 0.35);
+  }
+
+  /* Browsers without backdrop filtering fall back to a near-opaque surface. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-nav,
+    .glass-search,
+    .glass-pop {
+      background-color: rgb(var(--surface) / 0.98);
+    }
+  }
+
+  /* Interaction polish. Transforms and opacity only, so nothing reflows. */
+  .press {
+    transition:
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms ease,
+      background-color 220ms ease,
+      border-color 220ms ease;
+  }
+
+  .press:hover {
+    transform: translateY(-1px);
+  }
+
+  .press:active {
+    transform: translateY(0) scale(0.995);
+  }
+
+  .media-zoom {
+    overflow: hidden;
+  }
+
+  .media-zoom img {
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .media-zoom:hover img {
+    transform: scale(1.035);
+  }
+
+  .nav-underline::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 4px;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0;
+    transform: scaleX(0.4);
+    transform-origin: center;
+    transition:
+      opacity 220ms ease,
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .nav-underline:hover::after,
+  .nav-underline[data-active='true']::after {
+    opacity: 0.5;
+    transform: scaleX(1);
   }
 }
 
