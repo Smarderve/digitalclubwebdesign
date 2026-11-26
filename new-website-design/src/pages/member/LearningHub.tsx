@@ -19,7 +19,6 @@ export function LearningHub() {
     <>
       <PageHeader
         title="Learning hub"
-        description="Warmup quizzes and the teaching-week timetable in one place."
       />
 
       <Tabs

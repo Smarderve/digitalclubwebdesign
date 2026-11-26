@@ -65,7 +65,7 @@ export function Segmented({
           onClick={() => onChange(option.value)}
           className={cn(
             'inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-2 text-[0.75rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700 sm:py-1.5',
-            value === option.value ? 'bg-white text-ink-950 shadow-xs' : 'text-ink-500 hover:text-ink-800',
+            value === option.value ? 'bg-surface text-ink-950 shadow-xs' : 'text-ink-500 hover:text-ink-800',
           )}
         >
           {option.label}

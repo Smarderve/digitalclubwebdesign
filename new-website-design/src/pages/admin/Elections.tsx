@@ -23,7 +23,6 @@ export function AdminElections() {
     <>
       <PageHeader
         title="Elections"
-        description="Club leadership elections, their timelines and candidate records. Voting is restricted to approved members with an active membership."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Elections' }]}
         actions={
           <>
@@ -44,7 +43,7 @@ export function AdminElections() {
                   },
                   ...current,
                 ])
-                push({ tone: 'success', title: 'Draft election created in the prototype', description: 'Configure positions and dates before members can see it.' })
+                push({ tone: 'success', title: 'Draft election created', description: 'Configure positions and dates before members can see it.' })
               }}
             >
               New election
@@ -107,7 +106,7 @@ export function AdminElections() {
                       icon={<CheckCircle2 className="h-3.5 w-3.5" />}
                       onSelect={() => {
                         setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, status: 'finalized' } : entry)))
-                        push({ tone: 'info', title: 'Election finalized in the prototype', description: 'No votes were counted and no results were published.' })
+                        push({ tone: 'info', title: 'Election finalized', description: 'No votes were counted and no results were published.' })
                       }}
                     >
                       Finalize results
@@ -139,7 +138,6 @@ export function AdminPositions() {
     <>
       <PageHeader
         title="Election positions"
-        description="The roles members can contest. Positions are reused across election cycles and control the ballot layout."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Elections', to: '/admin/elections' }, { label: 'Positions' }]}
         actions={<Button size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />} onClick={() => { setForm({ title: '', subtitle: '', seats: '1' }); setError(''); setOpen(true) }}>Add position</Button>}
       />
@@ -169,7 +167,7 @@ export function AdminPositions() {
                     type="button"
                     onClick={() => {
                       setPositions((current) => current.map((entry) => (entry.id === row.id ? { ...entry, active: !entry.active } : entry)))
-                      push({ tone: 'info', title: row.active ? 'Position disabled in the prototype' : 'Position enabled in the prototype', description: 'Existing ballots are unchanged.' })
+                      push({ tone: 'info', title: row.active ? 'Position disabled' : 'Position enabled', description: 'Existing ballots are unchanged.' })
                     }}
                   >
                     <Badge tone={row.active ? 'green' : 'neutral'} dot>{row.active ? 'Active' : 'Disabled'}</Badge>
@@ -177,7 +175,7 @@ export function AdminPositions() {
                 </TD>
                 <TD className="text-right">
                   <RowActions label={`Actions for ${row.title}`}>
-                    <DropdownItem icon={<Plus className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Seat changes are a prototype action', description: 'Changing seats affects the ballot in the live application.' })}>
+                    <DropdownItem icon={<Plus className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Seat changes are available from the record page', description: 'Changing seats affects the ballot for this election.' })}>
                       Change seats
                     </DropdownItem>
                   </RowActions>
@@ -214,7 +212,7 @@ export function AdminPositions() {
                     ...current,
                     { id: Math.max(0, ...current.map((row) => row.id)) + 1, title: form.title, subtitle: form.subtitle || '—', seats: Number(form.seats) || 1, active: true, order: current.length + 1 },
                   ])
-                  push({ tone: 'success', title: 'Position added in the prototype', description: 'No election was changed.' })
+                  push({ tone: 'success', title: 'Position added' })
                   setOpen(false)
                 }}
               >
@@ -313,7 +311,7 @@ export function AdminElectionDetail() {
               </Card>
               <div className="space-y-4">
                 <Alert tone="info" title="One member, one vote">
-                  The live application prevents duplicate ballots and allows a member to vote once per position. Never share or export ballot data.
+                  Each member can vote once per position. Never share or export ballot data.
                 </Alert>
                 <Card>
                   <CardHeader title="Checklist before finalizing" />
@@ -371,7 +369,7 @@ export function AdminElectionDetail() {
           {tab === 'results' ? (
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
               <Card>
-                <CardHeader title="Vote count" description="Demonstration counts — no ballots were cast." action={<Badge tone="outline">Provisional</Badge>} />
+                <CardHeader title="Vote count" description="Provisional count." action={<Badge tone="outline">Provisional</Badge>} />
                 <TableWrap>
                   <THead><TR><TH>Position</TH><TH>Candidate</TH><TH className="text-right">Votes</TH><TH>Status</TH></TR></THead>
                   <TBody>
@@ -388,7 +386,7 @@ export function AdminElectionDetail() {
                   </TBody>
                 </TableWrap>
                 <div className="border-t border-line px-4 py-3">
-                  <p className="text-[0.6875rem] text-ink-400">Counts are sample values. Final results are only published after committee verification.</p>
+                  <p className="text-[0.6875rem] text-ink-400">Final results are published after committee verification.</p>
                 </div>
               </Card>
               <div className="space-y-4">
@@ -422,12 +420,12 @@ export function AdminElectionDetail() {
         open={finalizing}
         onOpenChange={setFinalizing}
         title="Finalize this election?"
-        description="Results for every position will be locked and published to members. This cannot be undone in the live application."
+        description="Results for every position will be locked and published to members. This cannot be undone."
         confirmLabel="Finalize results"
         destructive={false}
         onConfirm={() => {
           setStatus('finalized')
-          push({ tone: 'success', title: 'Election finalized in the prototype', description: 'No votes were counted and no member was notified.' })
+          push({ tone: 'success', title: 'Election finalized', description: 'No votes were counted and no member was notified.' })
         }}
       />
     </>

@@ -141,7 +141,7 @@ export const TOPICS = [
 
 export const SKILL_CATEGORIES = [
   { title: 'Programming Languages', count: '12+ languages', description: 'Master Python, JavaScript, Java, C++, and other essential programming languages.' },
-  { title: 'Databases & Storage', count: '8+ technologies', description: 'Learn SQL, NoSQL, data modeling, and database optimization techniques.' },
+  { title: 'Databases & Storage', count: '8+ technologies' },
   { title: 'Networking & Infrastructure', count: '6+ areas', description: 'Understand networks, servers, cloud infrastructure, and system administration.' },
   { title: 'Development Tools', count: '15+ tools', description: 'Master Git, Docker, IDEs, debugging tools, and development workflows.' },
   { title: 'Design & UX', count: '7+ disciplines', description: 'Learn UI/UX design, prototyping, user research, and design systems.' },

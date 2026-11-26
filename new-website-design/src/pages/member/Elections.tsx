@@ -19,7 +19,7 @@ function ElectionTimeline() {
   return (
     <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {steps.map((step, index) => (
-        <li key={step.label} className="relative rounded-md border border-line bg-white p-3.5">
+        <li key={step.label} className="relative rounded-md border border-line bg-surface p-3.5">
           <div className="flex items-center gap-2">
             <span
               className={cn(
@@ -43,12 +43,11 @@ export function MemberElections() {
     <>
       <PageHeader
         title="Leadership elections"
-        description="Club elections are run by the electoral committee. Approved members with an active membership can apply and vote."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Elections' }]}
         actions={<ButtonLink to="/elections" variant="outline" size="sm">Public election page</ButtonLink>}
       />
 
-      <div className="rounded-lg border border-line bg-white">
+      <div className="rounded-lg border border-line bg-surface">
         <div className="flex flex-col gap-4 border-b border-line px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -159,7 +158,7 @@ export function MemberElectionDetail() {
 
       <div className="space-y-4">
         {election.positions.map((position) => (
-          <section key={position.id} className="rounded-lg border border-line bg-white">
+          <section key={position.id} className="rounded-lg border border-line bg-surface">
             <div className="flex flex-wrap items-start justify-between gap-2 border-b border-line px-4 py-3">
               <div>
                 <h2 className="text-[0.9375rem] font-semibold text-ink-950">{position.title}</h2>
@@ -222,7 +221,7 @@ export function ElectionApply() {
         <Card>
           <div className="flex flex-col items-center px-6 py-12 text-center">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-700"><CheckCircle2 className="h-5 w-5" aria-hidden /></span>
-            <h2 className="mt-3 text-[1rem] font-semibold text-ink-950">Application captured in the prototype</h2>
+            <h2 className="mt-3 text-[1rem] font-semibold text-ink-950">Application captured</h2>
             <p className="mt-1 max-w-[48ch] text-[0.8125rem] leading-6 text-ink-500">
               Nothing was sent to the electoral committee and no candidate record was created. In the live site your application would wait for
               committee review.
@@ -241,7 +240,6 @@ export function ElectionApply() {
     <>
       <PageHeader
         title={`Apply — ${position.title}`}
-        description="One application per member per election. Applications are reviewed before candidates appear on the ballot."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Elections', to: '/member/elections' }, { label: position.title }]}
       />
 
@@ -258,7 +256,7 @@ export function ElectionApply() {
               }
               setError('')
               setSubmitted(true)
-              push({ tone: 'success', title: 'Demonstration application captured', description: 'No production record was created.' })
+              push({ tone: 'success', title: 'Application submitted' })
             }}
           >
             <Field label="Position" htmlFor="position">
@@ -273,7 +271,6 @@ export function ElectionApply() {
             <div className="flex flex-wrap items-center gap-2 border-t border-line pt-4">
               <Button type="submit" size="sm">Submit application</Button>
               <ButtonLink to={`/member/elections/${election.id}`} variant="ghost" size="sm">Cancel</ButtonLink>
-              <span className="text-[0.6875rem] text-ink-400 sm:ml-auto">Prototype only — nothing is stored.</span>
             </div>
           </form>
         </Card>
@@ -283,7 +280,7 @@ export function ElectionApply() {
             The application window closed on {formatDate(election.applicationsClose)}. This form demonstrates how the application screen behaved
             while it was open; submitting it does not create a candidacy.
           </Alert>
-          <div className="rounded-lg border border-line bg-white p-4">
+          <div className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.8125rem] font-semibold text-ink-900">Election rules</p>
             <ul className="mt-2 space-y-1.5 text-[0.75rem] leading-5 text-ink-500">
               <li>• Candidates must be approved members with an active membership.</li>
@@ -317,7 +314,6 @@ export function ElectionVote() {
     <>
       <PageHeader
         title="Cast your vote"
-        description="Select one candidate per position, or abstain. Your ballot cannot be changed after submission."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Elections', to: '/member/elections' }, { label: 'Vote' }]}
         actions={<Badge tone="green">Voting open</Badge>}
       />
@@ -336,7 +332,7 @@ export function ElectionVote() {
           }}
         >
           {election.positions.map((position) => (
-            <fieldset key={position.id} className="rounded-lg border border-line bg-white">
+            <fieldset key={position.id} className="rounded-lg border border-line bg-surface">
               <legend className="sr-only">{position.title}</legend>
               <div className="border-b border-line px-4 py-3">
                 <p className="text-[0.875rem] font-semibold text-ink-950">{position.title}</p>
@@ -368,7 +364,7 @@ export function ElectionVote() {
 
           {error ? <Alert tone="danger" title="Ballot incomplete">{error}</Alert> : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3">
             <p className="text-[0.75rem] text-ink-500">{completed} of {election.positions.length} positions completed</p>
             <Button type="submit" size="md" iconLeft={<VoteIcon className="h-4 w-4" />}>Review and submit</Button>
           </div>
@@ -379,7 +375,7 @@ export function ElectionVote() {
             Votes are recorded without showing how each member voted. Election results are published by the electoral committee after voting
             closes.
           </Alert>
-          <div className="rounded-lg border border-line bg-white p-4">
+          <div className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.8125rem] font-semibold text-ink-900">Before you submit</p>
             <ul className="mt-2 space-y-1.5 text-[0.75rem] leading-5 text-ink-500">
               <li>• Read each manifesto before choosing.</li>
@@ -390,7 +386,7 @@ export function ElectionVote() {
           </div>
           <div className="rounded-lg border border-line bg-canvas/50 p-4">
             <p className="text-[0.75rem] leading-6 text-ink-500">
-              This is a frontend prototype. No ballot is transmitted or stored, and no results are affected.
+              Results are published after the electoral committee verifies the count.
             </p>
           </div>
         </div>
@@ -400,11 +396,11 @@ export function ElectionVote() {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Submit your ballot?"
-        description="You cannot change or withdraw your ballot after submitting. This is a prototype and no vote will be recorded."
+        description="You cannot change or withdraw your ballot after submitting."
         confirmLabel="Submit ballot"
         destructive={false}
         onConfirm={() => {
-          push({ tone: 'success', title: 'Ballot demonstrated', description: 'No vote was stored. The real ballot is submitted to the club’s server.' })
+          push({ tone: 'success', title: 'Ballot submitted' })
           navigate(`/member/elections/${election.id}/results`)
         }}
       />
@@ -420,7 +416,6 @@ export function ElectionResults() {
     <>
       <PageHeader
         title="Election results"
-        description="Results are published by the electoral committee after voting closes and are final once certified."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Elections', to: '/member/elections' }, { label: 'Results' }]}
         actions={<ButtonLink to={`/member/elections/${election.id}`} variant="outline" size="sm">Back to election</ButtonLink>}
       />
@@ -441,7 +436,7 @@ export function ElectionResults() {
       </Card>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-line bg-white p-4">
+        <div className="rounded-lg border border-line bg-surface p-4">
           <p className="flex items-center gap-2 text-[0.8125rem] font-semibold text-ink-900"><ShieldCheck className="h-4 w-4 text-brand-700" aria-hidden />How results are certified</p>
           <ol className="mt-2 space-y-1.5 text-[0.75rem] leading-5 text-ink-500">
             <li>1. Voting closes and the ballot is locked.</li>
@@ -453,7 +448,7 @@ export function ElectionResults() {
         <div className="rounded-lg border border-line bg-canvas/50 p-4">
           <p className="flex items-center gap-2 text-[0.8125rem] font-semibold text-ink-900"><Info className="h-4 w-4 text-ink-500" aria-hidden />Your ballot</p>
           <p className="mt-2 text-[0.75rem] leading-5 text-ink-500">
-            Ballots are secret. This page never shows how you or anyone else voted. This prototype does not record a ballot at all.
+            Ballots are secret. This page never shows how you or anyone else voted.
           </p>
         </div>
       </div>

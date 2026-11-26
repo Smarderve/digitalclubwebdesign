@@ -26,7 +26,6 @@ export function AdminTechnologies() {
     <>
       <PageHeader
         title="Technologies"
-        description="The technology vocabulary used on member profiles, projects and learning paths. Members pick from this list, so keep it tidy."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Technologies' }]}
         actions={<Button size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />} onClick={() => { setForm({ name: '', category: 'web', description: '' }); setError(''); setOpen(true) }}>Add technology</Button>}
       />
@@ -74,7 +73,7 @@ export function AdminTechnologies() {
                   aria-pressed={row.active}
                   onClick={() => {
                     setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, active: !entry.active } : entry)))
-                    push({ tone: 'info', title: row.active ? 'Technology hidden in the prototype' : 'Technology enabled in the prototype', description: `${row.name} — no production vocabulary changed.` })
+                    push({ tone: 'info', title: row.active ? 'Technology hidden' : 'Technology enabled', description: `${row.name} — no production vocabulary changed.` })
                   }}
                 >
                   <Badge tone={row.active ? 'green' : 'neutral'} dot>{row.active ? 'Active' : 'Hidden'}</Badge>
@@ -91,7 +90,7 @@ export function AdminTechnologies() {
                     icon={<Power className="h-3.5 w-3.5" />}
                     onSelect={() => {
                       setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, active: !entry.active } : entry)))
-                      push({ tone: 'info', title: row.active ? 'Technology hidden in the prototype' : 'Technology enabled in the prototype', description: `${row.name} — existing project tags are unaffected.` })
+                      push({ tone: 'info', title: row.active ? 'Technology hidden' : 'Technology enabled', description: `${row.name} — existing project tags are unaffected.` })
                     }}
                   >
                     {row.active ? 'Hide from selection' : 'Enable for selection'}
@@ -130,7 +129,7 @@ export function AdminTechnologies() {
                     return
                   }
                   setRows((current) => [...current, { id: Math.max(0, ...current.map((row) => row.id)) + 1, name: form.name.trim(), category: form.category, active: true, description: form.description || 'No description yet.' }])
-                  push({ tone: 'success', title: 'Technology added in the prototype', description: 'No production vocabulary changed.' })
+                  push({ tone: 'success', title: 'Technology added' })
                   setOpen(false)
                 }}
               >

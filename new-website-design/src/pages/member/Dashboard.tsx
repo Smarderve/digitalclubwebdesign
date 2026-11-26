@@ -50,7 +50,6 @@ export function MemberDashboard() {
                 <p className="mt-1 text-[2rem] font-semibold leading-none tabular tracking-tight text-ink-950">
                   {demoMember.points}
                 </p>
-                <p className="mt-1 text-[0.6875rem] text-ink-400">Semester total</p>
               </div>
               <div>
                 <p className="flex items-center gap-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">
@@ -85,9 +84,7 @@ export function MemberDashboard() {
             <div className="divide-y divide-line">
               <div className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
                 <div className="flex gap-3">
-                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-brand-50 text-brand-700">
-                    <BookOpenCheck className="h-4 w-4" aria-hidden />
-                  </span>
+                  <BookOpenCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-700" aria-hidden />
                   <div>
                     <p className="text-[0.8125rem] font-semibold text-ink-900">{activeQuiz?.title}</p>
                     <p className="mt-0.5 text-[0.75rem] text-ink-500">
@@ -104,9 +101,7 @@ export function MemberDashboard() {
               {nextEvent ? (
                 <div className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
                   <div className="flex gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-ink-50 text-ink-600">
-                      <CalendarDays className="h-4 w-4" aria-hidden />
-                    </span>
+                    <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-ink-600" aria-hidden />
                     <div>
                       <p className="text-[0.8125rem] font-semibold text-ink-900">{nextEvent.title}</p>
                       <p className="mt-0.5 text-[0.75rem] text-ink-500">

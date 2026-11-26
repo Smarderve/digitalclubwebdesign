@@ -23,6 +23,7 @@ import { useToast } from '../../context/ToastContext'
 import { GlobalSearch } from './GlobalSearch'
 import { useSocial, useSocialSync, useViewer } from '../../features/social/hooks'
 import { unreadSocialCount } from '../../features/social/store'
+import { usePreferences } from '../../features/settings/preferences'
 
 export type NavItem = {
   label: string
@@ -35,6 +36,21 @@ export type NavItem = {
 }
 
 export type NavSection = { label: string; items: NavItem[] }
+
+/** Tracks a media query so the rail can switch to its compact state on tablets. */
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() =>
+    typeof window === 'undefined' ? true : window.matchMedia(query).matches,
+  )
+  useEffect(() => {
+    const mql = window.matchMedia(query)
+    const onChange = () => setMatches(mql.matches)
+    onChange()
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [query])
+  return matches
+}
 
 /** Internal dashboard history. Browser refresh keeps the current page; the
     stack itself starts fresh, exactly like an application menu. */
@@ -76,22 +92,18 @@ function useAppHistory(homeTo: string) {
   }
 }
 
-/**
- * One navigation destination. Each item is its own floating surface — the rail
- * is a stack of compact blocks, never one continuous container.
- */
-function RailNavItem({
+function NavItemLink({
   item,
   active,
   collapsed,
-  onNavigate,
   compact,
+  onNavigate,
 }: {
   item: NavItem
   active: boolean
   collapsed?: boolean
-  onNavigate?: () => void
   compact?: boolean
+  onNavigate?: () => void
 }) {
   const Icon = item.icon
   return (
@@ -102,18 +114,22 @@ function RailNavItem({
       title={collapsed ? item.label : undefined}
       aria-label={collapsed ? item.label : undefined}
       className={cn(
-        'rail-block group flex items-center gap-2.5 rounded-[16px] font-medium transition-[background-color,color,border-color,transform] duration-200',
-        compact ? 'h-11 px-3 text-[0.875rem]' : 'h-11 px-3 text-[0.8125rem]',
-        collapsed ? 'justify-center px-0' : 'w-full',
-        active
-          ? 'border-transparent bg-nav-active text-nav-active-text'
-          : 'text-ink-600 hover:border-ink-300 hover:bg-nav-hover hover:text-ink-950',
+        'group relative flex items-center rounded-[11px] font-medium transition-colors duration-200',
+        compact ? 'h-11 gap-3 px-3 text-[0.875rem]' : 'h-11 gap-3 px-3 text-[0.8125rem]',
+        collapsed ? 'mx-auto h-12 w-12 justify-center px-0' : 'w-full',
+        active ? 'bg-nav-active text-nav-active-text' : 'text-ink-600 hover:bg-nav-hover hover:text-ink-950',
       )}
     >
-      <Icon className="iconify h-[18px] w-[18px] shrink-0" aria-hidden />
+      {/* The glyph sits directly on the navigation surface: no tile, chip or
+          square container of its own. */}
+      <Icon
+        className={cn('shrink-0', active ? 'opacity-100' : 'opacity-85 group-hover:opacity-100')}
+        size={22}
+        aria-hidden
+      />
       {!collapsed ? <span className="min-w-0 flex-1 truncate">{item.label}</span> : null}
       {!collapsed && item.badge ? (
-        <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-100 px-1 text-[0.625rem] font-semibold tabular text-brand-900">
+        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-100 px-1.5 text-[0.6875rem] font-semibold tabular text-brand-900">
           {item.badge}
         </span>
       ) : null}
@@ -121,39 +137,48 @@ function RailNavItem({
   )
 }
 
-function RailNav({
+function NavRail({
   nav,
   collapsed,
   activeItem,
-  onNavigate,
   compact,
+  onNavigate,
 }: {
   nav: NavSection[]
   collapsed?: boolean
   activeItem: (item: NavItem) => boolean
-  onNavigate?: () => void
   compact?: boolean
+  onNavigate?: () => void
 }) {
   return (
     <nav
-      className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto py-0.5 scrollbar-thin"
       aria-label="Dashboard navigation"
+      className={cn(
+        'rail-block flex min-h-0 flex-col gap-0.5 overflow-y-auto scrollbar-thin',
+        collapsed ? 'rounded-2xl p-1.5' : 'rounded-2xl p-2',
+      )}
     >
-      {nav.map((section) => (
-        <div key={section.label || 'primary'} className={cn('flex flex-col gap-1.5', collapsed && 'mt-1 first:mt-0')}>
+      {nav.map((section, sectionIndex) => (
+        <div key={section.label || 'primary'} className="flex flex-col gap-0.5">
           {section.label && !collapsed ? (
-            <p className="px-2.5 pb-0.5 pt-2 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-ink-400">
+            <p
+              className={cn(
+                'px-3 pb-1 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-ink-400',
+                sectionIndex === 0 ? 'pt-1' : 'pt-3',
+              )}
+            >
               {section.label}
             </p>
           ) : null}
+          {sectionIndex > 0 && collapsed ? <span aria-hidden className="mx-2.5 my-1.5 h-px bg-line" /> : null}
           {section.items.map((item) => (
-            <RailNavItem
+            <NavItemLink
               key={item.to}
               item={item}
               active={activeItem(item)}
               collapsed={collapsed}
-              onNavigate={onNavigate}
               compact={compact}
+              onNavigate={onNavigate}
             />
           ))}
         </div>
@@ -187,9 +212,15 @@ export function AppShell({
   const { push } = useToast()
   useSocial()
   useSocialSync()
+  /* Re-apply the stored theme on entry, so a visit to the public site cannot
+     leave the dashboard in the day/night palette. */
+  usePreferences()
   const viewer = useViewer()
   const totalUnread = unread + unreadSocialCount(viewer)
   const [mobileOpen, setMobileOpen] = useState(false)
+  /* Tablets (768–1023px) keep an icon rail instead of a full sidebar, and the
+     drawer is reserved for phones. */
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem(`kiut-nav-${areaTone}`) === 'collapsed'
@@ -197,6 +228,8 @@ export function AppShell({
       return false
     }
   })
+
+  const railCollapsed = collapsed || !isDesktop
 
   const settingsTarget = settingsTo ?? (areaTone === 'admin' ? '/admin/settings' : '/member/settings')
   const history = useAppHistory(homeTo)
@@ -241,83 +274,109 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-canvas">
-      {/* Floating desktop rail: three independent areas plus one block per link. */}
+      {/* Sidebar: branding block, one centred navigation block, settings block. */}
       <aside
         className={cn(
-          'fixed bottom-4 left-4 top-4 z-30 hidden flex-col gap-2 transition-[width] duration-300 ease-smooth lg:flex',
-          collapsed ? 'w-[76px]' : 'w-[248px]',
+          'fixed bottom-3 left-3 top-3 z-30 hidden flex-col gap-3 transition-[width] duration-300 ease-smooth md:flex',
+          railCollapsed ? 'w-[64px]' : 'w-[232px]',
         )}
         aria-label={`${areaLabel} navigation`}
       >
-        {/* 1. Logo block. Clicking it opens the public website; the session stays intact. */}
-        <div className={cn('rail-block flex items-center gap-2.5 rounded-2xl px-3 py-2.5', collapsed && 'justify-center px-2')}>
-          <Link
-            to="/"
-            className={cn('flex min-w-0 items-center gap-2.5', collapsed && 'justify-center')}
-            aria-label="Open the KIUT Digital Club public website"
-            title="Open the public website"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-canvas p-1.5 ring-1 ring-inset ring-line">
-              <img src="/brand/digital-club-logo.svg" alt="" className="h-full w-full object-contain" />
-            </span>
-            {!collapsed ? (
-              <span className="min-w-0 leading-tight">
-                <span className="block truncate text-[0.875rem] font-semibold text-ink-950">Digital Club</span>
-                <span className="block text-[0.625rem] uppercase tracking-[0.12em] text-ink-400">{areaLabel}</span>
-              </span>
+        {/* Branding and collapse control share one block in both states. */}
+        {railCollapsed ? (
+          <div className="rail-block mx-auto flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-full p-1">
+            <Link
+              to="/"
+              className="flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-nav-hover"
+              aria-label="KIUT Digital Club public website"
+              title="KIUT Digital Club"
+            >
+              <img src="/brand/digital-club-logo.svg" alt="" className="h-5 w-5 object-contain" />
+            </Link>
+            {isDesktop ? (
+              <button
+                type="button"
+                onClick={() => setCollapsed(false)}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-nav-hover hover:text-ink-950"
+                aria-label="Open sidebar"
+                title="Open sidebar"
+              >
+                <PanelLeftOpen size={16} aria-hidden />
+              </button>
             ) : null}
-          </Link>
+          </div>
+        ) : (
+          <div className="rail-block flex shrink-0 items-center gap-1 rounded-2xl p-2">
+            <Link
+              to="/"
+              className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-0.5 py-1"
+              aria-label="KIUT Digital Club public website"
+              title="Open the public website"
+            >
+              <img
+                src="/brand/digital-club-logo.svg"
+                alt=""
+                className="h-9 w-9 shrink-0 object-contain"
+              />
+              <span className="min-w-0 leading-tight">
+                <span className="block truncate text-[0.8125rem] font-semibold text-ink-950">KIUT Digital Club</span>
+                <span className="block truncate text-[0.6875rem] text-ink-500">{areaLabel}</span>
+              </span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setCollapsed(true)}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-nav-hover hover:text-ink-950"
+              aria-label="Close sidebar"
+              title="Close sidebar"
+            >
+              <PanelLeftClose size={19} aria-hidden />
+            </button>
+          </div>
+        )}
+
+        {/* One shared navigation block, centred vertically in the rail. */}
+        <div className="flex min-h-0 flex-1 items-center">
+          <div className="max-h-full w-full">
+            <NavRail nav={nav} collapsed={railCollapsed} activeItem={isItemActive} />
+          </div>
         </div>
 
-        {/* 2. Collapse control: its own floating surface, visible in both states. */}
-        <button
-          type="button"
-          onClick={() => setCollapsed((value) => !value)}
-          className={cn(
-            'rail-block flex h-10 w-full items-center justify-center gap-2 rounded-2xl text-[0.6875rem] font-medium text-ink-500 transition-colors hover:text-ink-950',
-            !collapsed && 'px-3',
-          )}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? <PanelLeftOpen className="h-4 w-4" aria-hidden /> : <PanelLeftClose className="h-4 w-4" aria-hidden />}
-          {!collapsed ? <span>Collapse sidebar</span> : null}
-        </button>
-
-        {/* 3. Navigation: each destination is its own compact floating block. */}
-        <RailNav nav={nav} collapsed={collapsed} activeItem={isItemActive} />
-
-        {/* 4. Settings stays anchored at the bottom, in its own block. */}
-        <div className={cn('mt-auto shrink-0', collapsed ? 'w-full' : 'w-full')}>
+        {/* Settings, anchored at the bottom in its own block. */}
+        <div className={cn('rail-block shrink-0', railCollapsed ? 'rounded-full p-1.5' : 'rounded-2xl p-2')}>
           <NavLink
             to={settingsTarget}
-            title={collapsed ? 'Settings' : undefined}
-            aria-label={collapsed ? 'Settings' : undefined}
+            title={railCollapsed ? 'Settings' : undefined}
+            aria-label={railCollapsed ? 'Settings' : undefined}
             className={cn(
-              'rail-block flex h-11 items-center gap-2.5 rounded-[16px] text-[0.8125rem] font-medium transition-colors',
-              collapsed ? 'justify-center px-0' : 'px-3',
-              settingsActive
-                ? 'border-transparent bg-nav-active text-nav-active-text'
-                : 'text-ink-600 hover:border-ink-300 hover:bg-nav-hover hover:text-ink-950',
+              'flex items-center font-medium transition-colors',
+              railCollapsed
+                ? 'mx-auto h-12 w-12 justify-center rounded-full'
+                : 'h-11 w-full gap-3 rounded-[11px] px-3 text-[0.8125rem]',
+              settingsActive ? 'bg-nav-active text-nav-active-text' : 'text-ink-600 hover:bg-nav-hover hover:text-ink-950',
             )}
           >
-            <Settings className="h-[18px] w-[18px] shrink-0" aria-hidden />
-            {!collapsed ? <span>Settings</span> : null}
+            <Settings size={22} className="shrink-0" aria-hidden />
+            {!railCollapsed ? <span>Settings</span> : null}
           </NavLink>
         </div>
       </aside>
 
-      <div className={cn('min-h-screen transition-[padding] duration-300 ease-smooth', collapsed ? 'lg:pl-[108px]' : 'lg:pl-[284px]')}>
-        {/* Topbar: four independent floating surfaces with consistent gaps. */}
+      <div
+        className={cn(
+          'min-h-screen transition-[padding] duration-300 ease-smooth',
+          railCollapsed ? 'md:pl-[88px]' : 'md:pl-[256px]',
+        )}
+      >
+        {/* Topbar: four independent floating surfaces. */}
         <div className="sticky top-3 z-20 px-3 sm:px-4 lg:px-5">
           <header className="flex items-center gap-2 sm:gap-2.5">
-            {/* Navigation + page heading */}
             <div className="rail-block flex h-12 min-w-0 flex-1 items-center gap-1 rounded-2xl px-1.5 sm:h-14 sm:gap-1.5 sm:px-2.5">
               <button
                 type="button"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open navigation"
-                className="anim-menu inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink-600 transition-colors hover:bg-nav-hover hover:text-ink-950 lg:hidden"
+                className="anim-menu inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink-600 transition-colors hover:bg-nav-hover hover:text-ink-950 md:hidden"
               >
                 <Menu className="h-5 w-5" aria-hidden />
               </button>
@@ -350,18 +409,16 @@ export function AppShell({
               <p className="min-w-0 flex-1 truncate px-1 text-[0.8125rem] font-semibold text-ink-900">{title}</p>
             </div>
 
-            {/* Search: its own floating block */}
-            <div className="rail-block flex h-12 shrink-0 items-center rounded-2xl px-1 sm:h-14">
+            <div className="h-12 shrink-0 sm:h-14">
               <GlobalSearch nav={nav} areaLabel={areaLabel} areaTone={areaTone} settingsTo={settingsTarget} />
             </div>
 
-            {/* Notification: independent circle */}
             <Link
               to={notificationsTo}
               aria-label={`Notifications${totalUnread ? `, ${totalUnread} unread` : ''}`}
               className="rail-block group relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-ink-600 transition-colors hover:border-ink-300 hover:text-ink-950 sm:h-14 sm:w-14"
             >
-              <Bell className="anim-bell h-[18px] w-[18px]" aria-hidden />
+              <Bell className="anim-bell h-5 w-5" aria-hidden />
               {totalUnread > 0 ? (
                 <span className="absolute right-2 top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[0.5625rem] font-semibold tabular text-white ring-2 ring-surface sm:right-2.5 sm:top-2.5">
                   {totalUnread > 9 ? '9+' : totalUnread}
@@ -369,7 +426,6 @@ export function AppShell({
               ) : null}
             </Link>
 
-            {/* Profile: independent circle, outside the search block */}
             <Dropdown>
               <DropdownTrigger asChild>
                 <button
@@ -377,34 +433,31 @@ export function AppShell({
                   className="rail-block flex h-12 w-12 shrink-0 items-center justify-center rounded-full p-1 transition-shadow hover:ring-2 hover:ring-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 sm:h-14 sm:w-14 sm:p-1.5"
                   aria-label="Account menu"
                 >
-                  <Avatar name={user?.name ?? 'Demo Member'} size="sm" />
+                  <Avatar name={user?.name ?? 'Member'} size="sm" />
                 </button>
               </DropdownTrigger>
               <DropdownContent>
                 <div className="px-2.5 py-2">
                   <p className="text-[0.8125rem] font-semibold text-ink-900">{user?.name}</p>
                   <p className="truncate text-[0.6875rem] text-ink-500">{user?.email}</p>
-                  <p className="mt-1 inline-flex rounded-[3px] border border-dashed border-ink-200 px-1.5 text-[0.5625rem] uppercase tracking-wide text-ink-400">
-                    Demo account
-                  </p>
                 </div>
                 <DropdownSeparator />
-                <DropdownItem to={profileTo} icon={<UserRound className="h-3.5 w-3.5" />}>
+                <DropdownItem to={profileTo} icon={<UserRound size={15} />}>
                   Profile
                 </DropdownItem>
-                <DropdownItem to={settingsTarget} icon={<Settings className="h-3.5 w-3.5" />}>
+                <DropdownItem to={settingsTarget} icon={<Settings size={15} />}>
                   Settings
                 </DropdownItem>
                 <DropdownSeparator />
-                <DropdownItem to="/" icon={<ArrowLeft className="h-3.5 w-3.5" />}>
+                <DropdownItem to="/" icon={<ArrowLeft size={15} />}>
                   Back to website
                 </DropdownItem>
                 <DropdownItem
                   destructive
-                  icon={<LogOut className="h-3.5 w-3.5" />}
+                  icon={<LogOut size={15} />}
                   onSelect={() => {
                     logout()
-                    push({ tone: 'info', title: 'Signed out', description: 'This prototype session has ended.' })
+                    push({ tone: 'info', title: 'Signed out' })
                     navigate('/')
                   }}
                 >
@@ -415,24 +468,24 @@ export function AppShell({
           </header>
         </div>
 
-        <main id="main" className="mx-auto w-full max-w-[1320px] px-4 py-6 sm:px-6 lg:px-5 lg:py-7">
+        {/* Extra bottom padding on phones keeps the floating chat launcher from
+            sitting on top of the last controls of the page. */}
+        <main id="main" className="mx-auto w-full max-w-[1320px] px-4 pb-24 pt-6 sm:px-6 sm:pb-10 lg:px-5 lg:pb-7 lg:pt-7">
           <Outlet />
         </main>
       </div>
 
-      {/* Mobile: the same block structure inside an intentional drawer. */}
+      {/* Mobile: the same three areas inside an intentional drawer. */}
       <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-50 bg-ink-950/50 data-[state=open]:animate-fade-in lg:hidden" />
-          <Dialog.Content className="fixed bottom-3 left-3 top-3 z-50 flex w-[86%] max-w-[320px] flex-col gap-2 rounded-2xl bg-canvas p-2 text-ink-700 shadow-float focus:outline-none data-[state=open]:animate-slide-in lg:hidden">
-            <div className="rail-block flex items-center justify-between gap-2 rounded-2xl px-3 py-2.5">
-              <Link to="/" onClick={() => setMobileOpen(false)} className="flex min-w-0 items-center gap-2.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-canvas p-1.5 ring-1 ring-inset ring-line">
-                  <img src="/brand/digital-club-logo.svg" alt="" className="h-full w-full object-contain" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-[0.875rem] font-semibold text-ink-950">Digital Club</span>
-                  <span className="block text-[0.625rem] uppercase tracking-[0.12em] text-ink-400">{areaLabel}</span>
+          <Dialog.Overlay className="fixed inset-0 z-[65] bg-ink-950/50 data-[state=open]:animate-fade-in md:hidden" />
+          <Dialog.Content className="fixed bottom-3 left-3 top-3 z-[70] flex w-[82%] max-w-[300px] flex-col gap-3 rounded-2xl bg-canvas p-2 text-ink-700 shadow-float focus:outline-none data-[state=open]:animate-slide-in md:hidden">
+            <div className="rail-block flex items-center justify-between gap-2 rounded-2xl p-2">
+              <Link to="/" onClick={() => setMobileOpen(false)} className="flex min-w-0 items-center gap-2.5 p-1">
+                <img src="/brand/digital-club-logo.svg" alt="" className="h-9 w-9 shrink-0 object-contain" />
+                <span className="min-w-0 leading-tight">
+                  <span className="block truncate text-[0.8125rem] font-semibold text-ink-950">KIUT Digital Club</span>
+                  <span className="block truncate text-[0.6875rem] text-ink-500">{areaLabel}</span>
                 </span>
               </Link>
               <Dialog.Close
@@ -443,19 +496,19 @@ export function AppShell({
               </Dialog.Close>
             </div>
             <Dialog.Title className="sr-only">{areaLabel} navigation</Dialog.Title>
-            <RailNav nav={nav} activeItem={isItemActive} onNavigate={() => setMobileOpen(false)} compact />
-            <div className="mt-auto shrink-0">
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <NavRail nav={nav} activeItem={isItemActive} compact onNavigate={() => setMobileOpen(false)} />
+            </div>
+            <div className="rail-block shrink-0 rounded-2xl p-2">
               <NavLink
                 to={settingsTarget}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'rail-block flex h-11 items-center gap-2.5 rounded-[16px] px-3 text-[0.875rem] font-medium',
-                  settingsActive
-                    ? 'border-transparent bg-nav-active text-nav-active-text'
-                    : 'text-ink-600 hover:border-ink-300 hover:bg-nav-hover hover:text-ink-950',
+                  'flex h-11 items-center gap-3 rounded-[11px] px-3 text-[0.875rem] font-medium',
+                  settingsActive ? 'bg-nav-active text-nav-active-text' : 'text-ink-600 hover:bg-nav-hover hover:text-ink-950',
                 )}
               >
-                <Settings className="h-[18px] w-[18px] shrink-0" aria-hidden />
+                <Settings size={22} className="shrink-0" aria-hidden />
                 Settings
               </NavLink>
             </div>

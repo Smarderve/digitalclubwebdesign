@@ -63,7 +63,6 @@ export function ProjectForm() {
               push({
                 tone: 'success',
                 title: editing ? 'Project validated' : 'Project validated',
-                description: 'Prototype only — the project is not saved to the club database.',
               })
               navigate('/member/projects')
             })}

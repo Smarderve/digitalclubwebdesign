@@ -30,7 +30,6 @@ export function AdminFinance() {
     <>
       <PageHeader
         title="Financial records"
-        description="Club income and expenditure by operating period. Membership fees are recorded separately on the payments page."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Finance' }]}
         actions={
           <>
@@ -77,7 +76,7 @@ export function AdminFinance() {
         </Card>
 
         <div className="space-y-4">
-          <div className="rounded-lg border border-line bg-white p-4">
+          <div className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.8125rem] font-semibold text-ink-900">By category</p>
             <div className="mt-3 space-y-3">
               {[
@@ -101,7 +100,7 @@ export function AdminFinance() {
             <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">Bars use recorded amounts for the open period and are not a budget comparison.</p>
           </div>
 
-          <div className="rounded-lg border border-line bg-white">
+          <div className="rounded-lg border border-line bg-surface">
             <div className="border-b border-line px-4 py-3">
               <p className="text-[0.8125rem] font-semibold text-ink-900">Period actions</p>
             </div>
@@ -111,7 +110,7 @@ export function AdminFinance() {
                 variant="ghost"
                 size="sm"
                 className="w-full justify-center"
-                onClick={() => push({ tone: 'info', title: 'Export is a prototype action', description: 'A period export is available from the reports page using CSV.' })}
+                onClick={() => push({ tone: 'info', title: 'Export is available from the record page', description: 'A period export is available from the reports page using CSV.' })}
               >
                 Export period
               </Button>
@@ -177,7 +176,7 @@ export function AdminFinancialPeriod() {
               variant="outline"
               onClick={() => {
                 setStatus('open')
-                push({ tone: 'info', title: 'Period reopened in the prototype', description: 'Reopening allows transactions to be corrected.' })
+                push({ tone: 'info', title: 'Period reopened', description: 'Reopening allows transactions to be corrected.' })
               }}
             >
               Reopen period
@@ -192,7 +191,7 @@ export function AdminFinancialPeriod() {
           { label: 'Expenses', value: currency(expenses), hint: 'Recorded spending' },
           { label: 'Net', value: currency(revenue - expenses), hint: 'Revenue minus expenses' },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-line bg-white p-4">
+          <div key={item.label} className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             <p className="mt-1.5 text-[1.125rem] font-semibold tabular tracking-tight text-ink-950">{item.value}</p>
             <p className="text-[0.6875rem] text-ink-400">{item.hint}</p>
@@ -223,7 +222,7 @@ export function AdminFinancialPeriod() {
                     aria-label={`Delete ${transaction.description}`}
                     disabled={status === 'closed'}
                     onClick={() => setDeleting(transaction.id)}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-[4px] text-ink-400 hover:bg-[#FEF3F2] hover:text-danger disabled:opacity-30"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-[4px] text-ink-400 hover:bg-danger-soft hover:text-danger disabled:opacity-30"
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden />
                   </button>
@@ -258,7 +257,7 @@ export function AdminFinancialPeriod() {
                   ])
                   setDialogOpen(false)
                   setForm({ description: '', amount: '', date: new Date().toISOString().slice(0, 10), category: 'Event costs', type: 'expense' })
-                  push({ tone: 'success', title: 'Transaction added in the prototype', description: 'No production record was created.' })
+                  push({ tone: 'success', title: 'Transaction added' })
                 }}
               >
                 Add transaction
@@ -301,11 +300,11 @@ export function AdminFinancialPeriod() {
         open={deleting !== null}
         onOpenChange={(open) => !open && setDeleting(null)}
         title="Delete this transaction?"
-        description="The transaction will be removed from this period and the totals will change. This is a prototype and no production record is deleted."
+        description="The transaction will be removed from this period and the totals will change."
         confirmLabel="Delete transaction"
         onConfirm={() => {
           setTransactions((current) => current.filter((row) => row.id !== deleting))
-          push({ tone: 'info', title: 'Transaction removed in the prototype', description: 'Totals recalculated in this session.' })
+          push({ tone: 'info', title: 'Transaction removed', description: 'Totals recalculated in this session.' })
         }}
       />
       <ConfirmDialog
@@ -316,7 +315,7 @@ export function AdminFinancialPeriod() {
         confirmLabel="Close period"
         onConfirm={() => {
           setStatus('closed')
-          push({ tone: 'success', title: 'Period closed in the prototype', description: 'No production record was changed.' })
+          push({ tone: 'success', title: 'Period closed' })
         }}
       />
     </>
@@ -335,7 +334,6 @@ export function AdminFinancialCategories() {
     <>
       <PageHeader
         title="Financial categories"
-        description="Categories group transactions for reporting. Inactive categories stay on historical records."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Finance', to: '/admin/financial' }, { label: 'Categories' }]}
         actions={<Button size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />} onClick={() => setOpen(true)}>Add category</Button>}
       />
@@ -355,7 +353,7 @@ export function AdminFinancialCategories() {
                       type="button"
                       onClick={() => {
                         setCategories((current) => current.map((row) => (row.id === category.id ? { ...row, active: !row.active } : row)))
-                        push({ tone: 'info', title: 'Category status changed in the prototype', description: 'Historical transactions are unaffected.' })
+                        push({ tone: 'info', title: 'Category status changed', description: 'Historical transactions are unaffected.' })
                       }}
                       className={cn('inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[0.6875rem] font-medium', category.active ? 'border-brand-200 bg-brand-50 text-brand-800' : 'border-line bg-ink-50 text-ink-500')}
                       aria-pressed={category.active}
@@ -396,7 +394,7 @@ export function AdminFinancialCategories() {
                   setName('')
                   setError('')
                   setOpen(false)
-                  push({ tone: 'success', title: 'Category added in the prototype', description: 'No production record was created.' })
+                  push({ tone: 'success', title: 'Category added' })
                 }}
               >
                 Add category
@@ -429,7 +427,6 @@ export function AdminFinancialReports() {
     <>
       <PageHeader
         title="Financial reports"
-        description="Closed periods are summarised for review and handover. The current period appears only once it is closed."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Finance', to: '/admin/financial' }, { label: 'Reports' }]}
         actions={
           <Button
@@ -438,7 +435,7 @@ export function AdminFinancialReports() {
             iconLeft={<Download className="h-3.5 w-3.5" />}
             onClick={() => {
               const okay = downloadCsv('kiut-digital-club-financial-reports.csv', demoFinancial.reports.map((row) => ({ Period: row.period, Revenue: row.revenue, Expenses: row.expenses, Net: row.net, Status: row.status })))
-              push({ tone: okay ? 'success' : 'error', title: okay ? 'Report summary downloaded' : 'Nothing to export', description: 'Demonstration data only.' })
+              push({ tone: okay ? 'success' : 'error', title: okay ? 'Report summary downloaded' : 'Nothing to export' })
             }}
           >
             Export summary

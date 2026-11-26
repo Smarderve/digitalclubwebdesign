@@ -8,8 +8,8 @@ const tones = {
   red: 'border-danger-line bg-danger-soft text-danger',
   blue: 'border-info-line bg-info-soft text-info',
   dark: 'border-ink-800 bg-ink-900 text-white',
-  outline: 'border-ink-200 bg-white text-ink-600',
-  sample: 'border-dashed border-ink-300 bg-white text-ink-500',
+  outline: 'border-ink-200 bg-surface text-ink-600',
+  sample: 'border-dashed border-ink-300 bg-surface text-ink-500',
 } as const
 
 export type BadgeTone = keyof typeof tones

@@ -26,7 +26,6 @@ export function Teams({ embedded = false }: { embedded?: boolean } = {}) {
     push({
       tone: decision === 'approve' ? 'success' : 'info',
       title: decision === 'approve' ? 'Join request approved' : 'Join request rejected',
-      description: 'Prototype only — no team membership was changed.',
     })
   }
 
@@ -41,7 +40,6 @@ export function Teams({ embedded = false }: { embedded?: boolean } = {}) {
       ) : (
         <PageHeader
           title="Team hub"
-          description="Compete as a team, manage join requests and see how your team is performing."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Teams' }]}
           actions={
             <Button size="sm" onClick={() => setCreateOpen(true)} iconLeft={<Plus className="h-3.5 w-3.5" />}>
@@ -130,7 +128,6 @@ export function Teams({ embedded = false }: { embedded?: boolean } = {}) {
                               push({
                                 tone: 'info',
                                 title: 'Removal requires confirmation',
-                                description: 'Team membership changes are not available in this prototype.',
                               })
                             }
                           >
@@ -217,7 +214,6 @@ export function Teams({ embedded = false }: { embedded?: boolean } = {}) {
                           push({
                             tone: 'success',
                             title: 'Join request sent',
-                            description: 'Prototype only — no request was sent to the team.',
                           })
                         }
                       >
@@ -271,8 +267,7 @@ export function Teams({ embedded = false }: { embedded?: boolean } = {}) {
 
       <div className="mt-5">
         <Alert tone="info" title="Teams and competitions">
-          Teams are approved by the club and can enter team competitions. Team membership changes are part of the current
-          member workflow but are simulated in this prototype.
+          Teams are approved by the club and can enter team competitions.
         </Alert>
       </div>
 
@@ -295,7 +290,7 @@ export function Teams({ embedded = false }: { embedded?: boolean } = {}) {
                   setCreateOpen(false)
                   setTeamName('')
                   setTeamTagline('')
-                  push({ tone: 'success', title: 'Team created', description: 'Prototype only — no team was created.' })
+                  push({ tone: 'success', title: 'Team created' })
                 }}
               >
                 Create team

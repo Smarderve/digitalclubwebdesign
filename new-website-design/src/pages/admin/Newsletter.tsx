@@ -23,7 +23,6 @@ export function AdminNewsletter() {
     <>
       <PageHeader
         title="Newsletter"
-        description="People who subscribed to club news from the public website. Subscribers are separate from member accounts."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Newsletter' }]}
         actions={
           <>
@@ -49,7 +48,7 @@ export function AdminNewsletter() {
           { label: 'Active', value: rows.filter((row) => row.active).length, hint: 'Will receive campaigns' },
           { label: 'Unsubscribed', value: rows.filter((row) => !row.active).length, hint: 'Excluded from sends' },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-line bg-white p-4">
+          <div key={item.label} className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             <p className="mt-1.5 text-[1.25rem] font-semibold tabular tracking-tight text-ink-950">{item.value}</p>
             <p className="text-[0.6875rem] text-ink-400">{item.hint}</p>
@@ -80,7 +79,7 @@ export function AdminNewsletter() {
                     iconLeft={row.active ? <MailX className="h-3 w-3" /> : <Mail className="h-3 w-3" />}
                     onClick={() => {
                       setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, active: !entry.active } : entry)))
-                      push({ tone: 'info', title: row.active ? 'Subscriber removed in the prototype' : 'Subscriber restored in the prototype', description: 'No email preference was changed.' })
+                      push({ tone: 'info', title: row.active ? 'Subscriber removed' : 'Subscriber restored' })
                     }}
                   >
                     {row.active ? 'Unsubscribe' : 'Resubscribe'}
@@ -133,7 +132,7 @@ export function AdminNewsletter() {
                   if (form.body.trim().length < 30) next.body = 'Write at least 30 characters for the newsletter body.'
                   setErrors(next)
                   if (Object.keys(next).length) return
-                  push({ tone: 'success', title: 'Campaign queued in the prototype', description: 'No newsletter was sent to subscribers.' })
+                  push({ tone: 'success', title: 'Campaign queued', description: 'No newsletter was sent to subscribers.' })
                   setOpen(false)
                 }}
               >

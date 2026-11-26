@@ -41,7 +41,6 @@ export function AdminCompetitions() {
     <>
       <PageHeader
         title="Competitions"
-        description="Weekly and monthly challenges: briefs, eligibility, judging criteria and rewards. Publishing opens entries for eligible members."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Competitions' }]}
         actions={<Button size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />} onClick={() => setOpen(true)}>New competition</Button>}
       />
@@ -100,7 +99,7 @@ export function AdminCompetitions() {
                   <DropdownItem to={`/admin/competitions/${row.id}`} icon={<Gavel className="h-3.5 w-3.5" />}>Score submissions</DropdownItem>
                   <DropdownItem
                     icon={<Users className="h-3.5 w-3.5" />}
-                    onSelect={() => push({ tone: 'info', title: 'Enrollments are a prototype action', description: 'Member enrollments are managed from the competition detail page.' })}
+                    onSelect={() => push({ tone: 'info', title: 'Enrollments are available from the record page', description: 'Member enrollments are managed from the competition detail page.' })}
                   >
                     View enrollments
                   </DropdownItem>
@@ -109,7 +108,7 @@ export function AdminCompetitions() {
                       icon={<CheckCircle2 className="h-3.5 w-3.5" />}
                       onSelect={() => {
                         setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, status: 'published' } : entry)))
-                        push({ tone: 'success', title: 'Competition published in the prototype', description: 'No member notification was sent.' })
+                        push({ tone: 'success', title: 'Competition published', description: 'No member notification was sent.' })
                       }}
                     >
                       Publish competition
@@ -279,7 +278,7 @@ export function AdminCompetitionDetail() {
                         { label: 'Opens', value: formatDate(competition.startsAt) },
                         { label: 'Closes', value: formatDate(competition.endsAt) },
                       ].map((item) => (
-                        <div key={item.label} className="bg-white px-4 py-3">
+                        <div key={item.label} className="bg-surface px-4 py-3">
                           <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{item.label}</p>
                           <p className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">{item.value}</p>
                         </div>
@@ -342,10 +341,10 @@ export function AdminCompetitionDetail() {
                       <TD><StatusBadge status={row.status} /></TD>
                       <TD className="text-right">
                         <RowActions label={`Actions for ${row.member}`}>
-                          <DropdownItem icon={<Gavel className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Scoring is a prototype action', description: `${row.member} — score entry is part of the live judging workflow.` })}>
+                          <DropdownItem icon={<Gavel className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Scoring is available from the record page', description: `${row.member} — score entry is part of the live judging workflow.` })}>
                             Score submission
                           </DropdownItem>
-                          <DropdownItem icon={<ExternalLink className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Submission link opens externally', description: 'Repository and demo links are opened from the live console.' })}>
+                          <DropdownItem icon={<ExternalLink className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Submission link opens externally' })}>
                             Open submission
                           </DropdownItem>
                         </RowActions>
@@ -447,7 +446,7 @@ export function AdminCompetitionDetail() {
         destructive={false}
         onConfirm={() => {
           setStatus('finalized')
-          push({ tone: 'success', title: 'Competition finalized in the prototype', description: 'No points were awarded and no member was notified.' })
+          push({ tone: 'success', title: 'Competition finalized', description: 'No points were awarded and no member was notified.' })
         }}
       />
     </>

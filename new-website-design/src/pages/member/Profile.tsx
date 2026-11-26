@@ -23,7 +23,6 @@ export function MemberProfile() {
     <>
       <PageHeader
         title="My profile"
-        description="Your club profile, social connections, privacy, membership, digital ID and rewards."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Profile' }]}
         actions={
           <ButtonLink to="/member/edit-profile" size="sm">
@@ -167,7 +166,7 @@ export function MemberProfile() {
                   { label: 'Competitions', value: demoMember.competitions },
                   { label: 'Trophies earned', value: earned.length },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white px-4 py-3">
+                  <div key={item.label} className="bg-surface px-4 py-3">
                     <p className="text-[1.125rem] font-semibold tabular text-ink-950">{item.value}</p>
                     <p className="text-[0.6875rem] text-ink-500">{item.label}</p>
                   </div>

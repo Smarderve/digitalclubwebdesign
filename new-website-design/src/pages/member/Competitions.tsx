@@ -98,7 +98,7 @@ export function CompetitionList({ frequency, embedded = false }: { frequency: 'w
       </div>
 
       {visible.length ? (
-        <div className="overflow-hidden rounded-lg border border-line bg-white">
+        <div className="overflow-hidden rounded-lg border border-line bg-surface">
           <div className="divide-y divide-line">
             {visible.map((competition) => (
               <Link
@@ -231,7 +231,7 @@ export function CompetitionDetail() {
                   { label: 'Closes', value: formatDate(competition.endsAt) },
                   { label: 'Submission type', value: competition.submissionType },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white px-4 py-3">
+                  <div key={item.label} className="bg-surface px-4 py-3">
                     <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{item.label}</dt>
                     <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">{item.value}</dd>
                   </div>
@@ -277,7 +277,7 @@ export function CompetitionDetail() {
                 {competition.rewards.map((reward) => (
                   <div key={reward.rank} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                     <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFF8EB] text-[#A15C07]">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-warning-soft text-warning">
                         <Trophy className="h-3.5 w-3.5" aria-hidden />
                       </span>
                       <p className="text-[0.8125rem] font-medium text-ink-900">{reward.rank}</p>
@@ -380,7 +380,6 @@ export function CompetitionDetail() {
                 <li>Late entries are not accepted after the closing time.</li>
                 <li>Judges' scores are final once results are published.</li>
               </ul>
-              <p className="mt-3 text-[0.625rem] leading-4 text-ink-400">{DEMO_LABEL}</p>
             </CardBody>
           </Card>
         </div>
@@ -406,7 +405,6 @@ export function CompetitionDetail() {
                   push({
                     tone: 'success',
                     title: 'Submission validated',
-                    description: 'Prototype only — nothing was uploaded or submitted to the judges.',
                   })
                   setSubmission('')
                   setNotes('')
@@ -487,7 +485,7 @@ export function CompetitionLeaderboard() {
                   <span
                     className={
                       entry.rank <= 3
-                        ? 'inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#FFF8EB] text-[0.75rem] font-semibold tabular text-[#A15C07]'
+                        ? 'inline-flex h-7 w-7 items-center justify-center rounded-full bg-warning-soft text-[0.75rem] font-semibold tabular text-warning'
                         : 'inline-flex h-7 w-7 items-center justify-center text-[0.75rem] font-medium tabular text-ink-500'
                     }
                   >

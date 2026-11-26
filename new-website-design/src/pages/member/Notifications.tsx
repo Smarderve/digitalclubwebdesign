@@ -88,7 +88,6 @@ export function MemberNotifications() {
     <>
       <PageHeader
         title="Notifications"
-        description="Club updates, follow activity and requests. Follow requests can be approved or declined here."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Notifications' }]}
         actions={
           <Button
@@ -114,7 +113,7 @@ export function MemberNotifications() {
         </TabsList>
 
         <TabsContent value={tab}>
-          <div className="mt-4 overflow-hidden rounded-lg border border-line bg-white">
+          <div className="mt-4 overflow-hidden rounded-lg border border-line bg-surface">
             {visible.length ? (
               <ul className="divide-y divide-line">
                 {visible.map((entry) =>
@@ -267,7 +266,7 @@ export function MemberNotificationDetail() {
           All notifications
         </Link>
 
-        <article className="rounded-lg border border-line bg-white">
+        <article className="rounded-lg border border-line bg-surface">
           <header className="border-b border-line px-5 py-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="outline">{kindLabel[socialItem.kind]}</Badge>
@@ -356,7 +355,7 @@ export function MemberNotificationDetail() {
         All notifications
       </Link>
 
-      <article className="rounded-lg border border-line bg-white">
+      <article className="rounded-lg border border-line bg-surface">
         <header className="border-b border-line px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="outline">{kindLabel[item.kind] ?? 'Notice'}</Badge>
@@ -388,7 +387,7 @@ export function MemberNotificationDetail() {
       </article>
 
       <SectionTitle className="mt-6" title="Other updates" description="Recent notifications in this list" />
-      <div className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-white">
+      <div className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface">
         {demoNotifications
           .filter((entry) => entry.id !== item.id)
           .slice(0, 3)

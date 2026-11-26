@@ -31,12 +31,12 @@ export function DialogContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink-950/45 backdrop-blur-[2px] data-[state=open]:animate-fade-in" />
       <DialogPrimitive.Content
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-line bg-white shadow-pop focus:outline-none',
+          'fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-line bg-surface shadow-pop focus:outline-none [max-height:calc(100dvh-2rem)]',
           width,
         )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
-          <div>
+        <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-4 sm:px-5">
+          <div className="min-w-0">
             <DialogPrimitive.Title className="text-h3 text-ink-950">{title}</DialogPrimitive.Title>
             {description ? (
               <DialogPrimitive.Description className="mt-1 text-[0.8125rem] leading-5 text-ink-500">
@@ -51,8 +51,10 @@ export function DialogContent({
             <X className="h-4 w-4" aria-hidden />
           </DialogPrimitive.Close>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 scrollbar-thin">{children}</div>
-        {footer ? <div className="flex justify-end gap-2 border-t border-line bg-ink-50/50 px-5 py-3.5">{footer}</div> : null}
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 scrollbar-thin sm:px-5">{children}</div>
+        {footer ? (
+          <div className="flex flex-wrap justify-end gap-2 border-t border-line bg-ink-50/50 px-4 py-3.5 sm:px-5">{footer}</div>
+        ) : null}
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
   )
@@ -78,12 +80,12 @@ export function DrawerContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink-950/40 data-[state=open]:animate-fade-in" />
       <DialogPrimitive.Content
         className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-line bg-white shadow-pop focus:outline-none data-[state=open]:animate-slide-in',
+          'fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-line bg-surface shadow-pop focus:outline-none data-[state=open]:animate-slide-in',
           width,
         )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
-          <div>
+        <div className="flex items-start justify-between gap-4 border-b border-line px-4 py-4 sm:px-5">
+          <div className="min-w-0">
             <DialogPrimitive.Title className="text-h3 text-ink-950">{title}</DialogPrimitive.Title>
             {description ? (
               <DialogPrimitive.Description className="mt-1 text-[0.8125rem] leading-5 text-ink-500">
@@ -98,7 +100,7 @@ export function DrawerContent({
             <X className="h-4 w-4" aria-hidden />
           </DialogPrimitive.Close>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 scrollbar-thin">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 scrollbar-thin sm:px-5">{children}</div>
         {footer ? (
           <div className="flex flex-wrap justify-end gap-2 border-t border-line bg-ink-50/50 px-5 py-3.5">{footer}</div>
         ) : null}
@@ -156,7 +158,7 @@ export function ConfirmDialog({
         }
       >
         <p className="text-small leading-6 text-ink-600">
-          This confirmation is part of the prototype. No production record is changed.
+          Review the details before confirming. This action cannot be undone.
         </p>
       </DialogContent>
     </Dialog>

@@ -9,13 +9,22 @@ export type HeroMedia = {
   caption?: string
 }
 
-/** Build a responsive media reference from a Pexels asset stored in /public/images. */
+/** Build a responsive media reference from an asset stored in /public/images. */
 export function media(base: string, alt: string, caption?: string): HeroMedia {
   return {
     src: `${base}-1600.jpg`,
     srcSet: `${base}-800.jpg 800w, ${base}-1600.jpg 1600w`,
     alt,
     caption,
+  }
+}
+
+/** A club photograph at the widths that were exported for it. */
+export function clubMedia(base: string, alt: string, widths: number[] = [800, 1600]): HeroMedia {
+  return {
+    src: `${base}-${widths[widths.length - 1]}.jpg`,
+    srcSet: widths.map((width) => `${base}-${width}.jpg ${width}w`).join(', '),
+    alt,
   }
 }
 
@@ -30,12 +39,6 @@ function MediaImage({ media, sizes, priority }: { media: HeroMedia; sizes: strin
       decoding={priority ? 'sync' : 'async'}
       className="media-reveal h-full w-full object-cover"
     />
-  )
-}
-
-function StockNote({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <p className={cn('text-[0.625rem] leading-4 text-ink-400', className)}>{children}</p>
   )
 }
 
@@ -98,10 +101,9 @@ export function PageHero({
         </div>
         {image ? (
           <div className="container-editorial mt-9 flex-1 pb-3">
-            <figure className="animate-fade-up relative h-full min-h-[260px] overflow-hidden rounded-xl bg-ink-100 lg:min-h-[calc(100svh-30rem)]">
+            <figure className="media-zoom animate-fade-up relative h-full min-h-[260px] overflow-hidden rounded-xl bg-ink-100 lg:min-h-[calc(100svh-30rem)]">
               <MediaImage media={image} sizes="100vw" priority />
             </figure>
-            <StockNote className="mt-2">{footnote ?? image.caption ?? 'Stock photograph · Pexels.'}</StockNote>
           </div>
         ) : null}
       </section>
@@ -140,7 +142,6 @@ export function PageHero({
           ) : null}
           <div className="mt-12 flex flex-wrap items-end justify-between gap-6 border-t border-line pt-5">
             <div className="max-w-[520px]">{aside}</div>
-            {footnote ? <StockNote className="max-w-[360px]">{footnote}</StockNote> : null}
           </div>
         </div>
       </section>
@@ -182,11 +183,10 @@ export function PageHero({
           </div>
 
           {image ? (
-            <figure className="animate-fade-up -mx-5 sm:-mx-6 lg:mx-0 lg:my-8 lg:flex lg:h-[calc(100%-4rem)] lg:flex-col">
+            <figure className="media-zoom animate-fade-up -mx-5 sm:-mx-6 lg:mx-0 lg:my-8 lg:flex lg:h-[calc(100%-4rem)] lg:flex-col">
               <div className="relative min-h-[260px] flex-1 overflow-hidden sm:min-h-[340px] lg:rounded-xl">
                 <MediaImage media={image} sizes="(min-width: 1024px) 46vw, 100vw" priority />
               </div>
-              <StockNote className="mt-2">{image.caption ?? footnote ?? 'Stock photograph · Pexels.'}</StockNote>
             </figure>
           ) : null}
         </div>
@@ -209,7 +209,7 @@ export function EditorialFigure({
 }) {
   return (
     <figure className={cn('overflow-hidden', className)}>
-      <div className={cn('relative w-full overflow-hidden rounded-lg bg-ink-100', ratio)}>
+      <div className={cn('media-zoom relative w-full overflow-hidden rounded-lg bg-ink-100', ratio)}>
         <MediaImage media={image} sizes={sizes} />
       </div>
     </figure>

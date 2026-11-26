@@ -70,7 +70,6 @@ export function CompetitionsHub() {
     <>
       <PageHeader
         title="Competitions"
-        description="Weekly and monthly club challenges, judging status and results."
         actions={
           <Link
             to="/member/rankings"
@@ -270,7 +269,6 @@ function Overview({
         </Card>
       </div>
 
-      <p className="text-[0.6875rem] leading-5 text-ink-400">{DEMO_LABEL}</p>
     </div>
   )
 }
@@ -521,7 +519,7 @@ function Hackathons() {
       <EmptyState
         icon={<Sparkles className="h-4 w-4" aria-hidden />}
         title="No hackathons are published"
-        description="Hackathons need competition, team and result records. The current competition data model only stores weekly and monthly challenges, so there is nothing to show here yet — and nothing has been fabricated to fill it."
+        description="No hackathon records have been published yet."
         action={
           <Link to="/member/activities?tab=events" className="text-[0.8125rem] font-semibold text-brand-800 hover:underline">
             Browse club events

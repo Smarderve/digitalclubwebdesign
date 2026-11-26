@@ -52,7 +52,7 @@ export function MetricRow({
       )}
     >
       {items.map((item) => (
-        <div key={item.label} className="flex flex-col justify-between gap-3 bg-white p-4">
+        <div key={item.label} className="flex flex-col justify-between gap-3 bg-surface p-4">
           <div className="flex items-start justify-between gap-2">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             {item.icon ? (

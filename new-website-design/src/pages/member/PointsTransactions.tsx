@@ -28,7 +28,6 @@ export function PointsTransactions() {
     <>
       <PageHeader
         title="Points ledger"
-        description="View the individual points transactions recorded for a member. Totals are calculated from this ledger."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Rankings', to: '/member/rankings' }, { label: 'Points ledger' }]}
         actions={
           <ButtonLink to="/member/rankings" variant="outline" size="sm" iconLeft={<ArrowLeft className="h-3.5 w-3.5" />}>
@@ -106,7 +105,7 @@ export function PointsTransactions() {
             <EmptyState
               icon={<History className="h-4 w-4" aria-hidden />}
               title="No transactions for this member"
-              description="This prototype only includes a points ledger for the demonstration member. Select Amina Juma to review the ledger layout."
+              description="Select a member to review their points ledger."
             />
           </div>
         )}

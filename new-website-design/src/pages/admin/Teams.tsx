@@ -24,7 +24,6 @@ export function AdminTeams() {
     <>
       <PageHeader
         title="Teams"
-        description="Member teams for competitions and builds. Team leaders manage membership; administrators handle suspensions."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Teams' }]}
         actions={
           <Button
@@ -122,7 +121,7 @@ export function AdminTeams() {
         onConfirm={() => {
           if (!pending) return
           setRows((current) => current.map((row) => (row.id === pending.id ? { ...row, status: row.status === 'active' ? 'suspended' : 'active' } : row)))
-          push({ tone: 'info', title: pending.status === 'active' ? 'Team suspended in the prototype' : 'Team reactivated in the prototype', description: 'No production record changed.' })
+          push({ tone: 'info', title: pending.status === 'active' ? 'Team suspended' : 'Team reactivated' })
         }}
       />
     </>
@@ -194,8 +193,8 @@ export function AdminTeamDetail() {
                       <p className="text-[0.6875rem] text-ink-400">{request.course} · requested {formatDate(request.requested)}</p>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="outline" size="xs" iconLeft={<Check className="h-3 w-3" />} onClick={() => push({ tone: 'success', title: 'Request accepted in the prototype', description: `${request.name} — no team membership was changed.` })}>Accept</Button>
-                      <Button variant="ghost" size="xs" iconLeft={<X className="h-3 w-3" />} onClick={() => push({ tone: 'info', title: 'Request declined in the prototype', description: `${request.name} — no notification was sent.` })}>Decline</Button>
+                      <Button variant="outline" size="xs" iconLeft={<Check className="h-3 w-3" />} onClick={() => push({ tone: 'success', title: 'Request accepted', description: `${request.name} — no team membership was changed.` })}>Accept</Button>
+                      <Button variant="ghost" size="xs" iconLeft={<X className="h-3 w-3" />} onClick={() => push({ tone: 'info', title: 'Request declined', description: `${request.name} — no notification was sent.` })}>Decline</Button>
                     </div>
                   </li>
                 ))}
@@ -258,7 +257,7 @@ export function AdminTeamDetail() {
         description="Members keep their individual records and points either way."
         confirmLabel={team.status === 'active' ? 'Suspend team' : 'Reactivate'}
         destructive={team.status === 'active'}
-        onConfirm={() => push({ tone: 'info', title: 'Team status is unchanged in the prototype', description: 'Use the teams list to change demonstration status.' })}
+        onConfirm={() => push({ tone: 'info', title: 'Team status is unchanged' })}
       />
       <ConfirmDialog
         open={confirming === 'transfer'}
@@ -267,7 +266,7 @@ export function AdminTeamDetail() {
         description="A new leader must be a current member of the team. The current leader becomes a regular member."
         confirmLabel="Choose new leader"
         destructive={false}
-        onConfirm={() => push({ tone: 'info', title: 'Leadership transfer is a prototype action', description: 'Use the member directory to review candidates.' })}
+        onConfirm={() => push({ tone: 'info', title: 'Leadership transfer is available from the record page', description: 'Use the member directory to review candidates.' })}
       />
     </>
   )

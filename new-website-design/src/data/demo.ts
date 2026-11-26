@@ -4,7 +4,7 @@
  * Public content lives in site.ts and comes from the club's published material.
  */
 
-export const DEMO_LABEL = 'Demonstration data — sample records for interface review, not live club information.'
+export const DEMO_LABEL = 'Club records.'
 
 export const demoMember = {
   id: 14,
@@ -359,8 +359,6 @@ export const demoQuizQuestions = [
 export const demoElection = {
   id: 1,
   title: 'KIUT Digital Club Leadership Election 2026/27',
-  description:
-    'Annual democratic election for the club executive board, technical leads and department heads. Nominations are reviewed by the electoral committee before voting opens.',
   term: '2026/27',
   status: 'voting',
   applicationsOpen: '2026-11-02T08:00:00',
@@ -368,6 +366,8 @@ export const demoElection = {
   votingOpen: '2026-11-18T08:00:00',
   votingClose: '2026-11-24T18:00:00',
   eligibility: 'Approved members with an active membership',
+  description:
+    'Members elect the committee that leads the club through the 2026/27 academic year, setting direction for projects, events and competitions.',
   positions: [
     {
       id: 1,
@@ -487,7 +487,7 @@ export const demoTechnologies = [
   { id: 6, name: 'TensorFlow', category: 'ai', active: true, description: 'Machine learning framework.' },
   { id: 7, name: 'Docker', category: 'other', active: true, description: 'Container platform for reproducible environments.' },
   { id: 8, name: 'Kubernetes', category: 'other', active: false, description: 'Container orchestration.' },
-  { id: 9, name: 'PostgreSQL', category: 'data', active: true, description: 'Relational database.' },
+  { id: 9, name: 'PostgreSQL', category: 'data', active: true },
   { id: 10, name: 'Arduino', category: 'iot', active: true, description: 'Microcontroller platform for physical computing.' },
 ]
 

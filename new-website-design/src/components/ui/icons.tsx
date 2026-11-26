@@ -15,14 +15,33 @@ export type IconProps = Omit<SVGProps<SVGSVGElement>, 'ref'> & {
 
 export type LucideIcon = ComponentType<IconProps>
 
+type IconRecord = { body: string; width?: number; height?: number; left?: number; top?: number }
+
+/*
+ * Some bundled records omit their intrinsic size. Iconify would then assume a
+ * 16×16 canvas while the Phosphor paths are drawn on 256 units, which renders
+ * the glyph clipped or invisible. Normalise every record to the collection's
+ * real 256×256 canvas.
+ */
+function normalise(record: IconRecord | undefined) {
+  if (!record) return undefined
+  if (record.width && record.height) return record
+  return { ...record, width: 256, height: 256 }
+}
+
 function glyph(name: keyof typeof ICON_MAP) {
-  const icon = data[ICON_MAP[name] as PhosphorName]
-  return function Glyph({ className, size = 16, strokeWidth: _s, absoluteStrokeWidth: _a, color, style, ...rest }: IconProps) {
+  const icon = normalise(data[ICON_MAP[name] as PhosphorName] as IconRecord | undefined)
+  return function Glyph({ className, size, strokeWidth: _s, absoluteStrokeWidth: _a, color, style, ...rest }: IconProps) {
+    /* Size goes on the SVG attributes, not inline styles, so a layout class
+       (`h-5 w-5`, `size={22}` call sites, etc.) can still take precedence. */
+    const dimension = size ?? 16
     return (
       <Icon
-        icon={icon}
+        icon={icon as never}
+        width={dimension}
+        height={dimension}
         className={cn('align-[-0.125em]', className)}
-        style={{ width: size, height: size, ...style }}
+        style={style}
         {...(rest as Record<string, unknown>)}
       />
     )
@@ -132,14 +151,19 @@ export const SearchX = glyph('SearchX')
 export const Send = glyph('Send')
 export const Settings = glyph('Settings')
 export const Settings2 = glyph('Settings2')
+export const Share2 = glyph('Share2')
 export const ShieldAlert = glyph('ShieldAlert')
 export const ShieldCheck = glyph('ShieldCheck')
 export const ShieldOff = glyph('ShieldOff')
 export const SlidersHorizontal = glyph('SlidersHorizontal')
+export const Volume2 = glyph('Volume2')
+export const VolumeX = glyph('VolumeX')
 export const Smartphone = glyph('Smartphone')
 export const Sparkles = glyph('Sparkles')
 export const Star = glyph('Star')
 export const Ticket = glyph('Ticket')
+export const ThumbsUp = glyph('ThumbsUp')
+export const ThumbsDown = glyph('ThumbsDown')
 export const Timer = glyph('Timer')
 export const Trash2 = glyph('Trash2')
 export const TriangleAlert = glyph('TriangleAlert')

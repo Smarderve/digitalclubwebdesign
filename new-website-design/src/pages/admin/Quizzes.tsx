@@ -23,7 +23,6 @@ export function AdminQuizzes() {
     <>
       <PageHeader
         title="Warmup quizzes"
-        description="Short quizzes published by quizmasters. Administrators can review performance, close a quiz or remove it."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Quizzes' }]}
         actions={
           <>
@@ -89,7 +88,7 @@ export function AdminQuizzes() {
                       icon={<Clock className="h-3.5 w-3.5" />}
                       onSelect={() => {
                         setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, status: 'closed' } : entry)))
-                        push({ tone: 'info', title: 'Quiz closed in the prototype', description: 'No attempts were affected.' })
+                        push({ tone: 'info', title: 'Quiz closed', description: 'No attempts were affected.' })
                       }}
                     >
                       Close quiz
@@ -100,7 +99,7 @@ export function AdminQuizzes() {
                       icon={<Send className="h-3.5 w-3.5" />}
                       onSelect={() => {
                         setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, status: 'published' } : entry)))
-                        push({ tone: 'success', title: 'Quiz published in the prototype', description: 'No notification was sent to members.' })
+                        push({ tone: 'success', title: 'Quiz published', description: 'No notification was sent to members.' })
                       }}
                     >
                       Publish quiz
@@ -163,7 +162,7 @@ export function AdminQuizDetail() {
           { label: 'Average', value: quiz.average ? `${quiz.average}%` : '—' },
           { label: 'Best score', value: quiz.best ? `${quiz.best}%` : '—' },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-line bg-white p-4">
+          <div key={item.label} className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             <p className="mt-1.5 text-[1.25rem] font-semibold tabular tracking-tight text-ink-950">{item.value}</p>
           </div>
@@ -195,7 +194,7 @@ export function AdminQuizDetail() {
                               className={
                                 option === question.options[question.correct]
                                   ? 'rounded-sm border border-brand-200 bg-brand-50/60 px-2.5 py-1.5 text-[0.75rem] font-medium text-brand-900'
-                                  : 'rounded-sm border border-line bg-white px-2.5 py-1.5 text-[0.75rem] text-ink-600'
+                                  : 'rounded-sm border border-line bg-surface px-2.5 py-1.5 text-[0.75rem] text-ink-600'
                               }
                             >
                               {option}
@@ -280,7 +279,7 @@ export function AdminQuizDetail() {
         destructive={false}
         onConfirm={() => {
           setStatus('closed')
-          push({ tone: 'info', title: 'Quiz closed in the prototype', description: 'No production quiz was changed.' })
+          push({ tone: 'info', title: 'Quiz closed' })
         }}
       />
     </>
@@ -294,7 +293,6 @@ export function AdminQuizAnalytics() {
     <>
       <PageHeader
         title="Quiz analytics"
-        description="Participation and performance across the warmup programme. Use this to spot topics that need another session."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Quizzes', to: '/admin/quizzes' }, { label: 'Analytics' }]}
         actions={
           <>
@@ -403,7 +401,6 @@ export function AdminQuizSettings() {
     <>
       <PageHeader
         title="Quiz settings"
-        description="Defaults applied to new warmups. Individual quizzes can override these values."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Quizzes', to: '/admin/quizzes' }, { label: 'Settings' }]}
         actions={<ButtonLink to="/admin/quizzes" variant="outline" size="sm">All quizzes</ButtonLink>}
       />
@@ -438,10 +435,10 @@ export function AdminQuizSettings() {
                 checked={aiEnabled}
                 onCheckedChange={(value) => {
                   setAiEnabled(value)
-                  push({ tone: 'info', title: value ? 'AI drafting marked as enabled (prototype)' : 'AI drafting disabled (prototype)', description: 'The provider key is configured on the server; nothing was saved.' })
+                  push({ tone: 'info', title: value ? 'AI-assisted drafting enabled' : 'AI-assisted drafting disabled' })
                 }}
                 label="Allow AI-assisted question drafts"
-                description="Drafts must be reviewed before publishing. The prototype never calls an external model."
+                description="Drafts must be reviewed before publishing."
               />
               <div className="rounded-md border border-line bg-canvas/50 p-3">
                 <p className="text-[0.75rem] leading-5 text-ink-500">
@@ -452,8 +449,8 @@ export function AdminQuizSettings() {
           </Card>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => push({ tone: 'info', title: 'Defaults unchanged', description: 'Reload the page to discard prototype changes.' })}>Reset</Button>
-            <Button size="sm" onClick={() => push({ tone: 'success', title: 'Quiz defaults saved in the prototype', description: `${attempts} attempt(s), ${points} points. No production setting changed.` })}>Save defaults</Button>
+            <Button variant="outline" size="sm" onClick={() => push({ tone: 'info', title: 'Defaults unchanged' })}>Reset</Button>
+            <Button size="sm" onClick={() => push({ tone: 'success', title: 'Quiz defaults saved', description: `${attempts} attempt(s), ${points} points. No production setting changed.` })}>Save defaults</Button>
           </div>
         </div>
 

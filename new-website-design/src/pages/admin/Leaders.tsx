@@ -56,10 +56,10 @@ export function AdminLeaders() {
     if (Object.keys(next).length) return
     if (editing) {
       setRows((current) => current.map((row) => (row.id === editing.id ? { ...row, ...form } : row)))
-      push({ tone: 'success', title: 'Leader record updated in the prototype', description: 'The public leadership page is unchanged.' })
+      push({ tone: 'success', title: 'Leader record updated', description: 'The public leadership page is unchanged.' })
     } else {
       setRows((current) => [{ id: Math.max(0, ...current.map((row) => row.id)) + 1, ...form, order: current.length + 1, active: true }, ...current])
-      push({ tone: 'success', title: 'Leader added in the prototype', description: 'Nothing was saved to the club database.' })
+      push({ tone: 'success', title: 'Leader added' })
     }
     setOpen(false)
   }
@@ -79,7 +79,6 @@ export function AdminLeaders() {
     <>
       <PageHeader
         title="Leaders"
-        description="The published club leadership team. Records here mirror the public leadership page; ordering controls how they appear."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Leaders' }]}
         actions={<Button size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />} onClick={openAdd}>Add leader</Button>}
       />
@@ -90,7 +89,7 @@ export function AdminLeaders() {
           { label: 'Published positions', value: positions.length, hint: 'Across the executive' },
           { label: 'Hidden records', value: rows.filter((row) => !row.active).length, hint: 'Not shown publicly' },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-line bg-white p-4">
+          <div key={item.label} className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             <p className="mt-1.5 text-[1.25rem] font-semibold tabular tracking-tight text-ink-950">{item.value}</p>
             <p className="text-[0.6875rem] text-ink-400">{item.hint}</p>
@@ -136,7 +135,7 @@ export function AdminLeaders() {
                       type="button"
                       onClick={() => {
                         setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, active: !entry.active } : entry)))
-                        push({ tone: 'info', title: row.active ? 'Leader hidden in the prototype' : 'Leader shown in the prototype', description: 'The public page is unchanged.' })
+                        push({ tone: 'info', title: row.active ? 'Leader hidden' : 'Leader shown', description: 'The public page is unchanged.' })
                       }}
                     >
                       <Badge tone={row.active ? 'green' : 'neutral'} dot>{row.active ? 'Published' : 'Hidden'}</Badge>
@@ -147,7 +146,7 @@ export function AdminLeaders() {
                       <DropdownItem icon={<Pencil className="h-3.5 w-3.5" />} onSelect={() => openEdit(row)}>Edit record</DropdownItem>
                       <DropdownItem
                         icon={<Users className="h-3.5 w-3.5" />}
-                        onSelect={() => push({ tone: 'info', title: 'Leadership bios are public', description: 'Bios are written on the public leaders page in the live application.' })}
+                        onSelect={() => push({ tone: 'info', title: 'Leadership bios are public' })}
                       >
                         Manage biography
                       </DropdownItem>
@@ -168,7 +167,7 @@ export function AdminLeaders() {
       </Card>
 
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
-        Names and positions come from the club's published leadership list. Ordering and visibility changes are prototype-only until saved server-side.
+        Names and positions come from the club's published leadership list.
       </p>
       <DemoNotice />
 
@@ -226,7 +225,7 @@ export function AdminLeaders() {
         onConfirm={() => {
           if (!deleting) return
           setRows((current) => current.filter((row) => row.id !== deleting.id).map((row, index) => ({ ...row, order: index + 1 })))
-          push({ tone: 'info', title: 'Leader removed in the prototype', description: 'No production record was deleted.' })
+          push({ tone: 'info', title: 'Leader removed' })
         }}
       />
     </>

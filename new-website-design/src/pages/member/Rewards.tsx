@@ -18,7 +18,6 @@ export function Rewards({ embedded = false }: { embedded?: boolean } = {}) {
       {embedded ? null : (
         <PageHeader
           title="Rewards & points"
-          description="Points are awarded for competitions, warmups, event attendance and contributions. Trophies unlock at point thresholds."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Rewards' }]}
           actions={
             <ButtonLink to="/member/rankings" variant="outline" size="sm" iconLeft={<Trophy className="h-3.5 w-3.5" />}>

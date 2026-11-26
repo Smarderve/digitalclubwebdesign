@@ -19,7 +19,6 @@ export function AdminMemberIds() {
     <>
       <PageHeader
         title="Member IDs"
-        description="Issued digital member IDs and their verification state. Members can download their ID from the member area."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Member IDs' }]}
         actions={
           <>
@@ -31,11 +30,11 @@ export function AdminMemberIds() {
 
       <div className="grid gap-3 sm:grid-cols-3">
         {[
-          { label: 'IDs issued', value: demoMemberIds.length, hint: 'Demonstration records' },
+          { label: 'IDs issued', value: demoMemberIds.length, hint: 'Issued IDs' },
           { label: 'Active IDs', value: demoMemberIds.filter((row) => row.active).length, hint: 'Verifiable at the door' },
           { label: 'Inactive IDs', value: demoMemberIds.filter((row) => !row.active).length, hint: 'Suspended or expired' },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-line bg-white p-4">
+          <div key={item.label} className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             <p className="mt-1.5 text-[1.25rem] font-semibold tabular tracking-tight text-ink-950">{item.value}</p>
             <p className="text-[0.6875rem] text-ink-400">{item.hint}</p>
@@ -81,7 +80,7 @@ export function AdminMemberIds() {
       </Card>
 
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
-        Printing opens the browser print dialog. In the live application, IDs are generated as PDFs and can be reissued by an administrator.
+        Printing opens the browser print dialog.
       </p>
       <DemoNotice />
     </>
@@ -107,7 +106,6 @@ export function AdminScanId() {
     push({
       tone: found ? (found.active ? 'success' : 'error') : 'info',
       title: found ? (found.active ? 'Member ID is valid' : 'Member ID is inactive') : 'Member ID not found',
-      description: 'Lookup runs against demonstration records only.',
     })
   }
 
@@ -115,7 +113,6 @@ export function AdminScanId() {
     <>
       <PageHeader
         title="Scan or verify a member ID"
-        description="Check a digital ID at an event, workshop or club meeting. Verification uses the member ID printed on the card."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Member IDs', to: '/admin/member-ids' }, { label: 'Verify' }]}
         actions={<ButtonLink to="/admin/member-ids" variant="outline" size="sm">All member IDs</ButtonLink>}
       />
@@ -137,16 +134,16 @@ export function AdminScanId() {
                   }}
                   onKeyDown={(event) => event.key === 'Enter' && verify()}
                   placeholder="DC-2026-0014"
-                  className="h-9 w-full rounded-sm border border-ink-200 bg-white pl-8 pr-3 font-mono text-[0.8125rem] uppercase text-ink-900 placeholder:text-ink-300 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                  className="h-9 w-full rounded-sm border border-ink-200 bg-surface pl-8 pr-3 font-mono text-[0.8125rem] uppercase text-ink-900 placeholder:text-ink-300 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
                 />
               </div>
               <Button onClick={verify} iconLeft={<ScanLine className="h-3.5 w-3.5" />}>Verify ID</Button>
             </div>
-            <p className="text-[0.6875rem] text-ink-400">Scanner input can be typed or pasted. The live system also supports camera scanning where enabled.</p>
+            <p className="text-[0.6875rem] text-ink-400">Scanner input can be typed or pasted.</p>
 
             {searched ? (
               result ? (
-                <div className={cn('rounded-md border p-4', result.active ? 'border-brand-200 bg-brand-50/50' : 'border-[#F3C0BB] bg-[#FFF6F5]')}>
+                <div className={cn('rounded-md border p-4', result.active ? 'border-brand-200 bg-brand-50/50' : 'border-danger-line bg-danger-soft')}>
                   <div className="flex items-start gap-2.5">
                     {result.active ? <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-700" aria-hidden /> : <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-danger" aria-hidden />}
                     <div>
@@ -181,7 +178,7 @@ export function AdminScanId() {
             Verification shows only what is needed to confirm identity. Do not record member details in personal notes or share screens.
           </Alert>
           <Card>
-            <CardHeader title="Recent verifications" description="Demonstration records" />
+            <CardHeader title="Recent verifications" description="Issued member IDs" />
             <ul className="divide-y divide-line">
               {demoMemberIds.slice(0, 4).map((row) => (
                 <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
@@ -194,7 +191,6 @@ export function AdminScanId() {
               ))}
             </ul>
             <div className="border-t border-line px-4 py-3">
-              <p className="text-[0.6875rem] text-ink-400">This list is static demonstration data; no scan history is stored.</p>
             </div>
           </Card>
           <div className="rounded-lg border border-line bg-canvas/50 p-4">

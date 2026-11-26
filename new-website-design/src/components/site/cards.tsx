@@ -59,7 +59,7 @@ export function ProjectFeature({
   note?: string
 }) {
   return (
-    <article className="grid overflow-hidden rounded-lg border border-line bg-white lg:grid-cols-[0.92fr_1.08fr]">
+    <article className="grid overflow-hidden rounded-lg border border-line bg-surface lg:grid-cols-[0.92fr_1.08fr]">
       <TypeCover title={title} label="Featured project" index={index} className="min-h-[260px] lg:min-h-full" />
       <div className="flex flex-col justify-between p-6 sm:p-8">
         <div>

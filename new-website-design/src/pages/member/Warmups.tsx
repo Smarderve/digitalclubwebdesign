@@ -20,7 +20,6 @@ export function Warmups({ embedded = false }: { embedded?: boolean } = {}) {
       {embedded ? null : (
         <PageHeader
           title="Warmup quizzes"
-          description="Short quizzes published by quizmasters before or after a session. Warmups are low-stakes: the best attempt counts toward points."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Warmups' }]}
           actions={<ButtonLink to="/member/sessions/timetable" variant="outline" size="sm">Session timetable</ButtonLink>}
         />
@@ -32,7 +31,7 @@ export function Warmups({ embedded = false }: { embedded?: boolean } = {}) {
           { label: 'Closed', value: closed.length, hint: 'Results published' },
           { label: 'Your best score', value: '88%', hint: 'React Fundamentals' },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-line bg-white p-4">
+          <div key={item.label} className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             <p className="mt-2 text-[1.375rem] font-semibold tabular tracking-tight text-ink-950">{item.value}</p>
             <p className="mt-0.5 text-[0.6875rem] text-ink-400">{item.hint}</p>
@@ -53,7 +52,7 @@ export function Warmups({ embedded = false }: { embedded?: boolean } = {}) {
             onClick={() => setFilter(option.value)}
             className={cn(
               'h-7 rounded-full border px-3 text-[0.75rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700',
-              filter === option.value ? 'border-brand-700 bg-brand-700 text-white' : 'border-ink-200 bg-white text-ink-600 hover:bg-ink-50',
+              filter === option.value ? 'border-brand-700 bg-brand-700 text-white' : 'border-ink-200 bg-surface text-ink-600 hover:bg-ink-50',
             )}
           >
             {option.label}
@@ -61,7 +60,7 @@ export function Warmups({ embedded = false }: { embedded?: boolean } = {}) {
         ))}
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-line bg-white">
+      <div className="mt-4 overflow-hidden rounded-lg border border-line bg-surface">
         <ul className="divide-y divide-line">
           {visible.length ? (
             visible.map((quiz) => (
@@ -140,7 +139,7 @@ export function WarmupDetail() {
 
       <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
         <div>
-          <div className="rounded-lg border border-line bg-white">
+          <div className="rounded-lg border border-line bg-surface">
             <div className="border-b border-line px-5 py-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="outline">{quiz.field}</Badge>
@@ -192,7 +191,7 @@ export function WarmupDetail() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-lg border border-line bg-white">
+          <div className="rounded-lg border border-line bg-surface">
             <div className="border-b border-line px-4 py-3">
               <h2 className="text-[0.9375rem] font-semibold text-ink-950">Your results</h2>
             </div>
@@ -223,9 +222,9 @@ export function WarmupDetail() {
             type="button"
             onClick={() => {
               setReminders((value) => !value)
-              push({ tone: 'info', title: reminders ? 'Reminder turned off' : 'Reminder turned on', description: 'Prototype toggle — preference is not saved to the server.' })
+              push({ tone: 'info', title: reminders ? 'Reminder turned off' : 'Reminder turned on' })
             }}
-            className="flex w-full items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3 text-left hover:bg-ink-50/50"
+            className="flex w-full items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 text-left hover:bg-ink-50/50"
           >
             <span>
               <span className="block text-[0.8125rem] font-medium text-ink-900">Closing reminder</span>
@@ -245,7 +244,7 @@ export function WarmupDetail() {
         open={startOpen}
         onOpenChange={setStartOpen}
         title="Start the timer now?"
-        description={`You will have ${quiz.duration} minutes for ${quiz.questions} questions. The attempt is a prototype demonstration and is not recorded.`}
+        description={`You will have ${quiz.duration} minutes for ${quiz.questions} questions. This attempt is a practice run and is not scored.`}
         confirmLabel="Start attempt"
         destructive={false}
         onConfirm={() => navigate(`/member/quizzes/${quiz.id}/take`)}
@@ -276,7 +275,7 @@ export function WarmupTake() {
           <h1 className="mt-0.5 text-[1.25rem] font-semibold tracking-[-0.01em] text-ink-950">Question {index + 1} of {questions.length}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-sm border border-line bg-white px-2.5 py-1.5 text-[0.75rem] font-medium tabular text-ink-700">
+          <span className="inline-flex items-center gap-1.5 rounded-sm border border-line bg-surface px-2.5 py-1.5 text-[0.75rem] font-medium tabular text-ink-700">
             <Timer className="h-3.5 w-3.5 text-ink-400" aria-hidden />
             {quiz.duration}:00 remaining
           </span>
@@ -302,7 +301,7 @@ export function WarmupTake() {
                     key={option}
                     className={cn(
                       'flex cursor-pointer items-start gap-3 rounded-md border px-3.5 py-3 text-[0.8125rem] transition-colors',
-                      selected ? 'border-brand-600 bg-brand-50/60' : 'border-ink-200 bg-white hover:border-ink-300 hover:bg-ink-50/50',
+                      selected ? 'border-brand-600 bg-brand-50/60' : 'border-ink-200 bg-surface hover:border-ink-300 hover:bg-ink-50/50',
                     )}
                   >
                     <input
@@ -338,7 +337,7 @@ export function WarmupTake() {
 
       <div className="mt-3 flex items-start gap-2 text-[0.6875rem] leading-5 text-ink-400">
         <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-        Leaving this page is recorded as a violation. This prototype does not record anything; the warning text mirrors the live quiz rules.
+        Leaving this page during an attempt counts as a violation.
       </div>
 
       <ConfirmDialog
@@ -371,13 +370,13 @@ export function WarmupResult() {
             Warmup overview
           </Link>
           <h1 className="mt-2 text-[1.5rem] font-semibold tracking-[-0.02em] text-ink-950">{quiz.title}</h1>
-          <p className="mt-1 text-[0.8125rem] text-ink-500">Attempt completed · {formatDate(new Date())} · demonstration result</p>
+          <p className="mt-1 text-[0.8125rem] text-ink-500">Attempt completed · {formatDate(new Date())}</p>
         </div>
         <Badge tone="green">Submitted</Badge>
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_1.5fr]">
-        <div className="rounded-lg border border-line bg-white">
+        <div className="rounded-lg border border-line bg-surface">
           <div className="px-5 py-5 text-center">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">Your score</p>
             <p className="mt-2 text-[2.5rem] font-semibold leading-none tabular tracking-tight text-brand-800">{score}%</p>
@@ -403,7 +402,7 @@ export function WarmupResult() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-line bg-white">
+        <div className="rounded-lg border border-line bg-surface">
           <div className="border-b border-line px-4 py-3">
             <h2 className="text-[0.9375rem] font-semibold text-ink-950">Answer review</h2>
             <p className="mt-0.5 text-[0.6875rem] text-ink-400">Correct answers are shown after submission.</p>
@@ -492,9 +491,6 @@ export function WarmupLeaderboard() {
 
       <div className="mt-4">
         <SectionTitle title="Not on the list?" description="Only completed attempts appear. If your attempt is missing, contact the quizmaster." />
-        <Alert tone="info" title="Demonstration results">
-          This table shows sample results from the prototype data set. Real scores are calculated from submitted attempts.
-        </Alert>
       </div>
     </>
   )

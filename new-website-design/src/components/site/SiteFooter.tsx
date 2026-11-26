@@ -76,7 +76,6 @@ export function SiteFooter() {
                 push({
                   tone: 'success',
                   title: 'Email validated',
-                  description: 'Prototype only — no subscription is stored and no email is sent.',
                 })
               }}
               noValidate
@@ -171,7 +170,7 @@ export function SiteFooter() {
             <span aria-hidden className="text-ink-300">
               ·
             </span>
-            <span>Redesign prototype — not the live site</span>
+            <span>Student technology community</span>
           </p>
         </div>
       </div>

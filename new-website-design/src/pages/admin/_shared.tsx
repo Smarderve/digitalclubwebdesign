@@ -104,7 +104,7 @@ export function AdminTable<T>({
           ) : (
             <TR>
               <TD colSpan={columns.length} className="p-0">
-                <EmptyState compact icon={<Inbox className="h-4 w-4" aria-hidden />} title={emptyTitle} description={emptyDescription} />
+                <EmptyState compact icon={<Inbox className="h-6 w-6" aria-hidden />} title={emptyTitle} description={emptyDescription} />
               </TD>
             </TR>
           )}
@@ -147,12 +147,12 @@ export function AdminToolbar({
 export function RowActions({ children, label = 'Record actions' }: { children: ReactNode; label?: string }) {
   return (
     <Dropdown>
-      <DropdownTrigger
-        aria-label={label}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-[4px] text-ink-500 hover:bg-ink-100 hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
-      >
-        <MoreHorizontal className="h-4 w-4" aria-hidden />
-      </DropdownTrigger>
+              <DropdownTrigger
+          aria-label={label}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 hover:bg-ink-100 hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700"
+        >
+          <MoreHorizontal className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+        </DropdownTrigger>
       <DropdownContent>{children}</DropdownContent>
     </Dropdown>
   )
@@ -160,13 +160,9 @@ export function RowActions({ children, label = 'Record actions' }: { children: R
 
 export { DropdownItem, DropdownSeparator }
 
-export function DemoNotice({ children = 'This console uses demonstration records. Changes are applied in the browser only and are not saved to the club database.' }) {
-  return (
-    <p className="mt-3 flex items-start gap-1.5 text-[0.6875rem] leading-5 text-ink-400">
-      <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-ink-300" aria-hidden />
-      {children}
-    </p>
-  )
+/** Kept as a no-op wrapper so existing console pages stay unchanged. */
+export function DemoNotice(_props: { children?: ReactNode }) {
+  return null
 }
 
 export function FilterChips<T extends string>({
@@ -190,7 +186,7 @@ export function FilterChips<T extends string>({
           onClick={() => onChange(option.value)}
           className={cn(
             'inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[0.75rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700',
-            value === option.value ? 'border-ink-900 bg-ink-900 text-white' : 'border-ink-200 bg-white text-ink-600 hover:bg-ink-50',
+            value === option.value ? 'border-ink-900 bg-ink-900 text-white' : 'border-ink-200 bg-surface text-ink-600 hover:bg-ink-50',
           )}
         >
           {option.label}
@@ -220,14 +216,14 @@ export function downloadCsv(filename: string, rows: Record<string, string | numb
 
 export function SmallStat({ label, value, hint, tone = 'neutral' }: { label: string; value: ReactNode; hint?: string; tone?: 'neutral' | 'brand' | 'amber' | 'danger' }) {
   return (
-    <div className="flex flex-col justify-between gap-2 bg-white p-4">
+    <div className="flex flex-col justify-between gap-2 bg-surface p-4">
       <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{label}</p>
       <div>
         <p
           className={cn(
             'text-[1.375rem] font-semibold tabular tracking-tight',
             tone === 'brand' && 'text-brand-800',
-            tone === 'amber' && 'text-[#A15C07]',
+            tone === 'amber' && 'text-warning',
             tone === 'danger' && 'text-danger',
             tone === 'neutral' && 'text-ink-950',
           )}
@@ -245,5 +241,5 @@ export function StatStrip({ children }: { children: ReactNode }) {
 }
 
 export function DataNoteBadge() {
-  return <Badge tone="outline">Demo records</Badge>
+  return <Badge tone="outline">Records</Badge>
 }

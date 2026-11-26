@@ -16,7 +16,6 @@ export function QuizmasterDashboard() {
     <>
       <PageHeader
         title="Quizmaster dashboard"
-        description="Create and publish warmup quizzes for member sessions. Warmups are short, low-stakes checks of the week's topic."
         badge={<Badge tone="outline">Quizmaster</Badge>}
         actions={
           <>
@@ -110,7 +109,6 @@ export function CreateQuiz() {
     <>
       <PageHeader
         title="Create a warmup quiz"
-        description="Set the quiz details and options first. Questions are added in the builder."
         breadcrumbs={[{ label: 'Quizmaster', to: '/quizmaster' }, { label: 'Create quiz' }]}
         actions={<ButtonLink to="/quizmaster" variant="outline" size="sm">Cancel</ButtonLink>}
       />
@@ -173,7 +171,7 @@ export function CreateQuiz() {
             <Field label="Description" htmlFor="create-description" hint="Shown on the warmup page before a member starts.">
               <Textarea id="create-description" rows={4} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="A short warmup on layouts. Open to all members." />
             </Field>
-            <label className={cn('flex cursor-pointer items-start gap-2.5 rounded-md border px-3.5 py-3', form.generate ? 'border-brand-300 bg-brand-50/50' : 'border-line bg-white')}>
+            <label className={cn('flex cursor-pointer items-start gap-2.5 rounded-md border px-3.5 py-3', form.generate ? 'border-brand-300 bg-brand-50/50' : 'border-line bg-surface')}>
               <input type="checkbox" checked={form.generate} onChange={(event) => setForm({ ...form, generate: event.target.checked })} className="mt-0.5 h-4 w-4 accent-brand-700" />
               <span>
                 <span className="block text-[0.8125rem] font-medium text-ink-900">Draft starter questions with AI</span>
@@ -193,7 +191,7 @@ export function CreateQuiz() {
                 if (Object.keys(next).length) return
                 push({
                   tone: 'success',
-                  title: form.generate ? 'Quiz created with draft questions' : 'Quiz created in the prototype',
+                  title: form.generate ? 'Quiz created with draft questions' : 'Quiz created',
                   description: form.generate ? 'Draft questions are placeholders; review them before publishing.' : 'Add questions in the builder next.',
                 })
                 navigate('/quizmaster/quizzes/1/builder')
@@ -302,7 +300,7 @@ export function QuizBuilder() {
                       iconLeft={<Trash2 className="h-3.5 w-3.5" />}
                       onClick={() => {
                         setQuestions((current) => current.filter((entry) => entry.id !== question.id))
-                        push({ tone: 'info', title: 'Question removed in the prototype', description: 'No published quiz was changed.' })
+                        push({ tone: 'info', title: 'Question removed' })
                       }}
                     />
                   </div>
@@ -378,7 +376,7 @@ export function QuizBuilder() {
                   setQuestions((current) => [...current, { id: Math.max(0, ...current.map((row) => row.id)) + 1, prompt: form.prompt, options: form.options, correct: form.correct }])
                   setForm({ prompt: '', options: ['', '', '', ''], correct: 0 })
                   setError('')
-                  push({ tone: 'success', title: 'Question added in the prototype', description: 'Publish the quiz to make it available to members.' })
+                  push({ tone: 'success', title: 'Question added', description: 'Publish the quiz to make it available to members.' })
                   setOpen(false)
                 }}
               >
@@ -431,7 +429,7 @@ export function QuizBuilder() {
         description={`${questions.length} questions will be visible to members. They can attempt the warmup until it closes.`}
         confirmLabel="Publish quiz"
         destructive={false}
-        onConfirm={() => push({ tone: 'success', title: 'Quiz published in the prototype', description: 'No member notification was sent and nothing was saved.' })}
+        onConfirm={() => push({ tone: 'success', title: 'Quiz published' })}
       />
 
       <div className="mt-3 flex items-center gap-1.5 text-[0.6875rem] text-ink-400">

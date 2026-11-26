@@ -25,7 +25,6 @@ export function Membership({ embedded = false }: { embedded?: boolean } = {}) {
       ) : (
         <PageHeader
           title="Membership"
-          description="Your club membership status, payment record and what membership includes."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Membership' }]}
           actions={
             <ButtonLink href={`mailto:${SITE.email}?subject=Membership%20renewal`} size="sm" iconLeft={<Mail className="h-3.5 w-3.5" />}>
@@ -35,8 +34,8 @@ export function Membership({ embedded = false }: { embedded?: boolean } = {}) {
         />
       )}
 
-      <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr] xl:items-start">
-        <div className="space-y-5">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] xl:items-start">
+        <div className="min-w-0 space-y-5">
           <Card>
             <CardBody>
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -60,7 +59,7 @@ export function Membership({ embedded = false }: { embedded?: boolean } = {}) {
                   { label: 'Paid on', value: formatDate(payment.paidOn) },
                   { label: 'Method', value: payment.method },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white px-4 py-3">
+                  <div key={item.label} className="bg-surface px-4 py-3">
                     <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{item.label}</dt>
                     <dd className="mt-0.5 text-[0.875rem] font-semibold text-ink-900">{item.value}</dd>
                   </div>
@@ -129,7 +128,7 @@ export function Membership({ embedded = false }: { embedded?: boolean } = {}) {
           </Card>
         </div>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <Card>
             <CardHeader title="What membership includes" />
             <CardBody>
@@ -157,9 +156,8 @@ export function Membership({ embedded = false }: { embedded?: boolean } = {}) {
               </div>
               <p className="mt-2 text-[1.25rem] font-semibold tabular text-ink-950">TZS 20,000</p>
               <p className="mt-1 text-[0.75rem] leading-5 text-ink-500">
-                The fee is configured by the club administration. The amount shown here is sample data for the prototype.
+                The fee is set by the club administration for the academic year.
               </p>
-              <p className="mt-2 text-[0.625rem] leading-4 text-ink-400">{DEMO_LABEL}</p>
             </CardBody>
           </Card>
         </div>

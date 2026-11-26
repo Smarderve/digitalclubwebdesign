@@ -4,7 +4,7 @@ import * as SwitchPrimitive from '@radix-ui/react-switch'
 import { cn } from '../../lib/utils'
 
 export const inputStyles =
-  'block w-full rounded-sm border border-ink-200 bg-white px-3 py-2 text-[0.875rem] text-ink-900 shadow-xs transition-colors placeholder:text-ink-400 hover:border-ink-300 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-500 aria-[invalid=true]:border-danger aria-[invalid=true]:focus:ring-danger/20'
+  'block w-full rounded-sm border border-ink-200 bg-surface px-3 py-2 text-[0.875rem] text-ink-900 shadow-xs transition-colors placeholder:text-ink-400 hover:border-ink-300 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-500 aria-[invalid=true]:border-danger aria-[invalid=true]:focus:ring-danger/20'
 
 interface FieldProps {
   label: string
@@ -123,7 +123,7 @@ export function RadioCard({
     <label
       className={cn(
         'flex cursor-pointer items-start gap-3 rounded-md border px-3.5 py-3 transition-colors',
-        checked ? 'border-brand-600 bg-brand-50/60' : 'border-ink-200 bg-white hover:border-ink-300 hover:bg-ink-50/50',
+        checked ? 'border-brand-600 bg-brand-50/60' : 'border-ink-200 bg-surface hover:border-ink-300 hover:bg-ink-50/50',
       )}
     >
       <input

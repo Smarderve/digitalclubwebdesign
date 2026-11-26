@@ -75,7 +75,6 @@ export function EditProfile() {
     <>
       <PageHeader
         title="Edit profile"
-        description="These details feed your public member profile and the member search. Contact details and your student number are never published."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Profile', to: '/member/profile' }, { label: 'Edit' }]}
         actions={
           profile ? (

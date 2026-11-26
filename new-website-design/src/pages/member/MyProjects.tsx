@@ -32,7 +32,6 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
       {embedded ? null : (
         <PageHeader
           title="My projects"
-          description="Projects attached to your member profile. Public projects can appear in the club catalogue after review."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Projects' }]}
           actions={
             <ButtonLink to="/member/projects/add" size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />}>
@@ -66,7 +65,7 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
                 </ButtonLink>
               </div>
             ) : null}
-      <div className="overflow-hidden rounded-lg border border-line bg-white">
+      <div className="overflow-hidden rounded-lg border border-line bg-surface">
         <DataToolbar
           search={search}
           onSearch={setSearch}
@@ -160,7 +159,7 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
 
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
         Projects marked private are visible only to you and club administrators. Public projects may be featured on the
-        club website after review. This prototype does not persist changes.
+        club website after review.
       </p>
 
       <div className="mt-4 flex items-center justify-between rounded-md border border-line bg-canvas/50 px-4 py-3">
@@ -184,7 +183,7 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
         onConfirm={() => {
           if (deleteTarget === null) return
           setProjects((current) => current.filter((project) => project.id !== deleteTarget))
-          push({ tone: 'success', title: 'Project removed', description: 'Prototype only — nothing was deleted from the database.' })
+          push({ tone: 'success', title: 'Project removed' })
         }}
       />
     </>

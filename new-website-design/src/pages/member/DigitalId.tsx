@@ -13,7 +13,7 @@ function QrPattern({ value, className }: { value: string; className?: string }) 
   const seed = Array.from(value).reduce((acc, char) => acc + char.charCodeAt(0), 0)
   return (
     <div
-      className={cn('grid aspect-square grid-cols-[repeat(21,1fr)] gap-px rounded-[3px] bg-white p-1.5', className)}
+      className={cn('grid aspect-square grid-cols-[repeat(21,1fr)] gap-px rounded-[3px] bg-surface p-1.5', className)}
       aria-hidden
     >
       {Array.from({ length: cells * cells }).map((_, index) => {
@@ -24,7 +24,7 @@ function QrPattern({ value, className }: { value: string; className?: string }) 
           inFinder &&
           (row % 6 === 0 || col % 6 === 0 || (row % 6 >= 2 && row % 6 <= 4 && col % 6 >= 2 && col % 6 <= 4))
         const on = inFinder ? finderOn : (row * 31 + col * 17 + seed) % 7 < 3
-        return <span key={index} className={on ? 'bg-ink-950' : 'bg-white'} />
+        return <span key={index} className={on ? 'bg-ink-950' : 'bg-surface'} />
       })}
     </div>
   )
@@ -38,7 +38,6 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
     push({
       tone: 'info',
       title: `${side} card prepared`,
-      description: 'Prototype only — no PDF or image file is generated.',
     })
   }
 
@@ -59,7 +58,6 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
       ) : (
       <PageHeader
         title="Digital member ID"
-        description="Your club identity card. The QR code links to the public verification page for your member ID."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Digital ID' }]}
         actions={
           <>
@@ -89,7 +87,7 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
               <div className="relative flex h-full flex-col justify-between p-5 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-2.5">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-white p-1">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-surface p-1">
                       <img src="/brand/digital-club-logo.svg" alt="" className="h-full w-full object-contain" />
                     </span>
                     <div>
@@ -121,14 +119,13 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
               </div>
             </div>
             <p className="mt-2 text-center text-[0.625rem] text-ink-400">
-              Front of the digital member card. The card image is rendered in the app for this prototype; the live system
-              generates PNG and PDF files.
+              Front of the digital member card.
             </p>
           </div>
 
           {/* Card back */}
           <div className="mx-auto w-full max-w-[640px]">
-            <div className="rounded-lg border border-line bg-white p-5 sm:p-6">
+            <div className="rounded-lg border border-line bg-surface p-5 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4">
                 <div>
                   <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Card back</p>
@@ -149,7 +146,7 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
                   { label: 'Verification', value: `/verify-id/${demoMember.memberId}` },
                   { label: 'Membership', value: 'Valid through 31 Dec 2026' },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white px-3.5 py-2.5">
+                  <div key={item.label} className="bg-surface px-3.5 py-2.5">
                     <dt className="text-[0.5625rem] uppercase tracking-[0.08em] text-ink-400">{item.label}</dt>
                     <dd className="mt-0.5 break-all text-[0.75rem] font-medium text-ink-900">{item.value}</dd>
                   </div>
@@ -164,7 +161,7 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-lg border border-line bg-white p-5">
+          <div className="rounded-lg border border-line bg-surface p-5">
             <p className="flex items-center gap-2 text-[0.8125rem] font-semibold text-ink-900">
               <ShieldCheck className="h-4 w-4 text-brand-700" aria-hidden />
               Verification
@@ -181,7 +178,7 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
             </Link>
           </div>
 
-          <div className="rounded-lg border border-line bg-white p-5">
+          <div className="rounded-lg border border-line bg-surface p-5">
             <p className="text-[0.8125rem] font-semibold text-ink-900">Card details</p>
             <dl className="mt-3 space-y-2 text-[0.75rem]">
               {[
@@ -205,7 +202,6 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
             </p>
           </div>
 
-          <p className="text-[0.625rem] leading-4 text-ink-400">{DEMO_LABEL}</p>
         </div>
       </div>
 
@@ -217,7 +213,7 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
         confirmLabel="Regenerate"
         destructive={false}
         onConfirm={() =>
-          push({ tone: 'success', title: 'Card regenerated', description: 'Prototype only — no file was generated.' })
+          push({ tone: 'success', title: 'Card regenerated' })
         }
       />
     </>

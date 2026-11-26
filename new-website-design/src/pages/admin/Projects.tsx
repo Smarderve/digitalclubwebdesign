@@ -62,7 +62,6 @@ export function AdminProjects() {
     <>
       <PageHeader
         title="Projects"
-        description="Club projects and member submissions shown on the public project showcase. Member projects are reviewed before they appear."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Projects' }]}
         actions={<ButtonLink to="/projects" variant="outline" size="sm" iconLeft={<ExternalLink className="h-3.5 w-3.5" />}>View showcase</ButtonLink>}
       />
@@ -116,7 +115,7 @@ export function AdminProjects() {
               cell: (row) => (
                 <RowActions label={`Actions for ${row.title}`}>
                   <DropdownItem to="/projects" icon={<ExternalLink className="h-3.5 w-3.5" />}>View on showcase</DropdownItem>
-                  <DropdownItem icon={<Pencil className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Project editing is a prototype action', description: `${row.title} — members edit their own submissions from the member area.` })}>
+                  <DropdownItem icon={<Pencil className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Project editing is available from the record page', description: `${row.title} — members edit their own submissions from the member area.` })}>
                     Edit record
                   </DropdownItem>
                   <DropdownItem icon={<Trash2 className="h-3.5 w-3.5" />} destructive onSelect={() => setDeleting(row)}>Remove from showcase</DropdownItem>
@@ -151,7 +150,7 @@ export function AdminProjects() {
         onConfirm={() => {
           if (!deleting) return
           setRemoved((current) => [...current, deleting.id])
-          push({ tone: 'info', title: 'Project removed in the prototype', description: 'No production content was deleted.' })
+          push({ tone: 'info', title: 'Project removed' })
         }}
       />
 

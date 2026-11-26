@@ -24,7 +24,7 @@ export function DropdownContent({
         align={align}
         sideOffset={6}
         className={cn(
-          'z-50 min-w-[190px] overflow-hidden rounded-md border border-line bg-white p-1 shadow-pop data-[state=open]:animate-fade-in',
+          'z-50 min-w-[190px] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-md border border-line bg-surface p-1 shadow-pop data-[state=open]:animate-fade-in',
           className,
         )}
       >
@@ -51,7 +51,7 @@ export function DropdownItem({
 }) {
   const classes = cn(
     'flex cursor-pointer select-none items-center gap-2 rounded-[4px] px-2.5 py-2 text-[0.8125rem] outline-none transition-colors data-[highlighted]:bg-ink-50',
-    destructive ? 'text-danger data-[highlighted]:bg-[#FEF3F2]' : 'text-ink-700 data-[highlighted]:text-ink-950',
+    destructive ? 'text-danger data-[highlighted]:bg-danger-soft' : 'text-ink-700 data-[highlighted]:text-ink-950',
     className,
   )
   if (to) {

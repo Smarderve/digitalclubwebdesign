@@ -183,19 +183,29 @@ export function GlobalSearch({
         }
       }}
     >
-      <Dialog.Trigger asChild>
+      {/* The bar keeps the glass surface, but the text-entry area is a real
+          input with a text cursor instead of a button with a pointer. Only the
+          icon is a button, because it opens the palette. */}
+      <div className="glass-search flex h-full w-12 items-center rounded-2xl text-[0.8125rem] text-ink-500 sm:w-[200px] lg:w-[248px]">
         <button
           type="button"
-          className="inline-flex h-10 items-center gap-2 rounded-full px-2.5 text-[0.75rem] text-ink-500 transition-colors hover:bg-nav-hover hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 sm:min-w-[176px] sm:px-3 lg:min-w-[228px]"
+          onClick={() => setOpen(true)}
           aria-label={`Search ${areaLabel}`}
+          className="flex h-full w-11 shrink-0 cursor-pointer items-center justify-center rounded-l-2xl text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--ring))] sm:w-9"
         >
-          <Search className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          <span className="hidden flex-1 text-left sm:inline">Search</span>
-          <kbd className="ml-auto hidden rounded-[5px] border border-line bg-ink-50 px-1.5 py-0.5 font-sans text-[0.5625rem] uppercase tracking-wide text-ink-400 sm:inline">
-            Ctrl K
-          </kbd>
+          <Search className="h-[1.05rem] w-[1.05rem]" aria-hidden />
         </button>
-      </Dialog.Trigger>
+        <input
+          type="text"
+          value=""
+          readOnly
+          onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
+          placeholder="Search"
+          aria-label={`Search ${areaLabel}`}
+          className="hidden h-full min-w-0 flex-1 cursor-text bg-transparent pr-3 text-left text-[0.8125rem] text-ink-900 placeholder:text-ink-500 focus:outline-none sm:block"
+        />
+      </div>
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-ink-950/45 data-[state=open]:animate-fade-in" />
@@ -345,14 +355,13 @@ export function GlobalSearch({
                               active === index ? 'bg-ink-50' : 'hover:bg-ink-50/60',
                             )}
                           >
-                            <span
+                            <Icon
                               className={cn(
-                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-                                active === index ? 'bg-brand-50 text-brand-700' : 'bg-ink-50 text-ink-500',
+                                'h-[1.1rem] w-[1.1rem] shrink-0',
+                                active === index ? 'text-brand-700' : 'text-ink-500',
                               )}
-                            >
-                              <Icon className="h-4 w-4" aria-hidden />
-                            </span>
+                              aria-hidden
+                            />
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-[0.8125rem] font-medium text-ink-900">
                                 <Highlight text={item.label} query={deferred} />

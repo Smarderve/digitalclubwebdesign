@@ -26,7 +26,6 @@ export function ChangePassword() {
     <>
       <PageHeader
         title="Change password"
-        description="Use a strong password that you do not reuse on other services."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Profile', to: '/member/profile' }, { label: 'Password' }]}
       />
 
@@ -42,13 +41,12 @@ export function ChangePassword() {
               push({
                 tone: 'success',
                 title: 'Password validated',
-                description: 'Prototype only — no real password was changed.',
               })
             })}
           >
             <CardBody className="space-y-4">
               {done ? (
-                <Alert tone="success" title="Password updated in the prototype">
+                <Alert tone="success" title="Password updated">
                   Your new password passed validation. In production, the backend would hash and store it and invalidate
                   other sessions.
                 </Alert>

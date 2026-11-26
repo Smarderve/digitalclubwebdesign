@@ -40,7 +40,6 @@ export function AdminNews() {
     <>
       <PageHeader
         title="News"
-        description="Short announcements shown on the homepage and news page. News is separate from long-form blog articles."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'News' }]}
         actions={<Button size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />} onClick={openAdd}>New announcement</Button>}
       />
@@ -80,7 +79,7 @@ export function AdminNews() {
                     icon={<Plus className="h-3.5 w-3.5" />}
                     onSelect={() => {
                       setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, status: entry.status === 'Published' ? 'Draft' : 'Published', date: entry.status === 'Published' ? '—' : new Date().toISOString().slice(0, 10) } : row.id === entry.id ? entry : entry)))
-                      push({ tone: 'info', title: row.status === 'Published' ? 'Unpublished in the prototype' : 'Published in the prototype', description: 'No production content was changed.' })
+                      push({ tone: 'info', title: row.status === 'Published' ? 'Unpublished' : 'Published' })
                     }}
                   >
                     {row.status === 'Published' ? 'Unpublish' : 'Publish'}
@@ -115,10 +114,10 @@ export function AdminNews() {
                   if (Object.keys(next).length) return
                   if (editing) {
                     setRows((current) => current.map((row) => (row.id === editing.id ? { ...row, title: form.title, category: form.category, status: form.status, date: form.status === 'Published' ? new Date().toISOString().slice(0, 10) : row.date } : row)))
-                    push({ tone: 'success', title: 'Announcement updated in the prototype', description: 'No production content was changed.' })
+                    push({ tone: 'success', title: 'Announcement updated' })
                   } else {
                     setRows((current) => [{ id: Math.max(...current.map((row) => row.id)) + 1, title: form.title, category: form.category, status: form.status, date: form.status === 'Published' ? new Date().toISOString().slice(0, 10) : '—', author: 'Daniel Mushi' }, ...current])
-                    push({ tone: 'success', title: 'Announcement created in the prototype', description: 'No production content was created.' })
+                    push({ tone: 'success', title: 'Announcement created' })
                   }
                   setOpen(false)
                 }}
@@ -169,7 +168,7 @@ export function AdminNews() {
         onConfirm={() => {
           if (!deleting) return
           setRows((current) => current.filter((row) => row.id !== deleting.id))
-          push({ tone: 'info', title: 'Announcement removed in the prototype', description: 'No production content was deleted.' })
+          push({ tone: 'info', title: 'Announcement removed' })
         }}
       />
     </>

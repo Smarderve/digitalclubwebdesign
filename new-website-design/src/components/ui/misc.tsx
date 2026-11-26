@@ -138,8 +138,8 @@ export function EmptyState({
         className,
       )}
     >
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-400">
-        {icon ?? <SearchX className="h-4.5 w-4.5" aria-hidden />}
+      <div className="mb-3 flex items-center justify-center text-ink-400">
+        {icon ?? <SearchX className="h-6 w-6" aria-hidden />}
       </div>
       <p className="text-[0.9375rem] font-semibold text-ink-900">{title}</p>
       <p className="mt-1 max-w-[46ch] text-[0.8125rem] leading-6 text-ink-500">{description}</p>
@@ -246,7 +246,7 @@ export function SampleNote({ children, className }: { children?: ReactNode; clas
   return (
     <p className={cn('flex items-start gap-1.5 text-[0.6875rem] leading-5 text-ink-400', className)}>
       <Info className="mt-px h-3 w-3 shrink-0" aria-hidden />
-      <span>{children ?? 'Demonstration data — sample records, not live club information.'}</span>
+      <span>{children ?? 'Records are maintained by the club office.'}</span>
     </p>
   )
 }

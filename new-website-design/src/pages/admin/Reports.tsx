@@ -38,7 +38,6 @@ export function AdminReports() {
     <>
       <PageHeader
         title="Member reports"
-        description="Reports submitted from member profiles. Resolving or dismissing a report records the reviewer and an audit entry."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Reports' }]}
         actions={
           <Segmented

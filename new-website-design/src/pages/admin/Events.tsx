@@ -26,7 +26,6 @@ export function AdminEvents() {
     <>
       <PageHeader
         title="Events"
-        description="Workshops, hackathons and talks. Publishing an event makes it visible on the public events page and opens RSVPs."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Events' }]}
         actions={
           <>
@@ -93,7 +92,7 @@ export function AdminEvents() {
                   <DropdownItem to="/admin/rsvps" icon={<Users className="h-3.5 w-3.5" />}>Review RSVPs</DropdownItem>
                   <DropdownItem
                     icon={<CalendarDays className="h-3.5 w-3.5" />}
-                    onSelect={() => push({ tone: 'info', title: 'Event editing is a prototype action', description: 'Use New event to create a demonstration event; existing published events are read-only here.' })}
+                    onSelect={() => push({ tone: 'info', title: 'Event editing is available from the record page' })}
                   >
                     Edit event
                   </DropdownItem>
@@ -137,7 +136,7 @@ export function AdminEvents() {
                       status: 'Upcoming',
                     },
                   ])
-                  push({ tone: 'success', title: 'Event created in the prototype', description: 'No public event was published and no notification was sent.' })
+                  push({ tone: 'success', title: 'Event created', description: 'No public event was published and no notification was sent.' })
                   setOpen(false)
                 }}
               >
@@ -263,7 +262,7 @@ export function AdminEventCheckin() {
                         type="button"
                         onClick={() => {
                           setCheckedIn((current) => ({ ...current, [row.id]: !current[row.id] }))
-                          push({ tone: currentChecked(row.id) ? 'info' : 'success', title: currentChecked(row.id) ? 'Check-in removed in the prototype' : 'Checked in in the prototype', description: `${row.name} — no attendance record was saved.` })
+                          push({ tone: currentChecked(row.id) ? 'info' : 'success', title: currentChecked(row.id) ? 'Check-in removed' : 'Checked in', description: `${row.name} — no attendance record was saved.` })
                         }}
                         className={cn(
                           'inline-flex h-7 items-center gap-1.5 rounded-sm border px-2.5 text-[0.75rem] font-medium',
@@ -299,8 +298,8 @@ export function AdminEventCheckin() {
               <li>4. Send walk-ins to an administrator to record a manual RSVP.</li>
             </ul>
           </Card>
-          <Alert tone="warning" title="Demonstration check-in">
-            Check-in toggles only affect this browser session. Attendance and award points are recorded in the live application.
+          <Alert tone="warning" title="Event check-in">
+            Check in attendees as they arrive. Attendance counts towards event participation points.
           </Alert>
           <Card>
             <CardHeader title="Event summary" />

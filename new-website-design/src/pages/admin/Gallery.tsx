@@ -29,7 +29,6 @@ export function AdminGallery() {
     <>
       <PageHeader
         title="Gallery"
-        description="Photographs and videos from club events, workshops and project showcases. Only published items appear on the public gallery."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Gallery' }]}
         actions={
           <>
@@ -66,7 +65,7 @@ export function AdminGallery() {
         <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
           {list.visible.length ? (
             list.visible.map((row) => (
-              <article key={row.id} className="overflow-hidden rounded-md border border-line bg-white">
+              <article key={row.id} className="overflow-hidden rounded-md border border-line bg-surface">
                 <div className={cn('flex h-[120px] items-center justify-center border-b border-line', row.type === 'Video' ? 'bg-ink-900' : 'bg-canvas')}>
                   {row.type === 'Video' ? <Film className="h-7 w-7 text-white/70" aria-hidden /> : <ImageIcon className="h-7 w-7 text-ink-300" aria-hidden />}
                 </div>
@@ -82,7 +81,7 @@ export function AdminGallery() {
                       size="xs"
                       onClick={() => {
                         setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, status: entry.status === 'Published' ? 'Draft' : 'Published' } : entry)))
-                        push({ tone: 'info', title: row.status === 'Published' ? 'Item unpublished in the prototype' : 'Item published in the prototype', description: 'No production media was changed.' })
+                        push({ tone: 'info', title: row.status === 'Published' ? 'Item unpublished' : 'Item published' })
                       }}
                     >
                       {row.status === 'Published' ? 'Unpublish' : 'Publish'}
@@ -114,14 +113,14 @@ export function AdminGallery() {
       </Card>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[0.6875rem] leading-5 text-ink-400">Uploads are not stored in the prototype. The live application accepts images and video embeds.</p>
+        <p className="text-[0.6875rem] leading-5 text-ink-400">Uploads are not stored. The live application accepts images and video embeds.</p>
         <Button
           variant="ghost"
           size="xs"
           iconLeft={<ExternalLink className="h-3 w-3" />}
           onClick={() => {
             const okay = downloadCsv('gallery-index.csv', rows.map((row) => ({ Title: row.title, Type: row.type, Category: row.category, Status: row.status, Uploaded: row.uploaded })))
-            push({ tone: okay ? 'success' : 'error', title: okay ? 'Gallery index exported' : 'Nothing to export', description: 'The CSV lists demonstration records only.' })
+            push({ tone: okay ? 'success' : 'error', title: okay ? 'Gallery index exported' : 'Nothing to export' })
           }}
         >
           Export index
@@ -152,7 +151,7 @@ export function AdminGallery() {
                     { id: Math.max(0, ...current.map((row) => row.id)) + 1, title: form.title, type: form.type, category: form.category, uploaded: new Date().toISOString().slice(0, 10), status: form.status },
                     ...current,
                   ])
-                  push({ tone: 'success', title: 'Media added in the prototype', description: 'The file was not uploaded anywhere.' })
+                  push({ tone: 'success', title: 'Media added' })
                   setOpen(false)
                 }}
               >
@@ -200,7 +199,7 @@ export function AdminGallery() {
         onConfirm={() => {
           if (!deleting) return
           setRows((current) => current.filter((row) => row.id !== deleting.id))
-          push({ tone: 'info', title: 'Media removed in the prototype', description: 'No stored file was deleted.' })
+          push({ tone: 'info', title: 'Media removed', description: 'No stored file was deleted.' })
         }}
       />
     </>

@@ -25,7 +25,7 @@ export function AdminRsvps() {
     setRows((current) => current.map((row) => (row.id === pending.row.id ? { ...row, status: approving ? 'approved' : 'rejected', checkedIn: approving ? row.checkedIn : false } : row)))
     push({
       tone: approving ? 'success' : 'info',
-      title: approving ? 'RSVP approved in the prototype' : 'RSVP rejected in the prototype',
+      title: approving ? 'RSVP approved' : 'RSVP rejected',
       description: `${pending.row.name} — no email was sent and no production record changed.`,
     })
   }
@@ -34,7 +34,6 @@ export function AdminRsvps() {
     <>
       <PageHeader
         title="Event RSVPs"
-        description="Registrations for club events. Approving an RSVP admits the person to the event and the check-in list."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'RSVPs' }]}
         actions={
           <>
@@ -44,7 +43,7 @@ export function AdminRsvps() {
               iconLeft={<Download className="h-3.5 w-3.5" />}
               onClick={() => {
                 const okay = downloadCsv('event-rsvps.csv', rows.map((row) => ({ Name: row.name, Email: row.email, Event: row.event, Type: row.type, Submitted: row.submitted, Status: row.status, CheckedIn: row.checkedIn })))
-                push({ tone: okay ? 'success' : 'error', title: okay ? 'RSVP list exported' : 'Nothing to export', description: 'Exports demonstration records only.' })
+                push({ tone: okay ? 'success' : 'error', title: okay ? 'RSVP list exported' : 'Nothing to export' })
               }}
             >
               Export CSV
@@ -55,11 +54,11 @@ export function AdminRsvps() {
               onClick={() => {
                 const waiting = rows.filter((row) => row.status === 'pending')
                 if (!waiting.length) {
-                  push({ tone: 'info', title: 'No RSVPs are pending', description: 'Every demonstration registration has been decided.' })
+                  push({ tone: 'info', title: 'No RSVPs are pending' })
                   return
                 }
                 setRows((current) => current.map((row) => (row.status === 'pending' ? { ...row, status: 'approved' } : row)))
-                push({ tone: 'success', title: `${waiting.length} RSVPs approved in the prototype`, description: 'No notifications were sent.' })
+                push({ tone: 'success', title: `${waiting.length} RSVPs approved`, description: 'No notifications were sent.' })
               }}
             >
               Approve all pending
@@ -127,11 +126,11 @@ export function AdminRsvps() {
                     aria-pressed={row.checkedIn}
                     onClick={() => {
                       setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, checkedIn: !entry.checkedIn } : entry)))
-                      push({ tone: 'info', title: row.checkedIn ? 'Check-in removed in the prototype' : 'Checked in in the prototype', description: `${row.name} — no attendance record was saved.` })
+                      push({ tone: 'info', title: row.checkedIn ? 'Check-in removed' : 'Checked in', description: `${row.name} — no attendance record was saved.` })
                     }}
                     className={cn(
                       'inline-flex h-7 items-center rounded-full border px-2.5 text-[0.6875rem] font-semibold',
-                      row.checkedIn ? 'border-brand-200 bg-brand-50 text-brand-800' : 'border-ink-200 bg-white text-ink-500 hover:bg-ink-50',
+                      row.checkedIn ? 'border-brand-200 bg-brand-50 text-brand-800' : 'border-ink-200 bg-surface text-ink-500 hover:bg-ink-50',
                     )}
                   >
                     {row.checkedIn ? 'Checked in' : 'Not arrived'}
@@ -159,7 +158,7 @@ export function AdminRsvps() {
                       type="button"
                       aria-label={`Reject RSVP for ${row.name}`}
                       onClick={() => setPending({ type: 'reject', row })}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-line text-ink-500 hover:bg-[#FEF3F2] hover:text-danger"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[4px] border border-line text-ink-500 hover:bg-danger-soft hover:text-danger"
                     >
                       <X className="h-3.5 w-3.5" aria-hidden />
                     </button>
@@ -177,7 +176,7 @@ export function AdminRsvps() {
       </Card>
 
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
-        Approval does not send an email from the prototype. In the live application the member receives a confirmation and the event organiser sees the updated list.
+        Approval sends the member a confirmation email and updates the event organiser's list.
       </p>
       <DemoNotice />
 

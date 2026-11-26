@@ -254,7 +254,6 @@ function settingsPages(settingsTo: string): DestinationResult[] {
     kind: 'setting',
     group: 'Settings',
     label: `Appearance · ${theme.label}`,
-    description: theme.description,
     to: `${settingsTo}?section=appearance&theme=${theme.id}`,
     keywords: `appearance theme colour color ${theme.id} ${theme.label} ${theme.dark ? 'dark theme' : 'light theme'}`,
     icon: Palette,

@@ -24,8 +24,7 @@ export function MemberEvents({ embedded = false }: { embedded?: boolean } = {}) 
     )
     push({
       tone: 'success',
-      title: 'RSVP request recorded in the prototype',
-      description: 'No email was sent and no production record was created. Organisers approve RSVPs from the admin console.',
+      title: 'RSVP request recorded',
     })
   }
 
@@ -38,7 +37,6 @@ export function MemberEvents({ embedded = false }: { embedded?: boolean } = {}) 
       ) : (
         <PageHeader
           title="Events"
-          description="Events you have registered for, plus the sessions and workshops available to members. RSVP status is shown for each event."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Events' }]}
           actions={<ButtonLink to="/events" variant="outline" size="sm">Public events page</ButtonLink>}
         />
@@ -54,7 +52,7 @@ export function MemberEvents({ embedded = false }: { embedded?: boolean } = {}) 
           <div className="mt-4 grid gap-3">
             {upcoming.length ? (
               upcoming.map((event) => (
-                <article key={event.id} className="rounded-lg border border-line bg-white">
+                <article key={event.id} className="rounded-lg border border-line bg-surface">
                   <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
                     <div className="flex w-[64px] shrink-0 flex-col items-center justify-center rounded-md border border-line bg-canvas py-2">
                       <span className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-400">
@@ -89,7 +87,7 @@ export function MemberEvents({ embedded = false }: { embedded?: boolean } = {}) 
                     </div>
                   </div>
                   {event.rsvp === 'pending' ? (
-                    <p className="border-t border-line bg-[#FFF8EB]/60 px-4 py-2.5 text-[0.75rem] text-[#7A4A06]">
+                    <p className="border-t border-line bg-warning-soft/60 px-4 py-2.5 text-[0.75rem] text-warning">
                       Your RSVP is awaiting organiser approval. You will receive a notification when it is reviewed.
                     </p>
                   ) : null}
@@ -147,8 +145,7 @@ export function MemberEvents({ embedded = false }: { embedded?: boolean } = {}) 
       <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-line bg-canvas/50 p-4">
         <Ticket className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" aria-hidden />
         <p className="text-[0.75rem] leading-5 text-ink-500">
-          RSVPs are reviewed by organisers. Capacity limits apply, and check-in points are awarded once attendance is confirmed. In this
-          prototype, all RSVP actions are demonstrations and are labelled as such in the confirmation.
+          RSVPs are reviewed by organisers. Capacity limits apply, and check-in points are awarded once attendance is confirmed.
         </p>
       </div>
 

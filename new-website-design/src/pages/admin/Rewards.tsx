@@ -31,7 +31,6 @@ export function AdminRewards() {
     <>
       <PageHeader
         title="Points and rewards"
-        description="Record points transactions and manage the trophies members can earn. Points feed the club rankings."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Rewards' }]}
         actions={
           <>
@@ -42,7 +41,7 @@ export function AdminRewards() {
       />
 
       <StatStrip>
-        <SmallStat label="Points awarded" value={awarded} hint="Demonstration ledger" tone="brand" />
+        <SmallStat label="Points awarded" value={awarded} hint="Points ledger" tone="brand" />
         <SmallStat label="Transactions" value={rows.length} hint="All members" />
         <SmallStat label="Members with points" value={new Set(rows.map((row) => row.member)).size} hint="This period" />
         <SmallStat label="Trophies" value={demoAdminTrophies.length} hint="Trophy definitions" />
@@ -94,7 +93,7 @@ export function AdminRewards() {
                   ])
                   setDialogOpen(false)
                   setForm({ member: '', points: '', reason: '', type: 'Manual' })
-                  push({ tone: 'success', title: 'Points transaction added in the prototype', description: 'No production ledger was changed.' })
+                  push({ tone: 'success', title: 'Points transaction added' })
                 }}
               >
                 Add points
@@ -164,7 +163,6 @@ export function AdminTrophies() {
     <>
       <PageHeader
         title="Trophies"
-        description="Trophy definitions awarded manually or automatically. Points are added once when a trophy is earned."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Rewards', to: '/admin/rewards/history' }, { label: 'Trophies' }]}
         actions={<Button size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />} onClick={openAdd}>Add trophy</Button>}
       />
@@ -202,7 +200,7 @@ export function AdminTrophies() {
                     icon={<Award className="h-3.5 w-3.5" />}
                     onSelect={() => {
                       setRows((current) => current.map((entry) => (entry.id === row.id ? { ...entry, active: !entry.active } : entry)))
-                      push({ tone: 'info', title: 'Trophy status changed in the prototype', description: 'Existing awards are unaffected.' })
+                      push({ tone: 'info', title: 'Trophy status changed', description: 'Existing awards are unaffected.' })
                     }}
                   >
                     {row.active ? 'Deactivate' : 'Activate'}
@@ -235,10 +233,10 @@ export function AdminTrophies() {
                   if (Object.keys(next).length) return
                   if (editing) {
                     setRows((current) => current.map((row) => (row.id === editing.id ? { ...row, name: form.name, description: form.description, points: Number(form.points) } : row)))
-                    push({ tone: 'success', title: 'Trophy updated in the prototype', description: 'No production record was changed.' })
+                    push({ tone: 'success', title: 'Trophy updated' })
                   } else {
                     setRows((current) => [...current, { id: Math.max(...current.map((row) => row.id)) + 1, name: form.name, description: form.description, points: Number(form.points), active: true, awarded: 0 }])
-                    push({ tone: 'success', title: 'Trophy added in the prototype', description: 'No production record was created.' })
+                    push({ tone: 'success', title: 'Trophy added' })
                   }
                   setOpen(false)
                 }}
@@ -271,7 +269,7 @@ export function AdminTrophies() {
         onConfirm={() => {
           if (!deleting) return
           setRows((current) => current.filter((row) => row.id !== deleting.id))
-          push({ tone: 'info', title: 'Trophy removed in the prototype', description: 'No production record was deleted.' })
+          push({ tone: 'info', title: 'Trophy removed' })
         }}
       />
     </>

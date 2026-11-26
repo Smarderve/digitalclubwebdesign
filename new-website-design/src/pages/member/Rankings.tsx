@@ -49,7 +49,6 @@ export function Rankings({ embedded = false }: { embedded?: boolean } = {}) {
       {embedded ? null : (
         <PageHeader
           title="Rankings"
-          description="Points earned from competitions, warmups and club contributions. Standings update as results are published."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Rankings' }]}
           actions={
             <ButtonLink to="/member/rankings/points-transactions" variant="outline" size="sm">
@@ -177,7 +176,6 @@ export function RankingsHub() {
     <>
       <PageHeader
         title="Rankings"
-        description="Member leaderboards and the teams competing for club points."
         actions={
           <ButtonLink to="/member/rankings/points-transactions" variant="outline" size="sm">
             Points ledger

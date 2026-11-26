@@ -20,7 +20,6 @@ export function SessionsTimetable({ embedded = false }: { embedded?: boolean } =
       ) : (
         <PageHeader
           title="Sessions timetable"
-          description="The current teaching week, session venues and instructors. Session reports are submitted by the instructor who ran the session."
           breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Sessions' }]}
           actions={
             <>
@@ -31,7 +30,7 @@ export function SessionsTimetable({ embedded = false }: { embedded?: boolean } =
         />
       )}
 
-      <div className="rounded-lg border border-line bg-white">
+      <div className="rounded-lg border border-line bg-surface">
         <div className="flex flex-col gap-4 border-b border-line px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -103,7 +102,7 @@ export function SessionsTimetable({ embedded = false }: { embedded?: boolean } =
           </div>
         </Card>
 
-        <div className="rounded-lg border border-line bg-white">
+        <div className="rounded-lg border border-line bg-surface">
           <div className="border-b border-line px-4 py-3">
             <h2 className="text-[0.9375rem] font-semibold text-ink-950">Week at a glance</h2>
           </div>
@@ -144,7 +143,6 @@ export function SessionInstructors() {
     <>
       <PageHeader
         title="Session instructors"
-        description="Members who currently lead sessions. Each instructor can submit a report after their session."
         breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Sessions', to: '/member/sessions/timetable' }, { label: 'Instructors' }]}
         actions={<ButtonLink to="/member/sessions/timetable" variant="outline" size="sm" iconLeft={<ArrowLeft className="h-3.5 w-3.5" />}>Back to timetable</ButtonLink>}
       />
@@ -153,7 +151,7 @@ export function SessionInstructors() {
         {instructors.map((instructor) => {
           const sessions = demoSessions.sessions.filter((session) => session.instructor === instructor)
           return (
-            <article key={instructor} className="rounded-lg border border-line bg-white p-4">
+            <article key={instructor} className="rounded-lg border border-line bg-surface p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-[0.875rem] font-semibold text-ink-950">{instructor}</h2>
@@ -229,7 +227,7 @@ export function SessionReport() {
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-700">
               <CheckCircle2 className="h-5 w-5" aria-hidden />
             </span>
-            <h2 className="mt-3 text-[1rem] font-semibold text-ink-950">Report submitted in the prototype</h2>
+            <h2 className="mt-3 text-[1rem] font-semibold text-ink-950">Report submitted</h2>
             <p className="mt-1 max-w-[46ch] text-[0.8125rem] leading-6 text-ink-500">
               This is a frontend demonstration. No report was stored and no administrator was notified. In the live application the report moves
               to <span className="font-medium text-ink-800">pending review</span>.
@@ -277,7 +275,7 @@ export function SessionReport() {
               setErrors(next)
               if (Object.keys(next).length) return
               setSubmitted(true)
-              push({ tone: 'success', title: 'Demonstration report captured', description: 'Nothing was sent to the server.' })
+              push({ tone: 'success', title: 'Session report submitted' })
             }}
           >
             <Field label="Attendees" htmlFor="attendees" required hint="Count everyone present, including the instructor." error={errors.attendees}>
@@ -292,13 +290,12 @@ export function SessionReport() {
             <div className="flex flex-wrap items-center gap-2 border-t border-line pt-4">
               <Button type="submit" size="sm" iconLeft={<ClipboardCheck className="h-3.5 w-3.5" />}>Submit report</Button>
               <ButtonLink to="/member/sessions/timetable" variant="ghost" size="sm">Cancel</ButtonLink>
-              <span className="text-[0.6875rem] text-ink-400 sm:ml-auto">Prototype only — nothing is stored.</span>
             </div>
           </form>
         </Card>
 
         <div className="space-y-4">
-          <div className="rounded-lg border border-line bg-white">
+          <div className="rounded-lg border border-line bg-surface">
             <div className="border-b border-line px-4 py-3">
               <h2 className="text-[0.9375rem] font-semibold text-ink-950">Session details</h2>
             </div>

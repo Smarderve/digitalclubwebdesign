@@ -51,7 +51,7 @@ export function AdminBlogs() {
             : row,
         ),
       )
-      push({ tone: 'success', title: 'Article updated in the prototype', description: 'No published blog content was changed.' })
+      push({ tone: 'success', title: 'Article updated' })
     } else {
       setRows((current) => [
         {
@@ -65,7 +65,7 @@ export function AdminBlogs() {
         },
         ...current,
       ])
-      push({ tone: 'success', title: 'Draft article created in the prototype', description: 'Nothing was saved to the club database.' })
+      push({ tone: 'success', title: 'Draft article created' })
     }
     setOpen(false)
   }
@@ -74,7 +74,6 @@ export function AdminBlogs() {
     <>
       <PageHeader
         title="Blogs"
-        description="Long-form articles and tutorials. Blogs are separate from short news announcements and appear on the public blog page."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Blogs' }]}
         actions={
           <>
@@ -138,7 +137,7 @@ export function AdminBlogs() {
                             : entry,
                         ),
                       )
-                      push({ tone: 'info', title: publishing ? 'Article published in the prototype' : 'Article unpublished in the prototype', description: 'No production content changed.' })
+                      push({ tone: 'info', title: publishing ? 'Article published' : 'Article unpublished' })
                     }}
                   >
                     {row.status === 'Published' ? 'Unpublish' : 'Publish'}
@@ -190,7 +189,7 @@ export function AdminBlogs() {
             <Field label="Summary" htmlFor="blog-summary" required={form.status === 'Published'} error={errors.summary} hint="Shown on the blog index and in search results.">
               <Textarea id="blog-summary" rows={4} value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} placeholder="What is this article about?" />
             </Field>
-            <Field label="Body" htmlFor="blog-body" hint="Markdown is supported in the live editor. The prototype does not store article bodies.">
+            <Field label="Body" htmlFor="blog-body" hint="Markdown is supported in the live editor. ">
               <Textarea id="blog-body" rows={7} value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} placeholder="Write the article…" />
             </Field>
           </div>
@@ -206,7 +205,7 @@ export function AdminBlogs() {
         onConfirm={() => {
           if (!deleting) return
           setRows((current) => current.filter((row) => row.id !== deleting.id))
-          push({ tone: 'info', title: 'Article removed in the prototype', description: 'No production content was deleted.' })
+          push({ tone: 'info', title: 'Article removed' })
         }}
       />
     </>

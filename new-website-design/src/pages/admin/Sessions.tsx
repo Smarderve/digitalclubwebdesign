@@ -21,11 +21,10 @@ export function AdminSessions() {
     <>
       <PageHeader
         title="Sessions"
-        description="The weekly learning programme. Sessions are grouped into themed weeks and published to the member timetable."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Sessions' }]}
         actions={
           <>
-            <Link to="/admin/sessions/reports" className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-ink-200 bg-white px-3 text-[0.75rem] font-medium text-ink-800 hover:bg-ink-50">
+            <Link to="/admin/sessions/reports" className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-ink-200 bg-surface px-3 text-[0.75rem] font-medium text-ink-800 hover:bg-ink-50">
               <FileText className="h-3.5 w-3.5" aria-hidden />
               Session reports
             </Link>
@@ -48,7 +47,7 @@ export function AdminSessions() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => push({ tone: 'info', title: 'Week publishing is a prototype action', description: 'In the live application publishing a week notifies members and opens attendance.' })}
+              onClick={() => push({ tone: 'info', title: 'Week publishing is available from the record page', description: 'In the live application publishing a week notifies members and opens attendance.' })}
             >
               Publish week
             </Button>
@@ -90,10 +89,10 @@ export function AdminSessions() {
                 <TD><Badge tone={row.attendance === 'Required' ? 'green' : 'neutral'}>{row.attendance}</Badge></TD>
                 <TD className="text-right">
                   <RowActions label={`Actions for ${row.title}`}>
-                    <DropdownItem icon={<Users className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Attendance is a prototype action', description: 'Attendance is recorded by instructors in the live member area.' })}>
+                    <DropdownItem icon={<Users className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Attendance is available from the record page', description: 'Attendance is recorded by instructors in the live member area.' })}>
                       View attendance
                     </DropdownItem>
-                    <DropdownItem icon={<CalendarDays className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Session editing is a prototype action', description: 'Create a demonstration session to see how the timetable responds.' })}>
+                    <DropdownItem icon={<CalendarDays className="h-3.5 w-3.5" />} onSelect={() => push({ tone: 'info', title: 'Session editing is available from the record page' })}>
                       Edit session
                     </DropdownItem>
                   </RowActions>
@@ -126,7 +125,7 @@ export function AdminSessions() {
                   setErrors(next)
                   if (Object.keys(next).length) return
                   setSessions((current) => [...current, { id: Math.max(0, ...current.map((row) => row.id)) + 1, ...form }])
-                  push({ tone: 'success', title: 'Session added in the prototype', description: 'No member notification was sent.' })
+                  push({ tone: 'success', title: 'Session added', description: 'No member notification was sent.' })
                   setOpen(false)
                 }}
               >
@@ -201,9 +200,8 @@ export function AdminSessionReports() {
     <>
       <PageHeader
         title="Session reports"
-        description="Instructors submit a short report after each session. Reports record attendance and what was covered."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Sessions', to: '/admin/sessions' }, { label: 'Reports' }]}
-        actions={<Link to="/admin/sessions" className="inline-flex h-8 items-center rounded-sm border border-ink-200 bg-white px-3 text-[0.75rem] font-medium text-ink-800 hover:bg-ink-50">Timetable</Link>}
+        actions={<Link to="/admin/sessions" className="inline-flex h-8 items-center rounded-sm border border-ink-200 bg-surface px-3 text-[0.75rem] font-medium text-ink-800 hover:bg-ink-50">Timetable</Link>}
       />
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -212,7 +210,7 @@ export function AdminSessionReports() {
           { label: 'Awaiting review', value: reports.filter((row) => row.status === 'pending').length, hint: 'Needs an administrator' },
           { label: 'Attendees recorded', value: reports.reduce((total, row) => total + row.attendees, 0), hint: 'Across reports' },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-line bg-white p-4">
+          <div key={item.label} className="rounded-lg border border-line bg-surface p-4">
             <p className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-ink-500">{item.label}</p>
             <p className="mt-1.5 text-[1.25rem] font-semibold tabular tracking-tight text-ink-950">{item.value}</p>
             <p className="text-[0.6875rem] text-ink-400">{item.hint}</p>
@@ -260,7 +258,7 @@ export function AdminSessionReports() {
                         icon={<CheckCircle2 className="h-3.5 w-3.5" />}
                         onSelect={() => {
                           setReports((current) => current.map((entry) => (entry.id === row.id ? { ...entry, status: 'approved' } : entry)))
-                          push({ tone: 'success', title: 'Report approved in the prototype', description: 'No production record changed.' })
+                          push({ tone: 'success', title: 'Report approved' })
                         }}
                       >
                         Approve report
@@ -290,7 +288,7 @@ export function AdminSessionReports() {
         open={reviewing !== null}
         onOpenChange={(open) => !open && setReviewing(null)}
         title="Report preview"
-        description={`${reviewing?.session ?? 'Session'} — ${reviewing?.attendees ?? 0} attendees recorded by ${reviewing?.instructor ?? 'the instructor'}. Report content is not stored in the prototype.`}
+        description={`${reviewing?.session ?? 'Session'} — ${reviewing?.attendees ?? 0} attendees recorded by ${reviewing?.instructor ?? 'the instructor'}. Report content is not stored.`}
         confirmLabel="Close"
         destructive={false}
         onConfirm={() => undefined}
