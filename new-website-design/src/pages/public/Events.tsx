@@ -1,29 +1,48 @@
 import { useState } from 'react'
 import { CalendarX2, ClipboardCheck, MailCheck, MapPin, ShieldCheck } from 'lucide-react'
-import { COMPETITION_ARCHIVE, EVENTS } from '../../data/site'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
-import { PageHero, media } from '../../components/site/hero'
+import { PageHero, clubMedia } from '../../components/site/hero'
 import { ButtonLink } from '../../components/ui/button'
-import { Badge, EmptyState } from '../../components/ui'
-import { Button } from '../../components/ui/button'
+import { Alert, Badge, EmptyState } from '../../components/ui'
 import { EventRow } from '../../components/site/cards'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi, type PublicEvent } from '../../lib/publicApi'
 import { cn, formatDate } from '../../lib/utils'
 
-const categories = ['All', 'Workshop', 'Hackathon', 'Tech talk', 'Social event']
+const categories = [
+  { value: 'all', label: 'All' },
+  { value: 'workshop', label: 'Workshop' },
+  { value: 'hackathon', label: 'Hackathon' },
+  { value: 'tech_talk', label: 'Tech talk' },
+  { value: 'social_event', label: 'Social event' },
+]
 
-const eventsHero = media(
-  '/images/events/workshop-audience',
-  'An audience listening to a workshop presentation',
-  'Stock photograph · Pexels. Not a recorded KIUT Digital Club event.',
-)
+const eventsHero = clubMedia('/images/club/api-audience', 'Club members at the API Conference 2026')
+
+function timeOf(event: PublicEvent) {
+  if (!event.starts_at) return undefined
+  return new Date(event.starts_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
+function labelOf(category: string) {
+  return categories.find((item) => item.value === category)?.label ?? category.replace(/_/g, ' ')
+}
 
 export function Events() {
-  const [category, setCategory] = useState('All')
-  const now = Date.now()
-  const upcoming = EVENTS.filter((event) => new Date(event.date).getTime() >= now)
-  const past = EVENTS.filter((event) => new Date(event.date).getTime() < now)
-  const filteredPast = category === 'All' ? past : past.filter((event) => event.category === category)
-  const filteredUpcoming = category === 'All' ? upcoming : upcoming.filter((event) => event.category === category)
+  const [category, setCategory] = useState('all')
+  const { data, loading, error } = usePublicData(
+    () =>
+      Promise.all([
+        publicApi.events({ scope: 'upcoming', per_page: 50 }),
+        publicApi.events({ scope: 'past', per_page: 50 }),
+      ]),
+    [],
+  )
+  const upcoming = data?.[0].items ?? []
+  const past = data?.[1].items ?? []
+  const match = (event: PublicEvent) => category === 'all' || event.category === category
+  const filteredUpcoming = upcoming.filter(match)
+  const filteredPast = past.filter(match)
 
   return (
     <>
@@ -62,42 +81,50 @@ export function Events() {
             <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter events by category">
               {categories.map((item) => (
                 <button
-                  key={item}
+                  key={item.value}
                   type="button"
-                  aria-pressed={category === item}
-                  onClick={() => setCategory(item)}
+                  aria-pressed={category === item.value}
+                  onClick={() => setCategory(item.value)}
                   className={cn(
                     'rounded-full border px-3 py-1.5 text-[0.75rem] font-medium transition-colors',
-                    category === item
+                    category === item.value
                       ? 'border-brand-700 bg-brand-700 text-white'
-                      : 'border-ink-200 bg-white text-ink-600 hover:border-ink-300',
+                      : 'border-ink-200 bg-surface text-ink-600 hover:border-ink-300',
                   )}
                 >
-                  {item}
+                  {item.label}
                 </button>
               ))}
             </div>
           </div>
 
+          {error ? (
+            <Alert tone="warning" title="Events could not be loaded" className="mt-6">
+              {error}
+            </Alert>
+          ) : null}
+
           <div className="mt-8 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-ink-500">Upcoming</h3>
-                <span className="text-[0.6875rem] text-ink-400">{filteredUpcoming.length} published</span>
+                <span className="text-[0.6875rem] text-ink-400">
+                  {loading ? 'Loading…' : `${filteredUpcoming.length} published`}
+                </span>
               </div>
               <div className="divide-y divide-line border-y border-line">
                 {filteredUpcoming.length ? (
                   filteredUpcoming.map((event) => (
                     <EventRow
-                      key={event.slug}
+                      key={event.id}
                       title={event.title}
-                      date={event.date}
-                      time={event.time}
-                      location={event.location}
+                      date={event.starts_at ?? ''}
+                      time={timeOf(event)}
+                      location={event.venue ?? 'Venue to be announced'}
                       description={event.description}
-                      tags={event.tags}
+                      tags={[labelOf(event.category)]}
                       to={`/events/${event.id}/rsvp`}
-                      status={{ label: 'Open', tone: 'green' }}
+                      status={{ label: event.rsvp.state === 'open' ? 'Open' : 'Closed', tone: event.rsvp.state === 'open' ? 'green' : 'neutral' }}
                       actionLabel="Register"
                     />
                   ))
@@ -106,11 +133,6 @@ export function Events() {
                     icon={<CalendarX2 className="h-4 w-4" aria-hidden />}
                     title="No upcoming events published"
                     description="The club has not published a future event for this category. Past events remain available below, and members can see member-only events after signing in."
-                    action={
-                      <Button variant="outline" size="sm" onClick={() => setCategory('All')}>
-                        Show all categories
-                      </Button>
-                    }
                     className="my-4 border-0 bg-transparent py-10"
                   />
                 )}
@@ -125,36 +147,34 @@ export function Events() {
               <div className="rounded-lg border border-line bg-canvas/60 p-5">
                 {filteredPast.length ? (
                   filteredPast.map((event) => (
-                    <article key={event.slug}>
+                    <article key={event.id}>
                       <div className="flex items-center justify-between gap-3">
                         <Badge tone="neutral">Ended</Badge>
-                        <span className="text-[0.6875rem] text-ink-400">{formatDate(event.date, { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                        <span className="text-[0.6875rem] text-ink-400">
+                          {event.starts_at ? formatDate(event.starts_at, { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+                        </span>
                       </div>
                       <h4 className="mt-3 text-h3 text-ink-950">{event.title}</h4>
                       <p className="mt-1 text-[0.75rem] text-ink-500">
-                        {event.time} · {event.location}
+                        {timeOf(event)} · {event.venue ?? 'Venue not recorded'}
                       </p>
                       <p className="mt-3 text-[0.8125rem] leading-6 text-ink-600">{event.description}</p>
                       <ul className="mt-3 flex flex-wrap gap-1.5">
-                        {event.tags.map((tag) => (
-                          <li key={tag} className="rounded-[4px] border border-line bg-white px-2 py-0.5 text-[0.6875rem] text-ink-600">
-                            {tag}
-                          </li>
-                        ))}
+                        <li className="rounded-[4px] border border-line bg-surface px-2 py-0.5 text-[0.6875rem] text-ink-600">
+                          {labelOf(event.category)}
+                        </li>
                       </ul>
                       <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
-                        <span className="text-[0.6875rem] text-ink-400">{event.registered} / {event.capacity} seats recorded</span>
                         <span className="text-[0.6875rem] text-ink-400">Registration closed</span>
                       </div>
                     </article>
                   ))
                 ) : (
-                  <p className="py-8 text-center text-[0.8125rem] text-ink-500">No past events in this category.</p>
+                  <p className="py-8 text-center text-[0.8125rem] text-ink-500">
+                    {loading ? 'Loading…' : 'No past events in this category.'}
+                  </p>
                 )}
               </div>
-              <p className="mt-2 text-[0.625rem] leading-4 text-ink-400">
-                The most recent published event ended before this redesign. It is shown as archive, not as open registration.
-              </p>
             </div>
           </div>
         </div>
@@ -165,26 +185,18 @@ export function Events() {
           <SectionHead
             eyebrow="Competitions & challenges"
             title="Hackathons and coding challenges"
-            description="Competition entries as published on the current website. Dates are historical or recurring and are labelled accordingly."
+            description="Current competitions, submissions and leaderboards are member-only. Public dates appear in the event calendar above when the club publishes them."
           />
-          <div className="mt-8 divide-y divide-line border-y border-line">
-            {COMPETITION_ARCHIVE.map((item) => (
-              <article key={item.title} className="grid gap-3 py-5 sm:grid-cols-[1fr_180px] sm:items-start">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-[0.9375rem] font-semibold text-ink-950">{item.title}</h3>
-                    <Badge tone={item.status === 'As published' ? 'outline' : 'neutral'}>{item.status}</Badge>
-                  </div>
-                  <p className="mt-1 max-w-[64ch] text-[0.8125rem] leading-6 text-ink-500">{item.description}</p>
-                </div>
-                <p className="text-[0.75rem] text-ink-400 sm:text-right">{item.timing}</p>
-              </article>
-            ))}
+          <div className="mt-6 rounded-lg border border-dashed border-ink-200 bg-surface p-5">
+            <p className="text-[0.8125rem] leading-6 text-ink-500">
+              Sign in as a member to see competition briefs, eligibility rules and submission windows.
+            </p>
+            <div className="mt-3">
+              <ButtonLink to="/auth/login" size="sm" variant="outline">
+                Member sign in
+              </ButtonLink>
+            </div>
           </div>
-          <p className="mt-3 text-[0.6875rem] text-ink-400">
-            Current competitions, submissions and leaderboards are member-only. No 2026 competition dates are shown because
-            they were not published in the supplied content.
-          </p>
         </div>
       </section>
 
@@ -193,7 +205,7 @@ export function Events() {
           <SectionHead eyebrow="How RSVP works" title="Three steps, reviewed by a person" />
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             {[
-              { icon: ClipboardCheck, title: 'Submit the form', text: 'Provide your details, attendance type, field of study and any access needs.' },
+              { icon: ClipboardCheck, title: 'Submit the form', text: 'Provide your details and any access needs.' },
               { icon: ShieldCheck, title: 'Organiser review', text: 'Your RSVP is reviewed by the event organiser. Capacity and eligibility are checked.' },
               { icon: MailCheck, title: 'Confirmation', text: 'You receive an email confirmation once your RSVP is approved.' },
             ].map((item, index) => {
@@ -213,8 +225,7 @@ export function Events() {
           <div className="mt-6 flex items-start gap-2 rounded-md border border-line bg-canvas px-4 py-3">
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" aria-hidden />
             <p className="text-[0.75rem] leading-5 text-ink-500">
-              Club sessions take place at the KIUT Tech Lab unless an event specifies another venue. The AI Bootcamp was
-              held in Computer Lab 1.
+              Club sessions take place at the KIUT Tech Lab unless an event specifies another venue.
             </p>
           </div>
         </div>

@@ -1,17 +1,28 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { BadgeCheck, QrCode, Search, ShieldAlert, ShieldCheck } from 'lucide-react'
-import { demoMember } from '../../data/demo'
 import { Alert, Avatar, Badge } from '../../components/ui'
 import { Button } from '../../components/ui/button'
 import { Field, Input } from '../../components/ui/field'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi } from '../../lib/publicApi'
+import { formatDate } from '../../lib/utils'
 
 export function VerifyId() {
   const { memberId } = useParams()
   const navigate = useNavigate()
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
-  const verified = memberId?.toUpperCase() === demoMember.memberId
+  const query = (memberId ?? '').toUpperCase()
+  const lookup = usePublicData(
+    () =>
+      query
+        ? publicApi.verifyId(query)
+        : Promise.resolve({ valid: false } as Awaited<ReturnType<typeof publicApi.verifyId>>),
+    [query],
+  )
+
+  const record = lookup.data?.valid ? lookup.data.member : null
 
   return (
     <div className="bg-canvas/50">
@@ -29,7 +40,7 @@ export function VerifyId() {
             </p>
           </div>
 
-          <div className="mt-8 rounded-lg border border-line bg-white">
+          <div className="mt-8 rounded-lg border border-line bg-surface">
             <form
               className="border-b border-line p-5 sm:p-6"
               noValidate
@@ -72,53 +83,56 @@ export function VerifyId() {
 
             <div className="p-5 sm:p-6">
               {memberId ? (
-                verified ? (
+                lookup.error ? (
+                  <Alert tone="warning" title="Verification unavailable">
+                    {lookup.error}
+                  </Alert>
+                ) : lookup.loading ? (
+                  <p role="status" className="py-6 text-center text-[0.8125rem] text-ink-400">
+                    Checking the record…
+                  </p>
+                ) : record ? (
                   <div>
                     <div className="flex items-start gap-3 rounded-md border border-brand-200 bg-brand-50/70 p-4">
                       <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-700" aria-hidden />
                       <div>
                         <p className="text-[0.875rem] font-semibold text-brand-900">Valid member record</p>
                         <p className="mt-0.5 text-[0.75rem] leading-5 text-brand-800">
-                          This ID matches an approved Digital Club member record. Membership status: active.
+                          This ID matches an approved Digital Club member record.
                         </p>
                       </div>
                     </div>
 
                     <div className="mt-4 rounded-md border border-line">
                       <div className="flex items-center gap-4 border-b border-line p-4">
-                        <Avatar name={demoMember.name} size="lg" />
+                        <Avatar name={record.display_name} size="lg" />
                         <div className="min-w-0">
-                          <p className="text-[1rem] font-semibold text-ink-950">{demoMember.name}</p>
-                          <p className="text-[0.75rem] text-ink-500">{demoMember.memberId}</p>
-                          <Badge tone="green" dot className="mt-1.5">
-                            Active member
+                          <p className="text-[1rem] font-semibold text-ink-950">{record.display_name}</p>
+                          <p className="text-[0.75rem] text-ink-500">{query}</p>
+                          <Badge tone={record.status === 'alumni' ? 'neutral' : 'green'} dot className="mt-1.5">
+                            {record.status === 'alumni' ? 'Alumni member' : 'Active member'}
                           </Badge>
                         </div>
                       </div>
                       <dl className="grid gap-px bg-line sm:grid-cols-2">
                         {[
-                          { label: 'Course', value: demoMember.course },
-                          { label: 'Year', value: demoMember.year },
-                          { label: 'Member since', value: 'October 2025' },
-                          { label: 'ID valid through', value: 'September 2028' },
+                          { label: 'Course', value: record.course ?? 'Not recorded' },
+                          { label: 'Year', value: record.year ?? 'Not recorded' },
+                          { label: 'Member since', value: record.member_since ? formatDate(record.member_since) : 'Not recorded' },
+                          { label: 'ID valid through', value: record.id_valid_until ? formatDate(record.id_valid_until) : 'Not recorded' },
                         ].map((item) => (
-                          <div key={item.label} className="bg-white p-3.5">
+                          <div key={item.label} className="bg-surface p-3.5">
                             <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{item.label}</dt>
                             <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">{item.value}</dd>
                           </div>
                         ))}
                       </dl>
                     </div>
-                    <p className="mt-3 text-[0.6875rem] text-ink-400">
-                      Sample record for prototype review. In production this page reads the live member record and reports
-                      whether the account is active.
-                    </p>
                   </div>
                 ) : (
                   <Alert tone="warning" title="No matching member record">
                     <p>
-                      <strong className="font-medium text-ink-800">{memberId.toUpperCase()}</strong> does not match an active
-                      member record in this prototype. Only the demonstration ID DC-2026-0014 is available for review.
+                      <strong className="font-medium text-ink-800">{query}</strong> does not match an active member record.
                     </p>
                     <p className="mt-2 text-[0.75rem] text-ink-500">
                       If this ID was copied from a physical card, check the characters carefully and contact the club if the
@@ -150,7 +164,7 @@ export function VerifyId() {
           </div>
 
           <p className="mt-4 text-center text-[0.6875rem] text-ink-400">
-            Try the sample ID <button type="button" className="font-mono underline decoration-ink-300 underline-offset-2" onClick={() => setValue('DC-2026-0014')}>DC-2026-0014</button> to preview a verified record.
+            Enter the ID exactly as printed on the card. Verification lookups are rate limited.
           </p>
         </div>
       </div>

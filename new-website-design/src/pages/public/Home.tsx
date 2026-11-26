@@ -1,39 +1,65 @@
 import { useState } from 'react'
-import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import {
-  ARTICLES,
-  BENEFITS,
-  CLUB_FACTS,
-  COMPETITION_ARCHIVE,
-  EVENTS,
-  LEARNING_PATHS,
-  PROJECTS,
-  TESTIMONIALS,
-} from '../../data/site'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import type { Article } from '../../data/site'
+import { BENEFITS, LEARNING_PATHS } from '../../data/site'
 import { ButtonLink } from '../../components/ui/button'
-import { Badge } from '../../components/ui'
-import { ArticleCard, Testimonial } from '../../components/site/cards'
+import { Badge, EmptyState } from '../../components/ui'
+import { ArticleCard } from '../../components/site/cards'
 import { JoinBand, LinkArrow, SectionHead } from '../../components/site/primitives'
-import { EditorialFigure, media } from '../../components/site/hero'
+import { EditorialFigure, clubMedia, media } from '../../components/site/hero'
 import { HomeHero } from '../../components/site/HomeHero'
+import { homeForRole, useAuth } from '../../context/AuthContext'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi, type PublicBlog, type PublicEvent } from '../../lib/publicApi'
 import { cn, formatDate } from '../../lib/utils'
 
-const campusImage = media(
-  '/images/campus/campus-arrival',
-  'Students walking outside a university building',
-  'Stock photograph · Pexels. Not KIUT campus.',
+const campusImage = clubMedia(
+  '/images/club/devfest-group-wide',
+  'KIUT Digital Club members at the DevFest 2026 gathering',
 )
-const sessionImage = media('/images/learning/robotics-demo', 'Students demonstrating a humanoid robot')
-const eventImage = media('/images/events/auditorium', 'A full auditorium audience at a conference')
-const communityImage = media('/images/campus/two-students', 'Two students talking on campus')
+const sessionImage = clubMedia('/images/club/devfest-steps', 'KIUT Digital Club members after a DevFest event')
+const eventImage = clubMedia('/images/club/api-audience', 'Club members at the API Conference 2026')
+const communityImage = clubMedia(
+  '/images/club/devfest-team',
+  'Club members together at a technology community event',
+)
 const projectImage = media('/images/development/workspace-flatlay', 'A desk with a laptop and notebooks')
 const editorialImage = media('/images/development/code-closeup', 'A close view of code on a screen')
-const joinImage = media('/images/collaboration/duo-laptops', 'Two people working on laptops at a table')
+const joinImage = clubMedia('/images/club/devfest-team', 'KIUT Digital Club members working together')
+
+function asArticle(blog: PublicBlog): Article {
+  return {
+    slug: blog.slug,
+    title: blog.title,
+    category: blog.tags[0] ?? 'Article',
+    date: blog.published_at ?? '',
+    views: blog.views,
+    excerpt: blog.excerpt,
+    tags: blog.tags,
+    body: null,
+  }
+}
+
+function eventTime(event: PublicEvent) {
+  if (!event.starts_at) return ''
+  return new Date(event.starts_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
 
 export function Home() {
+  const { user } = useAuth()
   const [activePath, setActivePath] = useState(LEARNING_PATHS[0].slug)
   const path = LEARNING_PATHS.find((item) => item.slug === activePath) ?? LEARNING_PATHS[0]
-  const event = EVENTS[0]
+  const { data, loading } = usePublicData(() => publicApi.home(), [])
+  const stats = data?.stats
+  const facts = [
+    { label: 'Approved members', value: stats ? String(stats.members.total) : '—' },
+    { label: 'Published projects', value: stats ? String(stats.projects.published) : '—' },
+    { label: 'Upcoming events', value: stats ? String(stats.events.upcoming) : '—' },
+  ]
+  const projects = data?.featured_projects ?? []
+  const upcoming = data?.upcoming_events ?? []
+  const articles = (data?.latest_blog ?? []).slice(0, 3).map(asArticle)
+  const nextEvent = upcoming[0]
 
   return (
     <>
@@ -67,13 +93,14 @@ export function Home() {
                 Membership is free for KIUT students and no prior programming experience is required.
               </p>
               <dl className="divide-y divide-line border-y border-line">
-                {CLUB_FACTS.map((fact) => (
+                {facts.map((fact) => (
                   <div key={fact.label} className="flex items-baseline justify-between gap-4 py-3">
                     <dt className="text-[0.75rem] text-ink-500">{fact.label}</dt>
                     <dd className="text-[1.25rem] font-semibold tabular text-ink-950">{fact.value}</dd>
                   </div>
                 ))}
               </dl>
+              {loading ? <p className="text-[0.6875rem] text-ink-400">Loading figures…</p> : null}
             </div>
           </div>
         </div>
@@ -155,7 +182,7 @@ export function Home() {
                 {path.tags.map((tag) => (
                   <li
                     key={tag}
-                    className="rounded-full border border-line bg-white px-3 py-1 text-[0.75rem] font-medium text-ink-700"
+                    className="rounded-full border border-line bg-surface px-3 py-1 text-[0.75rem] font-medium text-ink-700"
                   >
                     {tag}
                   </li>
@@ -175,38 +202,43 @@ export function Home() {
           <div>
             <SectionHead eyebrow="Projects" title="Built by members" action={{ label: 'All projects', to: '/projects' }} />
             <div className="mt-8 divide-y divide-line border-y border-line" data-reveal>
-              {PROJECTS.map((project, index) => (
-                <a
-                  key={project.slug}
-                  href={`/projects#${project.slug}`}
-                  className="group grid grid-cols-[36px_1fr_auto] items-start gap-4 py-5 transition-colors hover:bg-white/70"
-                >
-                  <span className="font-mono text-[0.6875rem] text-ink-400">{String(index + 1).padStart(2, '0')}</span>
-                  <span>
-                    <span className="block text-[1.0625rem] font-semibold text-ink-950 group-hover:text-brand-800">
-                      {project.title}
+              {projects.length ? (
+                projects.map((project, index) => (
+                  <a
+                    key={project.id}
+                    href={`/projects#project-${project.id}`}
+                    className="group grid grid-cols-[36px_1fr_auto] items-start gap-4 py-5 transition-colors hover:bg-surface/70"
+                  >
+                    <span className="font-mono text-[0.6875rem] text-ink-400">{String(index + 1).padStart(2, '0')}</span>
+                    <span>
+                      <span className="block text-[1.0625rem] font-semibold text-ink-950 group-hover:text-brand-800">
+                        {project.title}
+                      </span>
+                      <span className="mt-1 block max-w-[58ch] text-[0.8125rem] leading-6 text-ink-500">
+                        {project.summary}
+                      </span>
+                      <span className="mt-2 flex flex-wrap gap-1.5">
+                        {project.technologies.map((tech) => (
+                          <span key={tech} className="rounded-[4px] border border-line px-1.5 py-0.5 text-[0.625rem] text-ink-500">
+                            {tech}
+                          </span>
+                        ))}
+                      </span>
                     </span>
-                    <span className="mt-1 block max-w-[58ch] text-[0.8125rem] leading-6 text-ink-500">
-                      {project.summary}
-                    </span>
-                    <span className="mt-2 flex flex-wrap gap-1.5">
-                      {project.technologies.map((tech) => (
-                        <span key={tech} className="rounded-[4px] border border-line px-1.5 py-0.5 text-[0.625rem] text-ink-500">
-                          {tech}
-                        </span>
-                      ))}
-                    </span>
-                  </span>
-                  <ArrowUpRight
-                    className="mt-1 h-4 w-4 text-ink-300 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-700"
-                    aria-hidden
-                  />
-                </a>
-              ))}
+                    <ArrowUpRight
+                      className="mt-1 h-4 w-4 text-ink-300 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand-700"
+                      aria-hidden
+                    />
+                  </a>
+                ))
+              ) : (
+                <EmptyState
+                  compact
+                  title={loading ? 'Loading projects…' : 'No published projects yet'}
+                  description="Projects appear here when members and administrators publish them."
+                />
+              )}
             </div>
-            <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
-              Project records are typographic because no project artwork was supplied.
-            </p>
           </div>
           <div className="hidden lg:block" data-reveal data-reveal-kind="image">
             <EditorialFigure media={projectImage} ratio="aspect-[4/5]" sizes="32vw" />
@@ -225,35 +257,52 @@ export function Home() {
 
           <div className="mt-9 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="divide-y divide-line border-y border-line" data-reveal>
-              {COMPETITION_ARCHIVE.map((item) => (
-                <article key={item.title} className="grid gap-2 py-5 sm:grid-cols-[1fr_auto] sm:items-start">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-[0.9375rem] font-semibold text-ink-950">{item.title}</h3>
-                      <Badge tone={item.status === 'As published' ? 'outline' : 'neutral'}>{item.status}</Badge>
+              {upcoming.length ? (
+                upcoming.map((item) => (
+                  <article key={item.id} className="grid gap-2 py-5 sm:grid-cols-[1fr_auto] sm:items-start">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-[0.9375rem] font-semibold text-ink-950">{item.title}</h3>
+                        <Badge tone="green">Upcoming</Badge>
+                      </div>
+                      <p className="mt-1 max-w-[56ch] text-[0.8125rem] leading-6 text-ink-500">{item.description}</p>
                     </div>
-                    <p className="mt-1 max-w-[56ch] text-[0.8125rem] leading-6 text-ink-500">{item.description}</p>
-                  </div>
-                  <p className="text-[0.75rem] text-ink-400 sm:text-right">{item.timing}</p>
-                </article>
-              ))}
+                    <p className="text-[0.75rem] text-ink-400 sm:text-right">
+                      {item.starts_at ? formatDate(item.starts_at, { day: 'numeric', month: 'short', year: 'numeric' }) : ''}
+                    </p>
+                  </article>
+                ))
+              ) : (
+                <EmptyState
+                  compact
+                  title={loading ? 'Loading events…' : 'No upcoming events published'}
+                  description="The club publishes public events here as they are scheduled."
+                />
+              )}
+              <div className="py-3">
+                <LinkArrow to="/events">View the event archive</LinkArrow>
+              </div>
             </div>
 
-            <article className="overflow-hidden" data-reveal style={{ transitionDelay: '80ms' }}>
-              <EditorialFigure media={eventImage} ratio="aspect-[16/10]" sizes="(min-width: 1024px) 40vw, 100vw" />
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-500">Most recent event</p>
-                <Badge tone="neutral">Ended</Badge>
-              </div>
-              <h3 className="mt-2 text-h3 text-ink-950">{event.title}</h3>
-              <p className="mt-1 text-[0.75rem] text-ink-500">
-                {formatDate(event.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} ·{' '}
-                {event.time} · {event.location}
-              </p>
-              <div className="mt-3">
-                <LinkArrow to="/events">View event archive</LinkArrow>
-              </div>
-            </article>
+            {nextEvent ? (
+              <article className="overflow-hidden" data-reveal style={{ transitionDelay: '80ms' }}>
+                <EditorialFigure media={eventImage} ratio="aspect-[16/10]" sizes="(min-width: 1024px) 40vw, 100vw" />
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-500">Next event</p>
+                  <Badge tone="neutral">{nextEvent.category.replace(/_/g, ' ')}</Badge>
+                </div>
+                <h3 className="mt-2 text-h3 text-ink-950">{nextEvent.title}</h3>
+                <p className="mt-1 text-[0.75rem] text-ink-500">
+                  {nextEvent.starts_at
+                    ? formatDate(nextEvent.starts_at, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+                    : ''}{' '}
+                  · {eventTime(nextEvent)} · {nextEvent.venue ?? 'Venue to be announced'}
+                </p>
+                <div className="mt-3">
+                  <LinkArrow to="/events">View event archive</LinkArrow>
+                </div>
+              </article>
+            ) : null}
           </div>
         </div>
       </section>
@@ -276,8 +325,16 @@ export function Home() {
               </div>
             </div>
             <div className="grid gap-x-8 gap-y-8 sm:grid-cols-2" data-reveal style={{ transitionDelay: '70ms' }}>
-              {TESTIMONIALS.slice(0, 2).map((testimonial) => (
-                <Testimonial key={testimonial.name} {...testimonial} />
+              {[
+                { title: 'Members lead', text: 'Sessions and workshops are run by students who have just learned the material themselves.' },
+                { title: 'Projects ship', text: 'Teams work on real builds with reviews, deadlines and a published record at the end.' },
+                { title: 'Everyone starts somewhere', text: 'No prior programming experience is required to join a path or a project team.' },
+                { title: 'The club is accountable', text: 'Leadership is elected annually, and public records show who holds each role.' },
+              ].map((item) => (
+                <div key={item.title} className="border-t border-line pt-5">
+                  <h3 className="text-[0.9375rem] font-semibold text-ink-950">{item.title}</h3>
+                  <p className="mt-1.5 text-[0.8125rem] leading-6 text-ink-600">{item.text}</p>
+                </div>
               ))}
             </div>
           </div>
@@ -294,9 +351,15 @@ export function Home() {
           <div>
             <SectionHead eyebrow="From the blog" title="Notes from members" action={{ label: 'All articles', to: '/blogs' }} />
             <div className="mt-6" data-reveal>
-              {ARTICLES.slice(0, 3).map((article, index) => (
-                <ArticleCard key={article.slug} article={article} index={index} />
-              ))}
+              {articles.length ? (
+                articles.map((article, index) => <ArticleCard key={article.slug} article={article} index={index} />)
+              ) : (
+                <EmptyState
+                  compact
+                  title={loading ? 'Loading articles…' : 'No articles published yet'}
+                  description="Published blog articles appear here."
+                />
+              )}
             </div>
           </div>
           <div className="hidden lg:block lg:pt-16" data-reveal data-reveal-kind="image">
@@ -308,8 +371,8 @@ export function Home() {
       <JoinBand
         media={joinImage}
         title="There is a place here whether you have written code before or not."
-        description="Membership is free for KIUT students. Register with your student email and come to an orientation session."
-        primary={{ label: 'Join the club', to: '/auth/register' }}
+        description={user ? `You are signed in as ${user.name}. Your member area holds your learning, projects and events.` : 'Membership is free for KIUT students. Register with your student email and come to an orientation session.'}
+        primary={user ? { label: 'Open dashboard', to: homeForRole(user.role) } : { label: 'Join the club', to: '/auth/register' }}
         secondary={{ label: 'Contact the club', to: '/contact' }}
       />
     </>

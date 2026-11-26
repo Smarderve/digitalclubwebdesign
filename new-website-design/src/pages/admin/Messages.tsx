@@ -23,7 +23,7 @@ export function AdminMessages() {
   const audienceCount: Record<string, number> = {
     'All members': demoUsers.length,
     'Expired members': 0,
-    'Pending registrations': demoUsers.filter((user) => !user.approved).length,
+    'Deactivated accounts': demoUsers.filter((user) => !user.active).length,
     'Event attendees': 86,
     'Quizmasters': demoUsers.filter((user) => user.role === 'quizmaster').length,
   }
@@ -32,7 +32,6 @@ export function AdminMessages() {
     <>
       <PageHeader
         title="Messages"
-        description="Bulk communications to members. Messages are sent by email and SMS and recorded in the delivery log."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Messages' }]}
         actions={
           <Button size="sm" iconLeft={<Send className="h-3.5 w-3.5" />} onClick={() => { setForm({ subject: '', audience: 'All members', channel: 'Email + SMS', body: '' }); setErrors({}); setOpen(true) }}>
@@ -83,7 +82,7 @@ export function AdminMessages() {
                     icon={<Send className="h-3.5 w-3.5" />}
                     onSelect={() => {
                       setRows((current) => [{ ...row, id: Math.max(0, ...current.map((entry) => entry.id)) + 1, subject: `${row.subject} (resend)`, sent: new Date().toISOString() }, ...current])
-                      push({ tone: 'info', title: 'Resend simulated in the prototype', description: 'No email or SMS was sent.' })
+                      push({ tone: 'info', title: 'Not sent', description: 'Email and SMS delivery is not connected.' })
                     }}
                   >
                     Resend
@@ -96,7 +95,7 @@ export function AdminMessages() {
       </Card>
 
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
-        Sends are rate-limited in the live application. Check the audience before sending: messages cannot be recalled.
+        Check the audience before sending: messages cannot be recalled.
       </p>
       <DemoNotice />
 
@@ -121,7 +120,7 @@ export function AdminMessages() {
                     { id: Math.max(0, ...current.map((row) => row.id)) + 1, subject: form.subject, audience: form.audience, recipients: audienceCount[form.audience] ?? 0, sent: new Date().toISOString(), status: 'Sent', channel: form.channel },
                     ...current,
                   ])
-                  push({ tone: 'success', title: 'Message queued in the prototype', description: 'No email or SMS was sent.' })
+                  push({ tone: 'success', title: 'Message queued', description: 'No email or SMS was sent.' })
                   setOpen(false)
                 }}
               >
@@ -152,7 +151,7 @@ export function AdminMessages() {
               <Textarea id="message-body" rows={7} value={form.body} onChange={(event) => setForm({ ...form, body: event.target.value })} placeholder="Write the message…" />
             </Field>
             <Alert tone="warning" title="This sends immediately">
-              In the live application sending is final. Preview the audience count before sending.
+              Sending is final. Preview the audience count before sending.
             </Alert>
           </div>
         </DialogContent>
@@ -199,7 +198,7 @@ export function AdminMessageDetail() {
                 { label: 'Delivered', value: message.recipients - 2 },
                 { label: 'Failed', value: 2 },
               ].map((item) => (
-                <div key={item.label} className="bg-white p-4">
+                <div key={item.label} className="bg-surface p-4">
                   <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{item.label}</p>
                   <p className="mt-1 text-[1.125rem] font-semibold tabular text-ink-950">{item.value}</p>
                 </div>
@@ -244,7 +243,7 @@ export function AdminMessageDetail() {
             <div className="p-4">
               <p className="text-[0.8125rem] font-semibold text-ink-900">{message.subject}</p>
               <p className="mt-2 text-[0.75rem] leading-6 text-ink-600">
-                Hello member, this is a demonstration preview. The full message body is stored with the delivery batch in the live application.
+                Hello member, this is a preview of your message.
               </p>
               <p className="mt-3 text-[0.6875rem] text-ink-400">KIUT Digital Club · {formatDate(message.sent)}</p>
             </div>

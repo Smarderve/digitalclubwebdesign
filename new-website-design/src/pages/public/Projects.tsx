@@ -1,51 +1,42 @@
 import { useMemo, useState } from 'react'
-import { ArrowUpRight, FolderGit2, Search, SlidersHorizontal } from 'lucide-react'
-import { PROJECTS } from '../../data/site'
+import { FolderGit2, Search, SlidersHorizontal } from 'lucide-react'
 import { JoinBand, LinkArrow } from '../../components/site/primitives'
 import { PageHero, media } from '../../components/site/hero'
-import { Badge, EmptyState } from '../../components/ui'
+import { Alert, Badge, EmptyState } from '../../components/ui'
 import { Button } from '../../components/ui/button'
 import { Input, Select } from '../../components/ui/field'
 import { TypeCover } from '../../components/site/primitives'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi } from '../../lib/publicApi'
 
-const projectsHero = media(
-  '/images/projects/phone-ui',
-  'A phone screen showing an app interface',
-  'Stock photograph · Pexels. Not a club project.',
-)
-
-const categories = [
-  { value: 'all', label: 'All categories' },
-  { value: 'web', label: 'Web' },
-  { value: 'mobile', label: 'Mobile' },
-  { value: 'ai', label: 'AI & machine learning' },
-  { value: 'data', label: 'Data' },
-  { value: 'iot', label: 'IoT & hardware' },
-  { value: 'other', label: 'Other' },
-]
-
-function projectCategory(slug: string) {
-  if (slug === 'smart-campus-navigator') return 'mobile'
-  return 'other'
-}
+const projectsHero = media('/images/projects/phone-ui', 'A phone screen showing an app interface')
 
 export function Projects() {
   const [query, setQuery] = useState('')
-  const [category, setCategory] = useState('all')
   const [technology, setTechnology] = useState('all')
+  const [year, setYear] = useState('all')
+  const { data, loading, error } = usePublicData(() => publicApi.projects({ per_page: 50 }), [])
+  const projects = data?.items ?? []
 
-  const technologies = useMemo(() => Array.from(new Set(PROJECTS.flatMap((project) => project.technologies))), [])
+  const technologies = useMemo(
+    () => Array.from(new Set(projects.flatMap((project) => project.technologies))).sort(),
+    [projects],
+  )
+  const years = useMemo(
+    () => Array.from(new Set(projects.map((project) => project.year).filter(Boolean) as string[])).sort().reverse(),
+    [projects],
+  )
 
-  const results = PROJECTS.filter((project) => {
+  const results = projects.filter((project) => {
     const text = `${project.title} ${project.summary} ${project.technologies.join(' ')}`.toLowerCase()
     const matchesQuery = !query.trim() || text.includes(query.trim().toLowerCase())
-    const matchesCategory = category === 'all' || projectCategory(project.slug) === category
     const matchesTech = technology === 'all' || project.technologies.includes(technology)
-    return matchesQuery && matchesCategory && matchesTech
+    const matchesYear = year === 'all' || project.year === year
+    return matchesQuery && matchesTech && matchesYear
   })
 
-  const filtered = query.trim() || category !== 'all' || technology !== 'all'
-  const featured = PROJECTS[0]
+  const filtered = Boolean(query.trim()) || technology !== 'all' || year !== 'all'
+  const featured = projects[0]
 
   return (
     <>
@@ -63,8 +54,8 @@ export function Projects() {
           <div className="rounded-lg border border-line bg-canvas p-5">
             <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Build with the club</p>
             <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              Have an idea? Join to collaborate with like-minded students, access mentorship and turn concepts into
-              real solutions.
+              Have an idea? Join to collaborate with like-minded students, access mentorship and turn concepts into real
+              solutions.
             </p>
             <div className="mt-3 flex flex-col gap-2">
               <LinkArrow to="/auth/register">Join to start a project</LinkArrow>
@@ -74,58 +65,54 @@ export function Projects() {
         }
       />
 
-      <section className="section border-b border-line">
-        <div className="container-editorial">
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-            <div>
-              <p className="eyebrow">Featured project</p>
-              <h2 className="mt-3 text-display-md text-ink-950">A project record, not a screenshot.</h2>
-              <p className="mt-3 max-w-[40ch] text-[0.9375rem] leading-7 text-ink-600">
-                The club publishes individual project records with their stack, team context and outcomes. Where an
-                image or live link has not been supplied, the redesign shows a typographic record instead of stock
-                imagery.
-              </p>
-              <div className="mt-5 rounded-md border border-line bg-ink-50/60 p-3.5">
-                <p className="text-[0.6875rem] leading-5 text-ink-500">
-                  The current projects catalogue also displays an empty state while this featured record is shown. Both
-                  states are preserved: featured content is independent of the dynamic catalogue.
+      {error ? (
+        <div className="container-editorial py-8">
+          <Alert tone="warning" title="Projects could not be loaded">
+            {error}
+          </Alert>
+        </div>
+      ) : null}
+
+      {featured ? (
+        <section className="section border-b border-line">
+          <div className="container-editorial">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+              <div>
+                <p className="eyebrow">Featured project</p>
+                <h2 className="mt-3 text-display-md text-ink-950">A project record, not a screenshot.</h2>
+                <p className="mt-3 max-w-[40ch] text-[0.9375rem] leading-7 text-ink-600">
+                  The club publishes individual project records with their stack, team context and outcomes.
                 </p>
               </div>
+              <article id={`project-${featured.id}`} className="overflow-hidden rounded-lg border border-line">
+                {featured.cover_url ? (
+                  <img src={featured.cover_url} alt={featured.title} className="aspect-[16/9] w-full object-cover" />
+                ) : (
+                  <TypeCover title={featured.title} label="Featured project" index="01" className="min-h-[200px]" />
+                )}
+                <div className="p-5 sm:p-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone="green">Published record</Badge>
+                    <span className="text-[0.6875rem] text-ink-400">{featured.year ?? ''}</span>
+                  </div>
+                  <h3 className="mt-3 text-h2 text-ink-950">{featured.title}</h3>
+                  <p className="mt-2 text-[0.875rem] leading-7 text-ink-600">{featured.summary}</p>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <ul className="flex flex-wrap gap-1.5">
+                      {featured.technologies.map((tech) => (
+                        <li key={tech} className="rounded-[4px] border border-line bg-ink-50 px-2 py-0.5 text-[0.6875rem] text-ink-600">
+                          {tech}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-[0.625rem] text-ink-400">By {featured.owner_display_name}</p>
+                  </div>
+                </div>
+              </article>
             </div>
-            <article id={featured.slug} className="overflow-hidden rounded-lg border border-line">
-              <TypeCover title={featured.title} label="Featured project" index="01" className="min-h-[200px]" />
-              <div className="p-5 sm:p-6">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone="green">Published record</Badge>
-                  <span className="text-[0.6875rem] text-ink-400">{featured.year}</span>
-                </div>
-                <h3 className="mt-3 text-h2 text-ink-950">{featured.title}</h3>
-                <p className="mt-2 text-[0.875rem] leading-7 text-ink-600">{featured.description}</p>
-                {featured.metrics ? (
-                  <dl className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-4">
-                    {featured.metrics.map((metric) => (
-                      <div key={metric.label} className="bg-white px-3 py-2.5">
-                        <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{metric.label}</dt>
-                        <dd className="mt-0.5 text-[0.875rem] font-semibold tabular text-ink-900">{metric.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : null}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <ul className="flex flex-wrap gap-1.5">
-                    {featured.technologies.map((tech) => (
-                      <li key={tech} className="rounded-[4px] border border-line bg-ink-50 px-2 py-0.5 text-[0.6875rem] text-ink-600">
-                        {tech}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-[0.625rem] text-ink-400">{featured.note}</p>
-                </div>
-              </div>
-            </article>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <section className="section" id="project-catalogue" data-reveal>
         <div className="container-editorial">
@@ -135,8 +122,7 @@ export function Projects() {
               <h2 className="mt-2 text-display-md text-ink-950">All projects</h2>
             </div>
             <p className="max-w-[46ch] text-[0.75rem] leading-5 text-ink-400">
-              Search by name, technology or description. Category filters follow the technology categories defined in the
-              club administration panel.
+              Search by name, technology or description. Only projects published by the club appear here.
             </p>
           </div>
 
@@ -160,13 +146,14 @@ export function Projects() {
               />
             </div>
             <div>
-              <label htmlFor="project-category" className="sr-only">
-                Category
+              <label htmlFor="project-year" className="sr-only">
+                Year
               </label>
-              <Select id="project-category" value={category} onChange={(event) => setCategory(event.target.value)}>
-                {categories.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
+              <Select id="project-year" value={year} onChange={(event) => setYear(event.target.value)}>
+                <option value="all">All years</option>
+                {years.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
                   </option>
                 ))}
               </Select>
@@ -192,8 +179,8 @@ export function Projects() {
                 iconLeft={<SlidersHorizontal className="h-3.5 w-3.5" />}
                 onClick={() => {
                   setQuery('')
-                  setCategory('all')
                   setTechnology('all')
+                  setYear('all')
                 }}
               >
                 Reset
@@ -203,28 +190,33 @@ export function Projects() {
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-[0.75rem] text-ink-500" role="status">
-              {results.length} {results.length === 1 ? 'project' : 'projects'}
+              {loading ? 'Loading projects…' : `${results.length} ${results.length === 1 ? 'project' : 'projects'}`}
               {filtered ? ' match your filters' : ' published'}
             </p>
-            {category !== 'all' ? <Badge tone="outline">{categories.find((item) => item.value === category)?.label}</Badge> : null}
           </div>
 
           <div className="mt-6">
             {results.length ? (
               <div className="grid gap-4 md:grid-cols-2">
                 {results.map((project, index) => (
-                  <article key={project.slug} id={project.slug} className="overflow-hidden rounded-lg border border-line bg-white">
-                    <TypeCover
-                      title={project.title}
-                      label={project.technologies[0] ?? 'Member project'}
-                      index={String(index + 1).padStart(2, '0')}
-                      tone={index % 2 === 0 ? 'soft' : 'charcoal'}
-                      className="min-h-[170px]"
-                    />
+                  <article key={project.id} id={`project-${project.id}`} className="overflow-hidden rounded-lg border border-line bg-surface">
+                    {project.cover_url ? (
+                      <img src={project.cover_url} alt={project.title} className="aspect-[16/9] w-full object-cover" />
+                    ) : (
+                      <TypeCover
+                        title={project.title}
+                        label={project.technologies[0] ?? 'Member project'}
+                        index={String(index + 1).padStart(2, '0')}
+                        tone={index % 2 === 0 ? 'soft' : 'charcoal'}
+                        className="min-h-[170px]"
+                      />
+                    )}
                     <div className="p-5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <Badge tone="outline">{project.year}</Badge>
-                        <span className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{project.status}</span>
+                        <Badge tone="outline">{project.year ?? 'Undated'}</Badge>
+                        <span className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">
+                          {project.owner_display_name}
+                        </span>
                       </div>
                       <h3 className="mt-3 text-h3 text-ink-950">{project.title}</h3>
                       <p className="mt-1.5 text-[0.8125rem] leading-6 text-ink-500">{project.summary}</p>
@@ -238,17 +230,6 @@ export function Projects() {
                           <li className="px-1 py-0.5 text-[0.6875rem] text-ink-400">+{project.technologies.length - 4}</li>
                         ) : null}
                       </ul>
-                      <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
-                        <span className="text-[0.6875rem] text-ink-400">{project.note}</span>
-                        <a
-                          href={`/projects#${project.slug}`}
-                          className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-brand-800 hover:underline"
-                          aria-label={`Read full record for ${project.title}`}
-                        >
-                          Record
-                          <ArrowUpRight className="h-3 w-3" aria-hidden />
-                        </a>
-                      </div>
                     </div>
                   </article>
                 ))}
@@ -256,11 +237,11 @@ export function Projects() {
             ) : (
               <EmptyState
                 icon={<FolderGit2 className="h-4 w-4" aria-hidden />}
-                title={filtered ? 'No projects match these filters' : 'No projects available'}
+                title={loading ? 'Loading projects…' : filtered ? 'No projects match these filters' : 'No projects available'}
                 description={
                   filtered
-                    ? 'Try a different technology or category, or clear the filters to see every published project.'
-                    : 'Projects will appear here once they are added by administrators or members.'
+                    ? 'Try a different technology or year, or clear the filters to see every published project.'
+                    : 'Projects will appear here once they are published by administrators or members.'
                 }
                 action={
                   filtered ? (
@@ -269,8 +250,8 @@ export function Projects() {
                       size="sm"
                       onClick={() => {
                         setQuery('')
-                        setCategory('all')
                         setTechnology('all')
+                        setYear('all')
                       }}
                     >
                       Clear filters

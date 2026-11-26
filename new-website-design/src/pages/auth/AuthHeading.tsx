@@ -33,7 +33,7 @@ export function AuthLogo({ align = 'center' }: { align?: 'center' | 'left' }) {
       className={`group items-center gap-2.5 rounded-sm ${align === 'center' ? 'mx-auto flex w-fit' : 'inline-flex'}`}
       aria-label="KIUT Digital Club home"
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-md border border-line bg-white p-1.5 shadow-xs transition-transform duration-300 ease-smooth group-hover:-translate-y-0.5">
+      <span className="flex h-9 w-9 items-center justify-center rounded-md border border-line bg-surface p-1.5 shadow-xs transition-transform duration-300 ease-smooth group-hover:-translate-y-0.5">
         <img src="/brand/digital-club-logo.svg" alt="" className="h-full w-full object-contain" />
       </span>
       <span className="text-left">

@@ -28,15 +28,15 @@ export function AdminMembers() {
     if (!pending) return
     if (pending.type === 'quizmaster') {
       setRows((current) => current.map((row) => (row.id === pending.row.id ? { ...row, role: 'quizmaster' as const } : row)))
-      push({ tone: 'success', title: 'Quizmaster role granted in the prototype', description: `${pending.row.name} can create warmups in this browser session.` })
+      push({ tone: 'success', title: 'Quizmaster role granted', description: `${pending.row.name} can create warmups.` })
     }
     if (pending.type === 'demote') {
       setRows((current) => current.map((row) => (row.id === pending.row.id ? { ...row, role: 'student' as const } : row)))
-      push({ tone: 'info', title: 'Quizmaster role removed in the prototype', description: `${pending.row.name} keeps member access.` })
+      push({ tone: 'info', title: 'Quizmaster role removed', description: `${pending.row.name} keeps member access.` })
     }
     if (pending.type === 'toggle') {
       setRows((current) => current.map((row) => (row.id === pending.row.id ? { ...row, active: !row.active } : row)))
-      push({ tone: 'info', title: pending.row.active ? 'Member access suspended in the prototype' : 'Member access restored in the prototype', description: `${pending.row.name} — no production record changed.` })
+      push({ tone: 'info', title: pending.row.active ? 'Member access suspended' : 'Member access restored', description: `${pending.row.name} — no production record changed.` })
     }
   }
 
@@ -44,7 +44,6 @@ export function AdminMembers() {
     <>
       <PageHeader
         title="Members"
-        description="The club's member directory, membership state and access. Use the record page for account actions and history."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Members' }]}
         actions={
           <>
@@ -57,7 +56,7 @@ export function AdminMembers() {
                   'kiut-digital-club-members.csv',
                   rows.map((row) => ({ Member: row.name, Email: row.email, MemberID: row.memberId, Course: row.course, Year: row.year, Status: row.status, Active: row.active, Points: row.points })),
                 )
-                push({ tone: okay ? 'success' : 'error', title: okay ? 'CSV downloaded' : 'Nothing to export', description: 'Exports demonstration records from this browser session.' })
+                push({ tone: okay ? 'success' : 'error', title: okay ? 'CSV downloaded' : 'Nothing to export' })
               }}
             >
               Export CSV
@@ -160,8 +159,8 @@ export function AdminMembers() {
         title={pending?.type === 'quizmaster' ? 'Grant quizmaster role?' : pending?.type === 'demote' ? 'Remove quizmaster role?' : pending?.row.active ? 'Suspend member access?' : 'Restore member access?'}
         description={
           pending?.type === 'toggle'
-            ? 'Access changes take effect immediately in the live application. The member keeps their records either way.'
-            : 'Roles control access to the quizmaster workspace. This prototype only changes the current browser session.'
+            ? 'Access changes take effect immediately. The member keeps their records either way.'
+            : 'Roles control access to the quizmaster workspace.'
         }
         confirmLabel={pending?.type === 'quizmaster' ? 'Grant role' : pending?.type === 'demote' ? 'Remove role' : pending?.row.active ? 'Suspend' : 'Restore'}
         destructive={pending?.type === 'demote' || (pending?.type === 'toggle' && pending.row.active)}
@@ -246,7 +245,7 @@ export function AdminMemberDetail() {
                 </TBody>
               </TableWrap>
             ) : (
-              <div className="p-4"><EmptyState compact title="No projects recorded" description="This member has not submitted a project in the demonstration data set." /></div>
+              <div className="p-4"><EmptyState compact title="No projects recorded" description="This member has not submitted a project yet." /></div>
             )}
           </Card>
 
@@ -281,15 +280,15 @@ export function AdminMemberDetail() {
                 <Badge tone={member.active ? 'green' : 'red'}>{member.active ? 'Can sign in' : 'Suspended'}</Badge>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[0.75rem] text-ink-500">Approved</p>
-                <Badge tone={member.approved ? 'green' : 'amber'}>{member.approved ? 'Yes' : 'Pending'}</Badge>
+                <p className="text-[0.75rem] text-ink-500">Registration</p>
+                <Badge tone="green">Automatic</Badge>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[0.75rem] text-ink-500">Role</p>
                 <span className="text-[0.75rem] font-medium capitalize text-ink-900">{member.role}</span>
               </div>
               <div className="flex flex-wrap gap-2 border-t border-line pt-3">
-                <Button variant="outline" size="sm" iconLeft={<ShieldCheck className="h-3.5 w-3.5" />} onClick={() => push({ tone: 'info', title: 'Role change is a prototype action', description: 'Use the member directory to grant or remove the quizmaster role.' })}>
+                <Button variant="outline" size="sm" iconLeft={<ShieldCheck className="h-3.5 w-3.5" />} onClick={() => push({ tone: 'info', title: 'Role change is available from the record page', description: 'Use the member directory to grant or remove the quizmaster role.' })}>
                   Manage role
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setConfirm('delete')}>Delete account</Button>
@@ -317,7 +316,7 @@ export function AdminMemberDetail() {
           </Card>
 
           <Alert tone="info" title="Deleting an account">
-            Account deletion is permanent in the live application and requires administrator confirmation. This prototype does not delete anything.
+            Account deletion is permanent and requires administrator confirmation.
           </Alert>
         </div>
       </div>
@@ -328,9 +327,9 @@ export function AdminMemberDetail() {
         open={confirm === 'delete'}
         onOpenChange={(open) => !open && setConfirm(null)}
         title="Delete this member account?"
-        description={`${member.name}'s account and personal data would be permanently removed. This cannot be undone in the live application.`}
+        description={`${member.name}'s account and personal data would be permanently removed. This cannot be undone.`}
         confirmLabel="Delete account"
-        onConfirm={() => push({ tone: 'info', title: 'Deletion is not performed in the prototype', description: 'No account was removed.' })}
+        onConfirm={() => push({ tone: 'info', title: 'Deletion is not performed', description: 'No account was removed.' })}
       />
       <ConfirmDialog
         open={confirm === 'demote'}

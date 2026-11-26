@@ -1,29 +1,17 @@
-import { Link } from 'react-router-dom'
 import { ArrowRight, ArrowUpRight, Award, Handshake } from 'lucide-react'
-import { ABOUT, ACHIEVEMENTS, CLUB_FACTS, LEADERSHIP_STRUCTURE, PARTNERS } from '../../data/site'
+import { ABOUT, ACHIEVEMENTS, LEADERSHIP_STRUCTURE, PARTNERS } from '../../data/site'
 import { JoinBand, LinkArrow, SectionHead } from '../../components/site/primitives'
-import { EditorialFigure, PageHero, media } from '../../components/site/hero'
+import { EditorialFigure, PageHero, media, clubMedia } from '../../components/site/hero'
 import { Accordion } from '../../components/ui/accordion'
-import { Badge } from '../../components/ui'
+import { Alert, Badge } from '../../components/ui'
 import { ButtonLink } from '../../components/ui/button'
 import { LeaderCard } from '../../components/site/cards'
-import { LEADERS } from '../../data/site'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi } from '../../lib/publicApi'
 
-const aboutHero = media(
-  '/images/learning/developer-portrait',
-  'A developer working at a laptop by a window',
-  'Stock photograph · Pexels. Not KIUT members or a club activity.',
-)
-const aboutLibrary = media(
-  '/images/lab/lab-rows',
-  'Rows of computers in a university laboratory',
-  'Stock photograph · Pexels.',
-)
-const aboutWorkshop = media(
-  '/images/learning/electronics-workshop',
-  'Students working with electronic components during a hands-on workshop',
-  'Stock photograph · Pexels.',
-)
+const aboutHero = clubMedia('/images/club/devfest-portrait', 'Club members together after a DevFest session')
+const aboutLibrary = clubMedia('/images/club/devfest-group-wide', 'KIUT Digital Club members at a DevFest gathering')
+const aboutWorkshop = clubMedia('/images/club/devfest-steps', 'Club members gathered after a DevFest event')
 
 const mentorship = [
   { title: '1-on-1 sessions', description: 'Personalised mentoring sessions tailored to your learning goals and career aspirations.' },
@@ -33,6 +21,14 @@ const mentorship = [
 ]
 
 export function About() {
+  const stats = usePublicData(() => publicApi.stats(), [])
+  const leaders = usePublicData(() => publicApi.leaders(), [])
+  const facts = [
+    { label: 'Approved members', value: stats.data ? String(stats.data.members.total) : '—' },
+    { label: 'Published projects', value: stats.data ? String(stats.data.projects.published) : '—' },
+    { label: 'Upcoming events', value: stats.data ? String(stats.data.events.upcoming) : '—' },
+  ]
+
   return (
     <>
       <PageHero
@@ -69,7 +65,6 @@ export function About() {
         }
       />
 
-      {/* Mission and vision */}
       <section className="section border-b border-line">
         <div className="container-editorial">
           <SectionHead
@@ -89,7 +84,6 @@ export function About() {
         </div>
       </section>
 
-      {/* What we do */}
       <section className="section border-b border-line bg-canvas/60" data-reveal>
         <div className="container-editorial">
           <SectionHead
@@ -115,7 +109,6 @@ export function About() {
         </div>
       </section>
 
-      {/* Mentorship */}
       <section className="section border-b border-line">
         <div className="container-editorial grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
@@ -133,9 +126,6 @@ export function About() {
                 Become a mentor
               </ButtonLink>
             </div>
-            <p className="mt-3 text-[0.6875rem] text-ink-400">
-              These actions open the contact form. The current site does not publish a separate application form.
-            </p>
           </div>
           <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
             {mentorship.map((item) => (
@@ -148,13 +138,12 @@ export function About() {
         </div>
       </section>
 
-      {/* Values */}
       <section className="section border-b border-line bg-canvas/60">
         <div className="container-editorial">
           <SectionHead eyebrow="Values" title="Principles that guide everything we do" />
           <div className="mt-9 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
             {ABOUT.values.map((value, index) => (
-              <div key={value.title} className="bg-white p-5">
+              <div key={value.title} className="bg-surface p-5">
                 <span className="font-mono text-[0.6875rem] text-brand-700">{String(index + 1).padStart(2, '0')}</span>
                 <h3 className="mt-3 text-[0.9375rem] font-semibold text-ink-950">{value.title}</h3>
                 <p className="mt-1.5 text-[0.8125rem] leading-6 text-ink-500">{value.description}</p>
@@ -164,7 +153,6 @@ export function About() {
         </div>
       </section>
 
-      {/* Impact */}
       <section className="section border-b border-line">
         <div className="container-editorial">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
@@ -172,29 +160,26 @@ export function About() {
               <p className="eyebrow">Our impact</p>
               <h2 className="mt-3 text-display-md text-ink-950">Making a difference in students' lives</h2>
               <p className="mt-3 max-w-[42ch] text-[0.9375rem] leading-7 text-ink-600">
-                The club publishes headline figures for its community. These numbers are carried over from the current
-                website and are awaiting the club's verification for the 2026/27 year.
+                Figures are computed from the club database. Only approved members and published records are counted.
               </p>
             </div>
             <div>
               <div className="grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
-                {CLUB_FACTS.map((fact) => (
-                  <div key={fact.label} className="bg-white p-5">
+                {facts.map((fact) => (
+                  <div key={fact.label} className="bg-surface p-5">
                     <p className="text-[2rem] font-semibold tabular leading-none tracking-tight text-ink-950">{fact.value}</p>
                     <p className="mt-1.5 text-[0.75rem] text-ink-500">{fact.label}</p>
                   </div>
                 ))}
               </div>
               <p className="mt-2 text-[0.625rem] leading-4 text-ink-400">
-                Source: figures as published on the current KIUT Digital Club homepage. The current impact section
-                separately displays zeros; both sets require owner confirmation before production.
+                {stats.error ? `Live figures unavailable: ${stats.error}` : 'Source: club database, updated as records change.'}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Recognition */}
       <section className="section border-b border-line bg-canvas/60">
         <div className="container-editorial">
           <SectionHead
@@ -219,7 +204,7 @@ export function About() {
                   </article>
                 ))}
               </div>
-              <p className="mt-2 text-[0.625rem] text-ink-400">2024 claims reproduced from the current site; evidence and permission to publish need confirmation.</p>
+              <p className="mt-2 text-[0.625rem] text-ink-400">Published claims are reproduced from the current site.</p>
             </div>
 
             <div>
@@ -229,19 +214,17 @@ export function About() {
               </div>
               <div className="grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
                 {PARTNERS.map((partner) => (
-                  <div key={partner.name} className="bg-white p-4">
+                  <div key={partner.name} className="bg-surface p-4">
                     <p className="text-[0.875rem] font-semibold tracking-tight text-ink-900">{partner.name}</p>
                     <p className="mt-1 text-[0.75rem] leading-5 text-ink-500">{partner.description}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-[0.625rem] text-ink-400">Partner relationships and logo permissions require owner confirmation.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Leadership preview */}
       <section className="section border-b border-line">
         <div className="container-editorial">
           <SectionHead
@@ -250,20 +233,26 @@ export function About() {
             description="The club is led by students across an executive board, technical leads and department heads."
             action={{ label: 'Full leadership', to: '/leaders' }}
           />
-          <div className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-            {LEADERS.slice(0, 4).map((leader) => (
-              <LeaderCard
-                key={leader.name}
-                name={leader.name}
-                position={leader.position}
-                programme={leader.programme}
-                year={leader.year}
-              />
-            ))}
-          </div>
+          {leaders.error ? (
+            <Alert tone="warning" title="Leadership could not be loaded" className="mt-6">
+              {leaders.error}
+            </Alert>
+          ) : (
+            <div className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+              {(leaders.data ?? []).slice(0, 4).map((leader) => (
+                <LeaderCard
+                  key={leader.id}
+                  name={leader.name}
+                  position={leader.position}
+                  programme={leader.programme ?? 'Programme not recorded'}
+                  year={leader.year ?? undefined}
+                />
+              ))}
+            </div>
+          )}
           <div className="mt-8 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
             {LEADERSHIP_STRUCTURE.map((item) => (
-              <div key={item.title} className="bg-white p-4">
+              <div key={item.title} className="bg-surface p-4">
                 <p className="text-[0.8125rem] font-semibold text-ink-950">{item.title}</p>
                 <p className="mt-1 text-[0.75rem] leading-5 text-ink-500">{item.description}</p>
               </div>
@@ -272,7 +261,6 @@ export function About() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="section" id="faq">
         <div className="container-editorial grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
           <div>

@@ -7,14 +7,14 @@ import { DemoNotice } from './_shared'
 import { formatDate } from '../../lib/utils'
 
 export function AdminDashboard() {
-  const pendingUsers = demoUsers.filter((user) => !user.approved)
+  const deactivatedUsers = demoUsers.filter((user) => !user.active)
   const pendingRsvps = demoRsvps.filter((rsvp) => rsvp.status === 'pending')
   const upcoming = demoAdminEvents.filter((event) => new Date(event.date).getTime() >= Date.now())
   const tasks = [
-    { label: 'Members awaiting approval', count: pendingUsers.length, to: '/admin/users', icon: UserCheck, hint: 'New registrations need review' },
-    { label: 'RSVPs awaiting a decision', count: pendingRsvps.length, to: '/admin/rsvps', icon: ClipboardList, hint: 'Event registrations pending' },
-    { label: 'Session reports to review', count: 2, to: '/admin/sessions/reports', icon: FileText, hint: 'Submitted by instructors' },
-    { label: 'Draft content', count: 2, to: '/admin/news', icon: Clock, hint: 'News and blog drafts' },
+    { label: 'Deactivated accounts', count: deactivatedUsers.length, to: '/admin/members', icon: UserCheck },
+    { label: 'RSVPs awaiting a decision', count: pendingRsvps.length, to: '/admin/rsvps', icon: ClipboardList },
+    { label: 'Session reports to review', count: 2, to: '/admin/sessions/reports', icon: FileText },
+    { label: 'Draft content', count: 2, to: '/admin/news', icon: Clock },
   ]
 
   return (
@@ -30,20 +30,18 @@ export function AdminDashboard() {
         }
       />
 
-      {pendingUsers.length ? (
-        <Alert
-          tone="warning"
-          title={`${pendingUsers.length} members are waiting for approval`}
-          action={
-            <Link to="/admin/users" className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-[#7A4A06] hover:underline">
-              Review registrations
-              <ArrowRight className="h-3 w-3" aria-hidden />
-            </Link>
-          }
-        >
-          Registration approval is set to manual. New accounts cannot sign in until an administrator approves them.
-        </Alert>
-      ) : null}
+      <Alert
+        tone="info"
+        title="Registration is automatic"
+        action={
+          <Link to="/admin/members" className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-brand-800 hover:underline">
+            Manage accounts
+            <ArrowRight className="h-3 w-3" aria-hidden />
+          </Link>
+        }
+      >
+        New student accounts are active immediately and can sign in without approval. Deactivate an account to block access.
+      </Alert>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
         <Card>
@@ -54,12 +52,9 @@ export function AdminDashboard() {
               return (
                 <li key={task.label}>
                   <Link to={task.to} className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-ink-50/60">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[5px] bg-ink-50 text-ink-500">
-                      <Icon className="h-4 w-4" aria-hidden />
-                    </span>
+                    <Icon className="h-5 w-5 shrink-0 text-ink-500" aria-hidden />
                     <span className="min-w-0 flex-1">
                       <span className="block text-[0.8125rem] font-medium text-ink-900">{task.label}</span>
-                      <span className="block text-[0.6875rem] text-ink-400">{task.hint}</span>
                     </span>
                     <span className="text-[0.8125rem] font-semibold tabular text-ink-900">{task.count}</span>
                     <ArrowRight className="h-3.5 w-3.5 text-ink-300" aria-hidden />

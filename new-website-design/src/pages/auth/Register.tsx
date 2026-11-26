@@ -7,6 +7,7 @@ import { COURSES, YEARS } from '../../data/site'
 import { useAuth } from '../../context/AuthContext'
 import { Alert, Field, Input, Progress, Select } from '../../components/ui'
 import { Button } from '../../components/ui/button'
+import { Turnstile } from '../../components/auth/Turnstile'
 import { AuthHeading, AuthLogo } from './AuthHeading'
 
 type RegisterValues = {
@@ -45,9 +46,13 @@ export function Register() {
   const { register: registerAccount } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [attempt, setAttempt] = useState(0)
+  const [submitError, setSubmitError] = useState('')
   const {
     register,
     handleSubmit,
+    setError,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterValues>()
@@ -77,23 +82,50 @@ export function Register() {
         />
       </div>
 
-      <Alert tone="info" className="mt-5" title="Accounts are reviewed">
-        New accounts are approved by a club administrator. You will be able to sign in after approval.
+      <Alert tone="success" className="mt-5" title="Sign in immediately">
+        Your account is activated as soon as you register — there is no approval step. You can sign in right away.
       </Alert>
 
       <form
         className="mt-7"
         noValidate
         onSubmit={handleSubmit(async (values) => {
-          await new Promise((resolve) => setTimeout(resolve, 700))
-          registerAccount({
+          setSubmitError('')
+          const result = await registerAccount({
             fullName: values.fullName,
             email: values.email,
+            password: values.password,
             phone: values.phone,
             course: values.course,
             year: values.year,
+            turnstileToken,
           })
-          navigate('/auth/approval-pending')
+
+          if (!result.ok) {
+            if (result.code === 'EMAIL_IN_USE') {
+              setError('email', { type: 'server', message: result.message })
+            } else if (result.fieldErrors && Object.keys(result.fieldErrors).length) {
+              const fields: Record<string, keyof RegisterValues> = {
+                full_name: 'fullName',
+                email: 'email',
+                password: 'password',
+                phone: 'phone',
+                course: 'course',
+                year: 'year',
+              }
+              for (const [field, message] of Object.entries(result.fieldErrors)) {
+                const key = fields[field]
+                if (key) setError(key, { type: 'server', message })
+              }
+            } else {
+              setSubmitError(result.message)
+            }
+            setTurnstileToken('')
+            setAttempt((value) => value + 1)
+            return
+          }
+
+          navigate('/auth/login', { state: { registeredEmail: values.email.trim() } })
         })}
       >
         <div className="space-y-6">
@@ -215,9 +247,9 @@ export function Register() {
         </div>
 
         <div className="mt-6 rounded-md border border-line bg-canvas/70 p-3.5">
-          <p className="text-[0.75rem] font-medium text-ink-800">Human verification</p>
+          <p className="text-[0.75rem] font-medium text-ink-800">Verification</p>
           <p className="mt-1 text-[0.6875rem] leading-5 text-ink-500">
-            The live site uses Cloudflare Turnstile. This prototype does not call a verification service.
+            Your account is active immediately after registration. Complete the human verification to continue.
           </p>
           <label className="mt-3 flex items-start gap-2 text-[0.75rem] leading-5 text-ink-600">
             <input
@@ -230,7 +262,21 @@ export function Register() {
           {errors.confirm ? <p className="mt-1 text-[0.6875rem] text-danger">{errors.confirm.message}</p> : null}
         </div>
 
-        <Button type="submit" size="lg" className="mt-5 w-full" loading={isSubmitting}>
+        <Turnstile className="mt-5" onToken={setTurnstileToken} resetSignal={attempt} />
+
+        {submitError ? (
+          <Alert tone="danger" className="mt-4" title="Could not create the account">
+            {submitError}
+          </Alert>
+        ) : null}
+
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-3 w-full"
+          loading={isSubmitting}
+          disabled={!turnstileToken}
+        >
           Create account
         </Button>
 

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { Alert, Field, Input } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
+import { api, ApiError } from '../../lib/api'
 import { AuthHeading, AuthLogo } from './AuthHeading'
 
 export function ResetPassword() {
@@ -48,7 +49,7 @@ export function ResetPassword() {
             align="left"
             label="Account recovery"
             title="Password updated"
-            description="The prototype validated the new password. No password was changed on any real account."
+            description="Your password has been updated. Sign in with your new password."
           />
           <div className="mt-6">
             <ButtonLink to="/auth/login" className="w-full">
@@ -81,7 +82,7 @@ export function ResetPassword() {
       <form
         className="mt-7 space-y-4"
         noValidate
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault()
           setError('')
           setFieldError('')
@@ -94,10 +95,24 @@ export function ResetPassword() {
             return
           }
           setLoading(true)
-          window.setTimeout(() => {
-            setLoading(false)
+          try {
+            await api.resetPassword(token, password)
             setDone(true)
-          }, 700)
+          } catch (caught) {
+            if (caught instanceof ApiError) {
+              if (caught.code === 'TOKEN_EXPIRED' || caught.code === 'TOKEN_INVALID') {
+                setError(`${caught.message} Request a new link below.`)
+              } else if (caught.code === 'VALIDATION_ERROR') {
+                setFieldError(caught.details.password ?? caught.message)
+              } else {
+                setError(caught.message)
+              }
+            } else {
+              setError('Could not reach the server. Check your connection and try again.')
+            }
+          } finally {
+            setLoading(false)
+          }
         }}
       >
         <Field label="New password" htmlFor="reset-password" required error={fieldError} hint="At least 8 characters.">
@@ -135,11 +150,6 @@ export function ResetPassword() {
           Update password
         </Button>
       </form>
-
-      <p className="mt-5 border-t border-line pt-4 text-[0.6875rem] leading-5 text-ink-400">
-        Token <span className="font-mono">{token}</span> is treated as valid in this prototype. In production the backend
-        verifies the token signature and expiry before accepting a new password.
-      </p>
 
       <Link
         to="/auth/login"

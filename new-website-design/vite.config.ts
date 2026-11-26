@@ -18,6 +18,15 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
     port: 5178,
+    /* Local development only. In production the SPA and the Flask API are served
+       from one origin (integration architecture §12.3); this proxy reproduces that
+       in the browser so Flask-Login cookies, the future CSRF token and Origin
+       checks behave exactly as they will in production. It changes no build output. */
+    proxy: {
+      '/api': { target: 'http://127.0.0.1:5051', changeOrigin: false },
+      '/healthz': { target: 'http://127.0.0.1:5051', changeOrigin: false },
+      '/static/uploads': { target: 'http://127.0.0.1:5051', changeOrigin: false },
+    },
   },
   preview: {
     host: '127.0.0.1',

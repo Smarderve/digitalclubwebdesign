@@ -2,51 +2,48 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, CheckCircle2, Clock, MapPin, ShieldAlert, Users } from 'lucide-react'
-import { EVENTS, RSVP_REQUIREMENTS } from '../../data/site'
 import { Alert, Badge } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
-import { Checkbox, Field, Input, Select, Textarea } from '../../components/ui/field'
-import { useToast } from '../../context/ToastContext'
-import { formatDate } from '../../lib/utils'
+import { Field, Input } from '../../components/ui/field'
+import { Turnstile } from '../../components/auth/Turnstile'
 import { PageNotFoundInline } from '../../components/site/primitives'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi } from '../../lib/publicApi'
+import { ApiError } from '../../lib/api'
+import { formatDate } from '../../lib/utils'
 
 type RsvpValues = {
   fullName: string
   email: string
   phone: string
-  attendeeType: string
-  studyField: string
-  studyYear: string
-  nonStudentRole: string
-  emergencyContact: string
-  emergencyPhone: string
-  dietary: string
-  notes: string
-  consent: boolean
+  studentId: string
 }
 
 export function EventRsvp() {
-  const { id } = useParams()
-  const event = EVENTS.find((item) => String(item.id) === id)
-  const [preview, setPreview] = useState(false)
-  const { push } = useToast()
+  const { id = '' } = useParams()
+  const { data: event, loading, error } = usePublicData(() => publicApi.eventDetail(id), [id])
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [resetSignal, setResetSignal] = useState(0)
+  const [submitError, setSubmitError] = useState('')
+  const [submitted, setSubmitted] = useState(false)
   const {
     register,
     handleSubmit,
-    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<RsvpValues>({
-    defaultValues: {
-      attendeeType: '',
-      studyField: '',
-      studyYear: '',
-      nonStudentRole: '',
-      consent: false,
-    },
+    defaultValues: { fullName: '', email: '', phone: '', studentId: '' },
   })
 
-  if (!event) {
+  if (loading) {
+    return (
+      <div className="container-editorial py-12 text-center text-[0.8125rem] text-ink-400" role="status">
+        Loading event…
+      </div>
+    )
+  }
+
+  if (error || !event) {
     return (
       <PageNotFoundInline
         title="Event not found"
@@ -55,8 +52,48 @@ export function EventRsvp() {
     )
   }
 
-  const attendeeType = watch('attendeeType')
-  const ended = new Date(event.date).getTime() < Date.now()
+  const ended = event.rsvp.state !== 'open'
+  const time = event.starts_at
+    ? new Date(event.starts_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    : ''
+
+  const onSubmit = handleSubmit(async (values) => {
+    setSubmitError('')
+    if (!turnstileToken) {
+      setSubmitError('Complete the human verification before submitting.')
+      return
+    }
+    try {
+      await publicApi.rsvp(id, {
+        fullName: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        studentId: values.studentId,
+        turnstileToken,
+      })
+      setSubmitted(true)
+      reset()
+      setTurnstileToken('')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.code === 'ALREADY_REGISTERED') {
+          setSubmitError('This email is already registered for this event.')
+        } else if (err.code === 'RSVP_CLOSED') {
+          setSubmitError('Registration for this event has closed.')
+        } else if (err.code === 'TURNSTILE_FAILED') {
+          setSubmitError('Human verification failed. Please complete it again.')
+        } else if (Object.keys(err.details).length) {
+          setSubmitError(Object.values(err.details).join(' '))
+        } else {
+          setSubmitError(err.message)
+        }
+      } else {
+        setSubmitError('The RSVP could not be submitted. Please try again.')
+      }
+      setTurnstileToken('')
+      setResetSignal((value) => value + 1)
+    }
+  })
 
   return (
     <div className="bg-canvas/50">
@@ -67,18 +104,15 @@ export function EventRsvp() {
         </Link>
 
         <div className="mt-4 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-          {/* Event summary */}
           <div className="lg:sticky lg:top-24">
-            <div className="overflow-hidden rounded-lg border border-line bg-white">
+            <div className="overflow-hidden rounded-lg border border-line bg-surface">
               <div className="relative bg-mint p-6">
                 <div aria-hidden className="absolute inset-0 opacity-40 hairline-grid" />
                 <div className="relative">
                   <div className="flex flex-wrap items-center gap-2">
-                    {event.tags.map((tag) => (
-                      <span key={tag} className="rounded-full border border-brand-200 bg-white/70 px-2 py-0.5 text-[0.625rem] font-medium text-brand-800">
-                        {tag}
-                      </span>
-                    ))}
+                    <span className="rounded-full border border-brand-200 bg-surface/70 px-2 py-0.5 text-[0.625rem] font-medium text-brand-800">
+                      {event.category.replace(/_/g, ' ')}
+                    </span>
                   </div>
                   <h1 className="mt-4 text-[1.75rem] font-semibold leading-tight tracking-tight text-ink-950">{event.title}</h1>
                   <p className="mt-2 text-[0.8125rem] text-ink-600">KIUT Digital Club · Public event</p>
@@ -86,14 +120,20 @@ export function EventRsvp() {
               </div>
               <div className="grid gap-px bg-line sm:grid-cols-2">
                 {[
-                  { icon: CalendarDays, label: 'Date', value: formatDate(event.date, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }) },
-                  { icon: Clock, label: 'Time', value: event.time },
-                  { icon: MapPin, label: 'Location', value: event.location },
-                  { icon: Users, label: 'Capacity', value: `${event.capacity} seats` },
+                  {
+                    icon: CalendarDays,
+                    label: 'Date',
+                    value: event.starts_at
+                      ? formatDate(event.starts_at, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
+                      : 'To be announced',
+                  },
+                  { icon: Clock, label: 'Time', value: time || 'To be announced' },
+                  { icon: MapPin, label: 'Location', value: event.venue ?? 'To be announced' },
+                  { icon: Users, label: 'Capacity', value: event.capacity ? `${event.capacity} seats` : 'Open' },
                 ].map((item) => {
                   const Icon = item.icon
                   return (
-                    <div key={item.label} className="bg-white p-4">
+                    <div key={item.label} className="bg-surface p-4">
                       <p className="flex items-center gap-1.5 text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">
                         <Icon className="h-3 w-3" aria-hidden />
                         {item.label}
@@ -105,19 +145,20 @@ export function EventRsvp() {
               </div>
               <div className="border-t border-line p-5">
                 <p className="text-[0.8125rem] leading-6 text-ink-600">{event.description}</p>
-                <div className="mt-4 space-y-1 text-[0.8125rem] text-ink-600">
-                  {event.longDescription.slice(1).map((line) => (
-                    <p key={line}>{line}</p>
-                  ))}
-                </div>
+                {event.requirements.length ? (
+                  <ul className="mt-4 space-y-1 text-[0.8125rem] text-ink-600">
+                    {event.requirements.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                ) : null}
                 <p className="mt-4 text-[0.6875rem] text-ink-400">
-                  The published event description was truncated after the second learning outcome.
+                  {event.registered_count} {event.registered_count === 1 ? 'registration' : 'registrations'} recorded.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* RSVP */}
           <div>
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-h2 text-ink-950">RSVP registration</h2>
@@ -126,10 +167,13 @@ export function EventRsvp() {
               </Badge>
             </div>
 
-            {ended ? (
+            {submitted ? (
+              <Alert tone="success" title="RSVP submitted" className="mb-4">
+                Your RSVP is pending organiser review. You will receive an email confirmation once it is approved.
+              </Alert>
+            ) : ended ? (
               <Alert tone="warning" title="This event has ended" className="mb-4">
-                The event took place on {formatDate(event.date, { day: 'numeric', month: 'long', year: 'numeric' })}. RSVP is
-                closed and no new registration can be accepted. The form is preserved below for review.
+                Registration is closed and no new RSVP can be accepted.
               </Alert>
             ) : (
               <Alert tone="info" title="RSVP review" className="mb-4">
@@ -137,34 +181,16 @@ export function EventRsvp() {
               </Alert>
             )}
 
-            <div className="rounded-lg border border-line bg-white">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-5 py-3.5">
-                <div>
-                  <p className="text-[0.8125rem] font-semibold text-ink-900">Registration form</p>
-                  <p className="text-[0.6875rem] text-ink-400">
-                    {preview ? 'Preview mode — validation is live, nothing is submitted.' : 'Disabled because the event has ended.'}
-                  </p>
-                </div>
-                <Button type="button" variant={preview ? 'secondary' : 'outline'} size="sm" onClick={() => setPreview((value) => !value)}>
-                  {preview ? 'Exit preview' : 'Preview form behaviour'}
-                </Button>
+            <div className="rounded-lg border border-line bg-surface">
+              <div className="border-b border-line px-5 py-3.5">
+                <p className="text-[0.8125rem] font-semibold text-ink-900">Registration form</p>
+                <p className="text-[0.6875rem] text-ink-400">
+                  {ended ? 'The form is closed.' : 'All fields marked required must be completed.'}
+                </p>
               </div>
 
-              <form
-                className="p-5"
-                noValidate
-                onSubmit={handleSubmit(async () => {
-                  await new Promise((resolve) => setTimeout(resolve, 700))
-                  push({
-                    tone: 'success',
-                    title: 'Form validated',
-                    description: 'Prototype only — no RSVP was stored and no confirmation email was sent.',
-                  })
-                  reset()
-                  setPreview(false)
-                })}
-              >
-                <fieldset disabled={!preview} className="space-y-4 disabled:opacity-60">
+              <form className="p-5" noValidate onSubmit={onSubmit}>
+                <fieldset disabled={ended || submitted || isSubmitting} className="space-y-4 disabled:opacity-60">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Full name" htmlFor="rsvp-name" required error={errors.fullName?.message}>
                       <Input
@@ -201,87 +227,10 @@ export function EventRsvp() {
                         {...register('phone', { required: 'Enter a phone number for event updates.' })}
                       />
                     </Field>
-                    <Field label="Attendance type" htmlFor="rsvp-type" required error={errors.attendeeType?.message}>
-                      <Select
-                        id="rsvp-type"
-                        aria-invalid={Boolean(errors.attendeeType)}
-                        {...register('attendeeType', { required: 'Select your attendance type.' })}
-                      >
-                        <option value="">Select attendance type</option>
-                        {RSVP_REQUIREMENTS.attendeeTypes.map((type) => (
-                          <option key={type} value={type.toLowerCase()}>
-                            {type}
-                          </option>
-                        ))}
-                      </Select>
+                    <Field label="Member ID" htmlFor="rsvp-student" optional hint="If you are a club member, the organiser can link your RSVP.">
+                      <Input id="rsvp-student" placeholder="DC-2026-0000" {...register('studentId')} />
                     </Field>
                   </div>
-
-                  {attendeeType === 'student' ? (
-                    <div className="grid gap-4 rounded-md border border-line bg-ink-50/40 p-4 sm:grid-cols-2">
-                      <Field label="Field of study" htmlFor="rsvp-field" required error={errors.studyField?.message}>
-                        <Select
-                          id="rsvp-field"
-                          aria-invalid={Boolean(errors.studyField)}
-                          {...register('studyField', { required: 'Select your field of study.' })}
-                        >
-                          <option value="">Select field of study</option>
-                          {RSVP_REQUIREMENTS.studyFields.map((course) => (
-                            <option key={course} value={course}>
-                              {course}
-                            </option>
-                          ))}
-                        </Select>
-                      </Field>
-                      <Field label="Year of study" htmlFor="rsvp-year" required error={errors.studyYear?.message}>
-                        <Select
-                          id="rsvp-year"
-                          aria-invalid={Boolean(errors.studyYear)}
-                          {...register('studyYear', { required: 'Select your year of study.' })}
-                        >
-                          <option value="">Select year</option>
-                          {RSVP_REQUIREMENTS.studyYears.map((year) => (
-                            <option key={year} value={year}>
-                              {year}
-                            </option>
-                          ))}
-                        </Select>
-                      </Field>
-                    </div>
-                  ) : null}
-
-                  {attendeeType === 'non-student' ? (
-                    <Field label="Role" htmlFor="rsvp-role" required error={errors.nonStudentRole?.message}>
-                      <Select
-                        id="rsvp-role"
-                        aria-invalid={Boolean(errors.nonStudentRole)}
-                        {...register('nonStudentRole', { required: 'Select staff or guest.' })}
-                      >
-                        <option value="">Select role</option>
-                        {RSVP_REQUIREMENTS.nonStudentRoles.map((role) => (
-                          <option key={role} value={role.toLowerCase()}>
-                            {role}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-                  ) : null}
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Emergency contact name" htmlFor="rsvp-emergency" optional>
-                      <Input id="rsvp-emergency" placeholder="Contact person" {...register('emergencyContact')} />
-                    </Field>
-                    <Field label="Emergency contact phone" htmlFor="rsvp-emergency-phone" optional>
-                      <Input id="rsvp-emergency-phone" type="tel" placeholder="Emergency number" {...register('emergencyPhone')} />
-                    </Field>
-                  </div>
-
-                  <Field label="Dietary requirements" htmlFor="rsvp-dietary" optional>
-                    <Input id="rsvp-dietary" placeholder="e.g. vegetarian, no nuts" {...register('dietary')} />
-                  </Field>
-                  <Field label="Additional notes" htmlFor="rsvp-notes" optional hint="Anything the organiser should know about access or attendance.">
-                    <Textarea id="rsvp-notes" placeholder="Add any notes for the event organiser" {...register('notes')} />
-                  </Field>
 
                   <div className="rounded-md border border-line bg-canvas/60 p-4">
                     <p className="flex items-center gap-2 text-[0.8125rem] font-medium text-ink-800">
@@ -289,21 +238,22 @@ export function EventRsvp() {
                       Human verification
                     </p>
                     <p className="mt-1 text-[0.6875rem] leading-5 text-ink-500">
-                      The live site uses Cloudflare Turnstile. This prototype does not call a verification service.
+                      Complete the check before submitting. The token is single-use.
                     </p>
-                    <Checkbox
-                      className="mt-3"
-                      label="I am attending as a real participant (prototype checkbox)."
-                      {...register('consent', { required: true })}
-                    />
-                    {errors.consent && preview ? <p className="mt-1 text-[0.6875rem] text-danger">Confirm to preview submission.</p> : null}
+                    <Turnstile className="mt-3" onToken={setTurnstileToken} resetSignal={resetSignal} />
                   </div>
+
+                  {submitError ? (
+                    <Alert tone="warning" title="RSVP not submitted">
+                      {submitError}
+                    </Alert>
+                  ) : null}
 
                   <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
                     <ButtonLink to="/events" variant="ghost" size="sm">
                       Back to events
                     </ButtonLink>
-                    <Button type="submit" loading={isSubmitting} disabled={!preview}>
+                    <Button type="submit" loading={isSubmitting} disabled={ended || submitted || !turnstileToken}>
                       Submit RSVP
                     </Button>
                   </div>
@@ -313,7 +263,8 @@ export function EventRsvp() {
 
             <p className="mt-3 flex items-start gap-1.5 text-[0.6875rem] leading-5 text-ink-400">
               <CheckCircle2 className="mt-px h-3 w-3 shrink-0" aria-hidden />
-              Registration is only confirmed after organiser approval. The prototype never claims a real submission succeeded.
+              Registration is only confirmed after organiser approval. Fields not shown here are collected by the organiser
+              when needed.
             </p>
           </div>
         </div>

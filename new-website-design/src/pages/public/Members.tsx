@@ -1,32 +1,54 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, GraduationCap, Search, UserRound, Users } from 'lucide-react'
-import { COURSES, LEADERS, YEARS } from '../../data/site'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
-import { PageHero, media } from '../../components/site/hero'
-import { Badge, EmptyState } from '../../components/ui'
+import { PageHero, clubMedia } from '../../components/site/hero'
+import { Alert, Badge, EmptyState } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
 import { Input, Select } from '../../components/ui/field'
 import { LeaderCard } from '../../components/site/cards'
 import { Avatar } from '../../components/ui/misc'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi, type PublicMember } from '../../lib/publicApi'
 
-const membersHero = media(
-  '/images/community/graduates',
-  'Two graduates in cap and gown',
-  'Stock photograph · Pexels. Not club members.',
-)
-const studentsHero = media(
-  '/images/collaboration/study-group',
-  'A group of students collaborating over a laptop indoors',
-  'Stock photograph · Pexels. Not club members.',
-)
-const alumniHero = media(
-  '/images/campus/two-students',
-  'Two students talking with a laptop on a university campus',
-  'Stock photograph · Pexels. Not club alumni.',
-)
+const membersHero = clubMedia('/images/club/devfest-team', 'KIUT Digital Club members together')
+const studentsHero = clubMedia('/images/club/devfest-tall', 'Club members gathered at a club event')
+const alumniHero = clubMedia('/images/club/devfest-students', 'KIUT Digital Club students at DevFest')
+
+function MemberCard({ member }: { member: PublicMember }) {
+  return (
+    <Link
+      to={`/members/${member.public_slug}`}
+      className="group flex items-start gap-3 rounded-lg border border-line bg-surface p-4 transition-colors hover:border-brand-300 hover:bg-brand-50/30"
+    >
+      <Avatar name={member.display_name} src={member.avatar_url} size="lg" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[0.9375rem] font-semibold text-ink-950 group-hover:text-brand-800">{member.display_name}</p>
+        <p className="mt-0.5 truncate text-[0.75rem] text-ink-500">
+          {[member.course, member.year].filter(Boolean).join(' · ') || 'Profile details not published'}
+        </p>
+        <Badge tone="outline" className="mt-2">
+          {member.status === 'alumni' ? 'Alumni' : 'Student'}
+        </Badge>
+      </div>
+      <ArrowUpRight className="mt-1 h-3.5 w-3.5 text-ink-300 transition-colors group-hover:text-brand-700" aria-hidden />
+    </Link>
+  )
+}
 
 export function Members() {
+  const stats = usePublicData(() => publicApi.stats(), [])
+  const leaders = usePublicData(() => publicApi.leaders(), [])
+  const byCourse = usePublicData(() => publicApi.members({ per_page: 50 }), [])
+  const courseCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    ;(byCourse.data?.items ?? []).forEach((member) => {
+      if (!member.course) return
+      counts.set(member.course, (counts.get(member.course) ?? 0) + 1)
+    })
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1])
+  }, [byCourse.data])
+
   return (
     <>
       <PageHero
@@ -64,7 +86,7 @@ export function Members() {
             ].map((item) => {
               const Icon = item.icon ?? UserRound
               return (
-                <Link key={item.title} to={item.to} className="group flex flex-col justify-between gap-6 bg-white p-5 transition-colors hover:bg-brand-50/40">
+                <Link key={item.title} to={item.to} className="group flex flex-col justify-between gap-6 bg-surface p-5 transition-colors hover:bg-brand-50/40">
                   <div>
                     <Icon className="h-4 w-4 text-brand-700" aria-hidden />
                     <h3 className="mt-3 text-[1.0625rem] font-semibold text-ink-950">{item.title}</h3>
@@ -86,42 +108,41 @@ export function Members() {
           <SectionHead
             eyebrow="Member statistics"
             title="The community by course"
-            description="The current members page aggregates approved members by course and status. Those database counts were not available in the content handoff."
+            description="Approved members by status, computed from the club database."
             action={{ label: 'Join the community', to: '/auth/register' }}
           />
-          <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="rounded-lg border border-line bg-white p-5">
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div className="min-w-0 rounded-lg border border-line bg-surface p-5">
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Available figures</p>
-              <div className="mt-3 grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2">
+              <div className="mt-3 grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-3">
                 {[
-                  { label: 'Members (site figure)', value: '200+' },
-                  { label: 'Student / alumni split', value: 'Not supplied' },
+                  { label: 'Members', value: stats.data ? String(stats.data.members.total) : '—' },
+                  { label: 'Students', value: stats.data ? String(stats.data.members.students) : '—' },
+                  { label: 'Alumni', value: stats.data ? String(stats.data.members.alumni) : '—' },
                 ].map((item) => (
-                  <div key={item.label} className="bg-white px-4 py-3">
+                  <div key={item.label} className="bg-surface px-4 py-3">
                     <p className="text-[0.6875rem] text-ink-500">{item.label}</p>
                     <p className="mt-1 text-[1.25rem] font-semibold tabular text-ink-950">{item.value}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-[0.625rem] leading-4 text-ink-400">
-                The 200+ figure is as published on the current homepage and requires confirmation. No course distribution
-                is fabricated.
-              </p>
             </div>
-            <div className="rounded-lg border border-dashed border-ink-200 bg-white p-5">
+            <div className="min-w-0 rounded-lg border border-line bg-surface p-5">
               <p className="text-[0.8125rem] font-semibold text-ink-900">Members by course</p>
-              <p className="mt-1 text-[0.75rem] leading-5 text-ink-500">
-                Course counts are calculated from the live member database and were not part of the supplied content.
-              </p>
-              <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-                {COURSES.slice(0, 6).map((course) => (
-                  <li key={course} className="flex items-center justify-between gap-3 rounded-sm border border-line px-3 py-2">
-                    <span className="truncate text-[0.75rem] text-ink-600">{course}</span>
-                    <span className="tabular text-[0.75rem] font-medium text-ink-400">—</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-2 text-[0.625rem] text-ink-400">Counts will populate from the live database after integration.</p>
+              {courseCounts.length ? (
+                <ul className="mt-4 grid min-w-0 gap-2 sm:grid-cols-2">
+                  {courseCounts.map(([course, count]) => (
+                    <li key={course} className="flex min-w-0 items-center justify-between gap-3 rounded-sm border border-line px-3 py-2">
+                      <span className="truncate text-[0.75rem] text-ink-600">{course}</span>
+                      <span className="tabular text-[0.75rem] font-medium text-ink-700">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-[0.75rem] leading-5 text-ink-500">
+                  {byCourse.loading ? 'Loading course counts…' : 'Counts appear when member records are published.'}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -136,13 +157,13 @@ export function Members() {
             action={{ label: 'All leadership', to: '/leaders' }}
           />
           <div className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-            {LEADERS.slice(0, 4).map((leader) => (
+            {(leaders.data ?? []).slice(0, 4).map((leader) => (
               <LeaderCard
-                key={leader.name}
+                key={leader.id}
                 name={leader.name}
                 position={leader.position}
-                programme={leader.programme}
-                year={leader.year}
+                programme={leader.programme ?? 'Programme not recorded'}
+                year={leader.year ?? undefined}
               />
             ))}
           </div>
@@ -167,6 +188,8 @@ function DirectoryFilters({
   setCourse,
   year,
   setYear,
+  courses,
+  years,
   onReset,
 }: {
   query: string
@@ -175,6 +198,8 @@ function DirectoryFilters({
   setCourse: (value: string) => void
   year: string
   setYear: (value: string) => void
+  courses: string[]
+  years: string[]
   onReset: () => void
 }) {
   return (
@@ -192,7 +217,7 @@ function DirectoryFilters({
         </label>
         <Select id="directory-course" value={course} onChange={(event) => setCourse(event.target.value)}>
           <option value="all">All courses</option>
-          {COURSES.map((item) => (
+          {courses.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
@@ -205,7 +230,7 @@ function DirectoryFilters({
         </label>
         <Select id="directory-year" value={year} onChange={(event) => setYear(event.target.value)}>
           <option value="all">All years</option>
-          {YEARS.map((item) => (
+          {years.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
@@ -219,12 +244,92 @@ function DirectoryFilters({
   )
 }
 
-export function Students() {
+function MemberDirectory({ status }: { status: 'student' | 'alumni' }) {
   const [query, setQuery] = useState('')
   const [course, setCourse] = useState('all')
   const [year, setYear] = useState('all')
-  const [showNote, setShowNote] = useState(false)
+  const { data, loading, error } = usePublicData(() => publicApi.members({ status, per_page: 50 }), [status])
+  const members = data?.items ?? []
 
+  const courses = useMemo(
+    () => Array.from(new Set(members.map((member) => member.course).filter(Boolean) as string[])).sort(),
+    [members],
+  )
+  const years = useMemo(
+    () => Array.from(new Set(members.map((member) => member.year).filter(Boolean) as string[])).sort(),
+    [members],
+  )
+  const filtered = members.filter((member) => {
+    const matchesQuery = !query.trim() || member.display_name.toLowerCase().includes(query.trim().toLowerCase())
+    const matchesCourse = course === 'all' || member.course === course
+    const matchesYear = year === 'all' || member.year === year
+    return matchesQuery && matchesCourse && matchesYear
+  })
+
+  return (
+    <div className="mt-5">
+      <DirectoryFilters
+        query={query}
+        setQuery={setQuery}
+        course={course}
+        setCourse={setCourse}
+        year={year}
+        setYear={setYear}
+        courses={courses}
+        years={years}
+        onReset={() => {
+          setQuery('')
+          setCourse('all')
+          setYear('all')
+        }}
+      />
+      <div className="mt-5">
+        {error ? (
+          <Alert tone="warning" title="Profiles could not be loaded">
+            {error}
+          </Alert>
+        ) : loading ? (
+          <p role="status" className="py-10 text-center text-[0.8125rem] text-ink-400">
+            Loading profiles…
+          </p>
+        ) : filtered.length ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((member) => (
+              <MemberCard key={member.public_slug} member={member} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={status === 'student' ? <GraduationCap className="h-4 w-4" aria-hidden /> : <Users className="h-4 w-4" aria-hidden />}
+            title={members.length ? 'No profiles match these filters' : `No ${status} profiles published`}
+            description={`${status === 'student' ? 'Student' : 'Alumni'} profiles appear here once the club publishes them.`}
+            action={
+              members.length ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setQuery('')
+                    setCourse('all')
+                    setYear('all')
+                  }}
+                >
+                  Clear filters
+                </Button>
+              ) : (
+                <ButtonLink to="/auth/register" size="sm">
+                  Join the club
+                </ButtonLink>
+              )
+            }
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function Students() {
   return (
     <>
       <PageHero
@@ -240,45 +345,7 @@ export function Students() {
       />
       <section className="section">
         <div className="container-editorial">
-          <DirectoryFilters
-            query={query}
-            setQuery={setQuery}
-            course={course}
-            setCourse={setCourse}
-            year={year}
-            setYear={setYear}
-            onReset={() => {
-              setQuery('')
-              setCourse('all')
-              setYear('all')
-            }}
-          />
-          <div className="mt-5">
-            <EmptyState
-              icon={<GraduationCap className="h-4 w-4" aria-hidden />}
-              title="No student profiles published"
-              description="Approved student profiles are read from the member database and were not included in the supplied content. This directory is ready for live records; no names were invented to fill it."
-              action={
-                <ButtonLink to="/auth/register" size="sm">
-                  Join the club
-                </ButtonLink>
-              }
-            />
-          </div>
-          <div className="mt-4 flex flex-col items-start justify-between gap-3 rounded-md border border-line bg-canvas/60 px-4 py-3 sm:flex-row sm:items-center">
-            <p className="text-[0.75rem] text-ink-500">
-              How profiles work: a member completes their course, year, phone and bio in the dashboard.
-            </p>
-            <Button variant="ghost" size="xs" onClick={() => setShowNote((value) => !value)} aria-expanded={showNote}>
-              {showNote ? 'Hide details' : 'Details'}
-            </Button>
-          </div>
-          {showNote ? (
-            <p className="mt-2 text-[0.75rem] leading-5 text-ink-500">
-              The live page filters by course and year and adds earned trophies to each profile. This prototype keeps both
-              filters functional. A published profile would show the member's name, course, year, interests and trophies.
-            </p>
-          ) : null}
+          <MemberDirectory status="student" />
         </div>
       </section>
     </>
@@ -286,10 +353,6 @@ export function Students() {
 }
 
 export function Alumni() {
-  const [query, setQuery] = useState('')
-  const [course, setCourse] = useState('all')
-  const [year, setYear] = useState('all')
-
   return (
     <>
       <PageHero
@@ -313,38 +376,14 @@ export function Alumni() {
       />
       <section className="section">
         <div className="container-editorial">
-          <DirectoryFilters
-            query={query}
-            setQuery={setQuery}
-            course={course}
-            setCourse={setCourse}
-            year={year}
-            setYear={setYear}
-            onReset={() => {
-              setQuery('')
-              setCourse('all')
-              setYear('all')
-            }}
-          />
-          <div className="mt-5">
-            <EmptyState
-              icon={<Users className="h-4 w-4" aria-hidden />}
-              title="No alumni profiles published"
-              description="Alumni profiles are read from the live member database and were not supplied for this redesign. No alumni names, companies or outcomes have been invented."
-              action={
-                <ButtonLink to="/contact?topic=mentor" variant="outline" size="sm">
-                  Get in touch
-                </ButtonLink>
-              }
-            />
-          </div>
+          <MemberDirectory status="alumni" />
           <div className="mt-8 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
             {[
               { title: 'Mentor a member', text: 'Share feedback on a project or meet a member for a career conversation.' },
               { title: 'Speak at a session', text: 'Give a talk or workshop on a technology you work with.' },
               { title: 'Open a door', text: 'Share internship or graduate opportunities with the club.' },
             ].map((item) => (
-              <div key={item.title} className="bg-white p-5">
+              <div key={item.title} className="bg-surface p-5">
                 <h3 className="text-[0.9375rem] font-semibold text-ink-950">{item.title}</h3>
                 <p className="mt-1.5 text-[0.8125rem] leading-6 text-ink-500">{item.text}</p>
               </div>

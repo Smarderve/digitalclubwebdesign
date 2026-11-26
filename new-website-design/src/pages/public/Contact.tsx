@@ -3,19 +3,17 @@ import { useSearchParams } from 'react-router-dom'
 import { Clock, Mail, MapPin, MessageSquare, Phone, Send, Users } from 'lucide-react'
 import { SITE } from '../../data/site'
 import { SectionHead } from '../../components/site/primitives'
-import { PageHero, media } from '../../components/site/hero'
+import { PageHero, clubMedia } from '../../components/site/hero'
 import { Alert, Badge } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
 import { Field, Input, Select, Textarea } from '../../components/ui/field'
 import { useToast } from '../../context/ToastContext'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi } from '../../lib/publicApi'
 
 type ContactValues = { name: string; email: string; subject: string; message: string }
 
-const contactHero = media(
-  '/images/campus/students-outdoors',
-  'Students studying with laptops at an outdoor campus table',
-  'Stock photograph · Pexels. Not KIUT campus or club members.',
-)
+const contactHero = clubMedia('/images/club/devfest-students', 'KIUT Digital Club students at DevFest')
 
 const subjects = [
   { value: 'general', label: 'General enquiry' },
@@ -34,6 +32,14 @@ export function Contact() {
   const [params] = useSearchParams()
   const initialTopic = params.get('topic') ?? 'general'
   const { push } = useToast()
+  const { data, loading } = usePublicData(() => Promise.all([publicApi.contact(), publicApi.site()]), [])
+  const contact = data?.[0]
+  const site = data?.[1]
+  const email = contact?.email || SITE.email
+  const phone = contact?.phone || SITE.phone
+  const address = contact?.address?.length ? contact.address : SITE.address
+  const hours = contact?.hours || 'Monday–Friday, 9:00 AM – 5:00 PM'
+  const meetingTimes = contact?.meeting_times || 'Weekly Tech Sessions · Every Wednesday, 4:00 PM'
   const {
     register,
     handleSubmit,
@@ -55,7 +61,7 @@ export function Contact() {
         media={contactHero}
         actions={
           <a
-            href={`mailto:${SITE.email}`}
+            href={`mailto:${email}`}
             className="inline-flex h-10 items-center gap-2 rounded-sm bg-brand-500 px-4 text-[0.875rem] font-medium text-ink-950 transition-colors hover:bg-brand-400"
           >
             Email the club
@@ -70,6 +76,7 @@ export function Contact() {
             <p className="mt-2 text-[0.75rem] leading-5 text-ink-500">
               For urgent event issues, call the club phone during meeting hours.
             </p>
+            {loading ? <p className="mt-2 text-[0.625rem] text-ink-400">Loading club contact details…</p> : null}
           </div>
         }
       />
@@ -85,8 +92,8 @@ export function Contact() {
 
             {isSubmitSuccessful ? (
               <Alert tone="success" title="Message validated" className="mt-6">
-                Your message passed validation in the prototype. No email was sent and nothing was stored. In production
-                the club would respond from {SITE.email} within 24–48 hours on weekdays.
+                Your message passed validation. This preview does not send email and stores nothing; in production the club
+                would respond from {email} within 24–48 hours on weekdays.
               </Alert>
             ) : null}
 
@@ -95,11 +102,7 @@ export function Contact() {
               noValidate
               onSubmit={handleSubmit(async () => {
                 await new Promise((resolve) => setTimeout(resolve, 700))
-                push({
-                  tone: 'success',
-                  title: 'Message validated',
-                  description: 'Prototype only — no email was sent and no record was stored.',
-                })
+                push({ tone: 'success', title: 'Message validated' })
                 reset({ subject: 'general' })
               })}
             >
@@ -155,9 +158,6 @@ export function Contact() {
                 />
               </Field>
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
-                <p className="max-w-[42ch] text-[0.6875rem] leading-4 text-ink-400">
-                  This is a prototype form. Submitting validates the fields but does not send an email.
-                </p>
                 <Button type="submit" loading={isSubmitting} iconRight={<Send className="h-3.5 w-3.5" />}>
                   Send message
                 </Button>
@@ -166,7 +166,7 @@ export function Contact() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-lg border border-line bg-white">
+            <div className="rounded-lg border border-line bg-surface">
               <div className="border-b border-line px-5 py-4">
                 <h2 className="text-[0.9375rem] font-semibold text-ink-950">Contact information</h2>
               </div>
@@ -175,7 +175,7 @@ export function Contact() {
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" aria-hidden />
                   <div>
                     <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-400">Location</p>
-                    {SITE.address.map((line) => (
+                    {address.map((line) => (
                       <p key={line} className="mt-0.5 text-[0.8125rem] leading-6 text-ink-700">
                         {line}
                       </p>
@@ -186,8 +186,8 @@ export function Contact() {
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" aria-hidden />
                   <div>
                     <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-400">Email</p>
-                    <a href={`mailto:${SITE.email}`} className="mt-0.5 block text-[0.8125rem] font-medium text-brand-800 hover:underline">
-                      {SITE.email}
+                    <a href={`mailto:${email}`} className="mt-0.5 block text-[0.8125rem] font-medium text-brand-800 hover:underline">
+                      {email}
                     </a>
                     <p className="mt-1 text-[0.6875rem] text-ink-400">{SITE.responseTime}</p>
                   </div>
@@ -196,8 +196,8 @@ export function Contact() {
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" aria-hidden />
                   <div>
                     <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-400">Phone</p>
-                    <a href={`tel:${SITE.phone.replace(/\s/g, '')}`} className="mt-0.5 block text-[0.8125rem] font-medium text-ink-900 hover:text-brand-800">
-                      {SITE.phone}
+                    <a href={`tel:${phone.replace(/\s/g, '')}`} className="mt-0.5 block text-[0.8125rem] font-medium text-ink-900 hover:text-brand-800">
+                      {phone}
                     </a>
                   </div>
                 </div>
@@ -208,37 +208,22 @@ export function Contact() {
               <div className="rounded-lg border border-line p-5">
                 <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-400">
                   <Clock className="h-3.5 w-3.5" aria-hidden />
-                  Meeting hours
+                  Office hours
                 </p>
-                <dl className="mt-3 space-y-1.5">
-                  {SITE.officeHours.map((item) => (
-                    <div key={item.label} className="flex justify-between gap-3 text-[0.75rem]">
-                      <dt className="text-ink-500">{item.label}</dt>
-                      <dd className="text-right font-medium text-ink-900">{item.detail}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <p className="mt-3 text-[0.75rem] leading-5 text-ink-700">{hours}</p>
               </div>
               <div className="rounded-lg border border-line p-5">
                 <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-400">
                   <Users className="h-3.5 w-3.5" aria-hidden />
                   Club meetings
                 </p>
-                <dl className="mt-3 space-y-2">
-                  {SITE.meetings.map((item) => (
-                    <div key={item.label}>
-                      <dt className="text-[0.75rem] text-ink-500">{item.label}</dt>
-                      <dd className="text-[0.75rem] font-medium text-ink-900">{item.detail}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <p className="mt-3 whitespace-pre-line text-[0.75rem] leading-5 text-ink-700">{meetingTimes}</p>
               </div>
             </div>
 
             <div className="rounded-lg border border-line p-5">
               <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-ink-400">
-                <MessageSquare className="h-3.5 w-3.5" aria-hidden />
-                Quick support
+                <MessageSquare className="h-3.5 w-3.5" aria-hidden /> Quick support
               </p>
               <dl className="mt-3 space-y-2 text-[0.75rem]">
                 <div className="flex justify-between gap-3">
@@ -250,8 +235,8 @@ export function Contact() {
                   <dd className="font-medium text-ink-900">Schedule a meeting</dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-ink-500">Emergency</dt>
-                  <dd className="font-medium text-ink-900">{SITE.phone}</dd>
+                  <dt className="text-ink-500">Club name</dt>
+                  <dd className="font-medium text-ink-900">{site?.club_name ?? 'KIUT Digital Club'}</dd>
                 </div>
               </dl>
             </div>
@@ -290,31 +275,31 @@ export function Contact() {
               </ButtonLink>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-lg border border-line bg-white">
+          <div className="relative overflow-hidden rounded-lg border border-line bg-surface">
             <div aria-hidden className="h-[240px] surface-grid bg-brand-50/40" />
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-200 bg-white text-brand-700">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-200 bg-surface text-brand-700">
                 <MapPin className="h-4 w-4" aria-hidden />
               </span>
               <p className="mt-3 text-[0.875rem] font-semibold text-ink-950">Kampala International University in Tanzania</p>
               <p className="mt-1 max-w-[34ch] text-[0.75rem] leading-5 text-ink-500">
                 Kampala Road No. 2, Off Nyerere Road, Gongo la Mboto, Dar es Salaam
               </p>
-              <p className="mt-3 text-[0.625rem] text-ink-400">Interactive map link opens Google Maps — no map key is stored in the prototype.</p>
+              <p className="mt-3 text-[0.625rem] text-ink-400">Interactive map link opens Google Maps — no map key is stored.</p>
             </div>
           </div>
         </div>
       </section>
 
       <section className="section">
-        <div className="container-editorial flex flex-col items-start justify-between gap-5 rounded-lg border border-line bg-white p-6 sm:flex-row sm:items-center">
+        <div className="container-editorial flex flex-col items-start justify-between gap-5 rounded-lg border border-line bg-surface p-6 sm:flex-row sm:items-center">
           <div>
             <Badge tone="green">Ready to join or collaborate?</Badge>
             <h2 className="mt-3 text-h2 text-ink-950">Whether you're a student, an organisation or a mentor, we'd love to hear from you.</h2>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <ButtonLink to="/auth/register">Join as member</ButtonLink>
-            <ButtonLink href={`mailto:${SITE.email}?subject=Partnership%20inquiry`} variant="outline">
+            <ButtonLink href={`mailto:${email}?subject=Partnership%20inquiry`} variant="outline">
               Partnership inquiry
             </ButtonLink>
           </div>

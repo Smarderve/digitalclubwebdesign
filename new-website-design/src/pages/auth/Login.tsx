@@ -1,44 +1,80 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import { useAuth, homeForRole } from '../../context/AuthContext'
-import type { Role } from '../../context/AuthContext'
+import { homeForRole, useAuth } from '../../context/AuthContext'
 import { Alert, Button, Field, Input } from '../../components/ui'
-import { useToast } from '../../context/ToastContext'
+import { Turnstile } from '../../components/auth/Turnstile'
 import { AuthHeading, AuthLogo } from './AuthHeading'
+
+/** Map server error codes to the sentence a student should read. */
+function messageFor(code: string, fallback: string) {
+  switch (code) {
+    case 'INVALID_CREDENTIALS':
+      return 'That email and password do not match an account. Check them and try again.'
+    case 'ACCOUNT_INACTIVE':
+      return 'This account has been deactivated. Contact a club administrator.'
+    case 'TURNSTILE_FAILED':
+      return 'Human verification did not complete. Try again.'
+    case 'RATE_LIMITED':
+      return 'Too many sign-in attempts. Wait a minute and try again.'
+    case 'NETWORK_ERROR':
+      return 'Could not reach the server. Check your connection and try again.'
+    default:
+      return fallback
+  }
+}
 
 export function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const { push } = useToast()
-  const [email, setEmail] = useState('')
+  const location = useLocation()
+  /* Registration sends the new address here so the student can sign in at once. */
+  const registeredEmail = (location.state as { registeredEmail?: string } | null)?.registeredEmail ?? ''
+  const [email, setEmail] = useState(registeredEmail)
   const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [attempt, setAttempt] = useState(0)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  function submit(role?: Role) {
+  async function submit() {
     setError('')
-    if (!role && !email.trim()) {
+    if (!email.trim()) {
       setError('Enter your email address.')
       return
     }
-    if (!role && !password) {
+    if (!password) {
       setError('Enter your password.')
       return
     }
+    if (!turnstileToken) {
+      setError('Complete the human verification below, then try again.')
+      return
+    }
+
     setLoading(true)
-    window.setTimeout(() => {
-      const result = login(role ? `${role}@demo.local` : email, role ? 'demo' : password, role)
-      setLoading(false)
-      if (!result.ok) {
-        setError(result.error ?? 'Sign in failed.')
-        return
+    const result = await login(email, password, remember, turnstileToken)
+    setLoading(false)
+
+    if (!result.ok) {
+      if (result.code === 'VALIDATION_ERROR') {
+        setError(
+          result.fieldErrors?.email ??
+            result.fieldErrors?.password ??
+            'Check the details you entered and try again.',
+        )
+      } else {
+        setError(messageFor(result.code, result.message))
       }
-      const resolved: Role = role ?? (email.includes('admin') ? 'admin' : 'member')
-      push({ tone: 'success', title: 'Signed in to the prototype', description: 'You are viewing demonstration data.' })
-      navigate(homeForRole(resolved))
-    }, 450)
+      /* A Turnstile token is single-use, so a failed attempt needs a new one. */
+      setTurnstileToken('')
+      setAttempt((value) => value + 1)
+      return
+    }
+
+    navigate(homeForRole(result.user?.role ?? 'member'))
   }
 
   return (
@@ -49,9 +85,15 @@ export function Login() {
         <AuthHeading
           label="Member sign in"
           title="Welcome back"
-          description="Sign in with your KIUT student email to open your member dashboard."
+          description="Sign in with the email address you registered with the club."
         />
       </div>
+
+      {registeredEmail && !error ? (
+        <Alert tone="success" className="mt-5" title="Your account is ready">
+          Registration succeeded. Sign in with the password you just created.
+        </Alert>
+      ) : null}
 
       {error ? (
         <Alert tone="danger" className="mt-5" title="Could not sign in">
@@ -64,7 +106,7 @@ export function Login() {
         noValidate
         onSubmit={(event) => {
           event.preventDefault()
-          submit()
+          void submit()
         }}
       >
         <Field label="Email address" htmlFor="login-email" required>
@@ -103,7 +145,15 @@ export function Login() {
         </Field>
 
         <div className="flex items-baseline justify-between gap-3 pt-0.5">
-          <span className="text-[0.6875rem] leading-4 text-ink-400">Approved accounts only</span>
+          <label className="flex items-center gap-2 text-[0.75rem] leading-5 text-ink-600">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(event) => setRemember(event.target.checked)}
+              className="h-3.5 w-3.5 accent-brand-700"
+            />
+            Keep me signed in
+          </label>
           <Link
             to="/auth/forgot-password"
             className="text-[0.75rem] font-medium text-brand-800 underline-offset-4 hover:underline"
@@ -112,45 +162,19 @@ export function Login() {
           </Link>
         </div>
 
-        <Button type="submit" size="lg" className="w-full" loading={loading}>
+        <Turnstile onToken={setTurnstileToken} resetSignal={attempt} />
+
+        <Button type="submit" size="lg" className="w-full" loading={loading} disabled={!turnstileToken}>
           Sign in
         </Button>
       </form>
 
-      <p className="mt-6 border-t border-line pt-5 text-center text-[0.8125rem] text-ink-500">
+      <p className="mt-5 text-center text-[0.8125rem] text-ink-500">
         New to the club?{' '}
         <Link to="/auth/register" className="font-semibold text-brand-800 underline-offset-4 hover:underline">
           Create an account
         </Link>
       </p>
-
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[0.6875rem] text-ink-400">
-        <span className="uppercase tracking-[0.1em]">Prototype</span>
-        <button
-          type="button"
-          onClick={() => submit('member')}
-          disabled={loading}
-          className="font-medium text-ink-600 underline-offset-4 transition-colors hover:text-brand-800 hover:underline disabled:opacity-50"
-        >
-          Continue as member
-        </button>
-        <button
-          type="button"
-          onClick={() => submit('admin')}
-          disabled={loading}
-          className="font-medium text-ink-600 underline-offset-4 transition-colors hover:text-brand-800 hover:underline disabled:opacity-50"
-        >
-          Continue as admin
-        </button>
-        <button
-          type="button"
-          onClick={() => submit('quizmaster')}
-          disabled={loading}
-          className="font-medium text-ink-600 underline-offset-4 transition-colors hover:text-brand-800 hover:underline disabled:opacity-50"
-        >
-          Continue as quizmaster
-        </button>
-      </div>
     </>
   )
 }

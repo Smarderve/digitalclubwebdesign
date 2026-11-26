@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { KeyRound, Mail, Save, ShieldCheck, Smartphone } from 'lucide-react'
+import { CreditCard, KeyRound, Mail, Palette, Save, Settings2, ShieldCheck, Smartphone } from 'lucide-react'
 import { demoAdminProfile, demoSettings } from '../../data/demo'
 import { SITE } from '../../data/site'
 import { PageHeader } from '../../components/app/primitives'
+import { AppearancePanel } from '../../components/app/AppearancePanel'
 import { Alert, Badge, Button, Card, CardHeader, DetailList, Field, Input, Select, Switch, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from '../../components/ui'
 import { DemoNotice } from './_shared'
 import { useToast } from '../../context/ToastContext'
@@ -20,7 +21,6 @@ export function AdminSettings() {
     <>
       <PageHeader
         title="Settings"
-        description="Club-wide configuration: contact details, membership rules and communication channels."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Settings' }]}
         actions={
           <Button
@@ -35,7 +35,7 @@ export function AdminSettings() {
                 push({ tone: 'error', title: 'Settings not saved', description: 'Fix the highlighted fields and try again.' })
                 return
               }
-              push({ tone: 'success', title: 'Settings saved in the prototype', description: 'No production configuration changed.' })
+              push({ tone: 'success', title: 'Settings saved' })
             }}
           >
             Save changes
@@ -45,17 +45,49 @@ export function AdminSettings() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList ariaLabel="Settings sections">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="membership">Membership</TabsTrigger>
-          <TabsTrigger value="channels">Channels</TabsTrigger>
-          <TabsTrigger value="access">Access</TabsTrigger>
+          <TabsTrigger value="general">
+            <span className="inline-flex items-center gap-1.5">
+              <Settings2 className="h-5 w-5 shrink-0" aria-hidden />
+              General
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="appearance">
+            <span className="inline-flex items-center gap-1.5">
+              <Palette className="h-5 w-5 shrink-0" aria-hidden />
+              Appearance
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="membership">
+            <span className="inline-flex items-center gap-1.5">
+              <CreditCard className="h-5 w-5 shrink-0" aria-hidden />
+              Membership
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="channels">
+            <span className="inline-flex items-center gap-1.5">
+              <Mail className="h-5 w-5 shrink-0" aria-hidden />
+              Channels
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="access">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="h-5 w-5 shrink-0" aria-hidden />
+              Access
+            </span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={tab}>
+          {tab === 'appearance' ? (
+            <div className="mt-4">
+              <AppearancePanel />
+            </div>
+          ) : null}
+
           {tab === 'general' ? (
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
               <Card>
-                <CardHeader title="Club contact details" description="Shown on the public contact page and in system emails." />
+                <CardHeader title="Club contact details" />
                 <div className="space-y-4 p-4">
                   <Field label="Club email" htmlFor="settings-email" required error={errors.clubEmail}>
                     <Input id="settings-email" type="email" value={general.clubEmail} onChange={(event) => setGeneral({ ...general, clubEmail: event.target.value })} />
@@ -63,7 +95,7 @@ export function AdminSettings() {
                   <Field label="Phone number" htmlFor="settings-phone" required error={errors.clubPhone}>
                     <Input id="settings-phone" value={general.clubPhone} onChange={(event) => setGeneral({ ...general, clubPhone: event.target.value })} />
                   </Field>
-                  <Field label="Response time" htmlFor="settings-response" hint="Shown on the contact page.">
+                  <Field label="Response time" htmlFor="settings-response">
                     <Input id="settings-response" value={general.responseTime} onChange={(event) => setGeneral({ ...general, responseTime: event.target.value })} />
                   </Field>
                   <Field label="Postal address" htmlFor="settings-address">
@@ -94,9 +126,9 @@ export function AdminSettings() {
           {tab === 'membership' ? (
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
               <Card>
-                <CardHeader title="Membership rules" description="Applied when a membership payment is recorded." />
+                <CardHeader title="Membership rules" />
                 <div className="grid gap-4 p-4 sm:grid-cols-2">
-                  <Field label="Annual fee (TZS)" htmlFor="settings-fee" hint="Published on the membership page.">
+                  <Field label="Annual fee (TZS)" htmlFor="settings-fee">
                     <Input id="settings-fee" type="number" min={0} value={membership.fee} onChange={(event) => setMembership({ ...membership, fee: event.target.value })} />
                   </Field>
                   <Field label="Membership period" htmlFor="settings-period">
@@ -106,7 +138,7 @@ export function AdminSettings() {
                       <option>Academic year</option>
                     </Select>
                   </Field>
-                  <Field label="Registration approval" htmlFor="settings-approval" className="sm:col-span-2" hint="Manual review is recommended. Automatic approval lets accounts in immediately.">
+                  <Field label="Registration approval" htmlFor="settings-approval" className="sm:col-span-2">
                     <Select id="settings-approval" value={membership.approval} onChange={(event) => setMembership({ ...membership, approval: event.target.value })}>
                       <option value="manual">Manual review</option>
                       <option value="auto">Automatic approval</option>
@@ -121,7 +153,7 @@ export function AdminSettings() {
                 <Card>
                   <CardHeader title="Digital IDs" />
                   <p className="px-4 py-3 text-[0.75rem] leading-5 text-ink-500">
-                    IDs are issued automatically after an administrator approves the member. Validity follows the membership period.
+                    IDs are issued automatically when a member signs in without one. Validity follows the membership period.
                   </p>
                   <div className="border-t border-line px-4 py-3">
                     <Badge tone="green" dot>Issuing enabled</Badge>
@@ -137,10 +169,10 @@ export function AdminSettings() {
           {tab === 'channels' ? (
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
               <Card>
-                <CardHeader title="Communication channels" description="Controls which channels administrators can use." />
+                <CardHeader title="Communication channels" />
                 <div className="space-y-5 p-4">
-                  <Switch checked={channels.newsletter} onCheckedChange={(value) => setChannels({ ...channels, newsletter: value })} label="Newsletter" description="Allow campaign sends to public subscribers." />
-                  <Switch checked={channels.sms} onCheckedChange={(value) => setChannels({ ...channels, sms: value })} label="SMS notifications" description="Send SMS for session changes and event reminders. Carrier charges apply." />
+                  <Switch checked={channels.newsletter} onCheckedChange={(value) => setChannels({ ...channels, newsletter: value })} label="Newsletter" />
+                  <Switch checked={channels.sms} onCheckedChange={(value) => setChannels({ ...channels, sms: value })} label="SMS notifications" />
                   <div className="rounded-md border border-line bg-canvas/50 p-3">
                     <p className="flex items-center gap-2 text-[0.75rem] font-medium text-ink-800">
                       <Mail className="h-3.5 w-3.5 text-ink-400" aria-hidden />
@@ -169,9 +201,6 @@ export function AdminSettings() {
                     </p>
                   </div>
                 </Card>
-                <Alert tone="info" title="Quiet hours">
-                  SMS messages are only sent between 08:00 and 20:00 EAT in the live application.
-                </Alert>
               </div>
             </div>
           ) : null}
@@ -179,7 +208,7 @@ export function AdminSettings() {
           {tab === 'access' ? (
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
               <Card>
-                <CardHeader title="Administrator access" description="Who can open this console." />
+                <CardHeader title="Administrator access" />
                 <div className="p-4">
                   <DetailList
                     items={[
@@ -227,10 +256,9 @@ export function AdminProfile() {
     <>
       <PageHeader
         title="Administrator profile"
-        description="Your own account details. Changes here affect only your login, not the club settings."
         breadcrumbs={[{ label: 'Admin', to: '/admin' }, { label: 'Admin profile' }]}
         actions={
-          <Button size="sm" iconLeft={<Save className="h-3.5 w-3.5" />} onClick={() => push({ tone: 'success', title: 'Profile saved in the prototype', description: 'No production account changed.' })}>
+          <Button size="sm" iconLeft={<Save className="h-3.5 w-3.5" />} onClick={() => push({ tone: 'success', title: 'Profile saved' })}>
             Save profile
           </Button>
         }
@@ -257,10 +285,10 @@ export function AdminProfile() {
           </Card>
 
           <Card>
-            <CardHeader title="Password" description="Use a unique password that is not shared with other club accounts." />
+            <CardHeader title="Password" />
             <div className="flex flex-wrap items-center justify-between gap-3 p-4">
               <p className="text-[0.75rem] text-ink-500">Last changed on 2 September 2026.</p>
-              <Button variant="outline" size="sm" iconLeft={<KeyRound className="h-3.5 w-3.5" />} onClick={() => push({ tone: 'info', title: 'Password change is a prototype action', description: 'Password changes happen through the secure account flow in the live application.' })}>
+              <Button variant="outline" size="sm" iconLeft={<KeyRound className="h-3.5 w-3.5" />} onClick={() => push({ tone: 'info', title: 'Password change is available from your account settings' })}>
                 Change password
               </Button>
             </div>

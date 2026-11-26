@@ -44,7 +44,7 @@ export function AuthLayout() {
 
       <footer className="relative z-10 pb-6 text-center">
         <p className="text-[0.6875rem] leading-5 text-ink-400">
-          Redesign prototype · sign-in, registration and recovery are simulated.
+          KIUT Digital Club · Student technology community
         </p>
       </footer>
     </div>

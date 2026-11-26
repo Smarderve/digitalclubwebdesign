@@ -1,17 +1,19 @@
 import { ArrowRight, BookOpen, Layers } from 'lucide-react'
-import { LEARNING_PATHS, SKILL_CATEGORIES, TECHNOLOGIES, TOPICS } from '../../data/site'
+import { LEARNING_PATHS, SKILL_CATEGORIES } from '../../data/site'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
 import { PageHero, media } from '../../components/site/hero'
-import { Badge } from '../../components/ui'
+import { Alert } from '../../components/ui'
 import { ButtonLink } from '../../components/ui/button'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi } from '../../lib/publicApi'
 
-const topicsHero = media(
-  '/images/topics/server-room',
-  'Network and server racks in a data centre',
-  'Stock photograph · Pexels. Not KIUT infrastructure.',
-)
+const topicsHero = media('/images/topics/server-room', 'Network and server racks in a data centre')
 
 export function Topics() {
+  const { data, loading, error } = usePublicData(() => publicApi.topics(), [])
+  const topics = data?.topics ?? []
+  const technologies = data?.technologies ?? []
+
   return (
     <>
       <PageHero
@@ -27,13 +29,12 @@ export function Topics() {
         }
         aside={
           <p className="text-[0.8125rem] leading-6 text-white/70">
-            Six learning paths, six topic areas and six skill categories. Start anywhere — the paths are meant to be
-            combined.
+            Learning paths and skill categories are the club's programme. The topic and technology lists below are read
+            from the club database.
           </p>
         }
       />
 
-      {/* Technology stack */}
       <section className="section border-b border-line" data-reveal>
         <div className="container-editorial">
           <SectionHead
@@ -42,32 +43,51 @@ export function Topics() {
             description="The club's topic areas group the tools and languages members work with across sessions and projects."
             action={{ label: 'Published notes', to: '/learn' }}
           />
+
+          {error ? (
+            <Alert tone="warning" title="Topics could not be loaded" className="mt-6">
+              {error}
+            </Alert>
+          ) : null}
+
           <div className="mt-9 grid gap-x-12 gap-y-0 sm:grid-cols-2">
-            {TOPICS.map((topic, index) => (
-              <article key={topic.name} className="group grid grid-cols-[44px_1fr_auto] items-start gap-4 border-t border-line py-5">
-                <span className="font-mono text-[0.6875rem] text-ink-400">{String(index + 1).padStart(2, '0')}</span>
-                <div>
-                  <h3 className="text-[1.0625rem] font-semibold text-ink-950">{topic.name}</h3>
-                  <p className="mt-1 max-w-[46ch] text-[0.8125rem] leading-6 text-ink-500">{topic.description}</p>
-                </div>
-                <BookOpen className="mt-0.5 h-4 w-4 text-ink-200 transition-colors group-hover:text-brand-600" aria-hidden />
-              </article>
-            ))}
+            {topics.length ? (
+              topics.map((topic, index) => (
+                <article key={topic.id} className="group grid grid-cols-[44px_1fr_auto] items-start gap-4 border-t border-line py-5">
+                  <span className="font-mono text-[0.6875rem] text-ink-400">{String(index + 1).padStart(2, '0')}</span>
+                  <div>
+                    <h3 className="text-[1.0625rem] font-semibold text-ink-950">{topic.name}</h3>
+                    <p className="mt-1 max-w-[46ch] text-[0.8125rem] leading-6 text-ink-500">{topic.description}</p>
+                  </div>
+                  <BookOpen className="mt-0.5 h-4 w-4 text-ink-200 transition-colors group-hover:text-brand-600" aria-hidden />
+                </article>
+              ))
+            ) : (
+              <p className="border-t border-line py-5 text-[0.8125rem] text-ink-400 sm:col-span-2">
+                {loading ? 'Loading topics…' : 'No topics have been published yet.'}
+              </p>
+            )}
           </div>
+
           <div className="mt-8 border-y border-line py-4">
             <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Technologies we work with</p>
-            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5">
-              {TECHNOLOGIES.map((tech) => (
-                <li key={tech} className="text-[0.8125rem] text-ink-600">
-                  {tech}
-                </li>
-              ))}
-            </ul>
+            {technologies.length ? (
+              <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5">
+                {technologies.map((tech) => (
+                  <li key={tech.id} className="text-[0.8125rem] text-ink-600">
+                    {tech.name}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-[0.8125rem] text-ink-400">
+                {loading ? 'Loading technologies…' : 'No technologies have been published yet.'}
+              </p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Learning paths */}
       <section className="section border-b border-line bg-canvas/60">
         <div className="container-editorial">
           <SectionHead
@@ -90,7 +110,7 @@ export function Topics() {
                   <p className="text-[0.625rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Typical stack</p>
                   <ul className="mt-2 flex flex-wrap gap-1.5">
                     {path.tags.map((tag) => (
-                      <li key={tag} className="rounded-[4px] border border-line bg-white px-2 py-0.5 text-[0.6875rem] font-medium text-ink-700">
+                      <li key={tag} className="rounded-[4px] border border-line bg-surface px-2 py-0.5 text-[0.6875rem] font-medium text-ink-700">
                         {tag}
                       </li>
                     ))}
@@ -102,7 +122,6 @@ export function Topics() {
         </div>
       </section>
 
-      {/* Skill categories */}
       <section className="section border-b border-line">
         <div className="container-editorial">
           <SectionHead
@@ -112,7 +131,7 @@ export function Topics() {
           />
           <div className="mt-8 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
             {SKILL_CATEGORIES.map((category) => (
-              <div key={category.title} className="bg-white p-5">
+              <div key={category.title} className="bg-surface p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="text-[0.9375rem] font-semibold text-ink-950">{category.title}</h3>
                   <Layers className="h-3.5 w-3.5 shrink-0 text-ink-300" aria-hidden />
@@ -125,7 +144,6 @@ export function Topics() {
         </div>
       </section>
 
-      {/* How learning works */}
       <section className="section border-b border-line bg-canvas/60">
         <div className="container-editorial grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
           <div>

@@ -60,7 +60,6 @@ import { VerifyId } from './pages/public/VerifyId'
 import { AuthLayout } from './pages/auth/AuthLayout'
 import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
-import { ApprovalPending } from './pages/auth/ApprovalPending'
 import { ForgotPassword } from './pages/auth/ForgotPassword'
 import { ResetPassword } from './pages/auth/ResetPassword'
 import { NotFound } from './pages/public/NotFound'
@@ -88,7 +87,6 @@ import { Warmups, WarmupDetail, WarmupTake, WarmupResult, WarmupLeaderboard } fr
 import { MemberElections, MemberElectionDetail, ElectionApply, ElectionVote, ElectionResults } from './pages/member/Elections'
 import { QuizmasterDashboard, QuizBuilder, CreateQuiz } from './pages/quizmaster/Quizmaster'
 import { AdminDashboard } from './pages/admin/Dashboard'
-import { AdminUsers } from './pages/admin/Users'
 import { AdminReports } from './pages/admin/Reports'
 import { AdminMembers, AdminMemberDetail } from './pages/admin/Members'
 import { AdminMemberIds, AdminScanId } from './pages/admin/MemberIds'
@@ -155,7 +153,6 @@ const adminNav: NavSection[] = [
   {
     label: 'People',
     items: [
-      { label: 'Users', to: '/admin/users', icon: Users, badge: 3 },
       { label: 'Members', to: '/admin/members', icon: UserRound },
       { label: 'Member IDs', to: '/admin/member-ids', icon: IdCard },
       { label: 'Scan ID', to: '/admin/scan-id', icon: ScanLine },
@@ -197,10 +194,7 @@ const adminNav: NavSection[] = [
   },
   {
     label: 'System',
-    items: [
-      { label: 'Settings', to: '/admin/settings', icon: Settings },
-      { label: 'Admin profile', to: '/admin/profile', icon: ShieldCheck },
-    ],
+    items: [{ label: 'Admin profile', to: '/admin/profile', icon: ShieldCheck }],
   },
 ]
 
@@ -257,7 +251,16 @@ function PublicLayout() {
 }
 
 function RequireRole({ roles, children }: { roles: string[]; children: React.ReactNode }) {
-  const { user } = useAuth()
+  const { user, status } = useAuth()
+  /* The session is read from the server on every page load. Until that answer
+     arrives, redirecting would bounce a signed-in member to the login page. */
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-canvas" role="status">
+        <span className="text-[0.8125rem] text-ink-400">Checking your session…</span>
+      </div>
+    )
+  }
   if (!user) return <Navigate to="/auth/login" replace />
   if (!roles.includes(user.role)) {
     return (
@@ -266,7 +269,7 @@ function RequireRole({ roles, children }: { roles: string[]; children: React.Rea
           <ShieldCheck className="mx-auto h-6 w-6 text-ink-400" aria-hidden />
           <h1 className="mt-3 text-h3 text-ink-950">You don't have access to this area</h1>
           <p className="mt-2 text-[0.8125rem] leading-6 text-ink-500">
-            This section requires a different account role. The prototype signs you in as a member or administrator from the
+            This section requires a different account role. Sign in as a member or administrator from the
             login screen.
           </p>
           <a href="/member" className="mt-5 inline-flex h-9 items-center rounded-sm bg-brand-700 px-4 text-[0.8125rem] font-medium text-white">
@@ -298,7 +301,7 @@ function MemberLayout() {
   return (
     <AppShell
       nav={memberNav}
-      areaLabel="Member area"
+      areaLabel="Member dashboard"
       areaTone="member"
       homeTo="/member"
       profileTo="/member/profile"
@@ -313,7 +316,7 @@ function AdminLayout() {
   return (
     <AppShell
       nav={adminNav}
-      areaLabel="Admin console"
+      areaLabel="Admin dashboard"
       areaTone="admin"
       homeTo="/admin"
       profileTo="/admin/profile"
@@ -378,7 +381,6 @@ export function App() {
               <Route path="/auth" element={<AuthLayout />}>
                 <Route path="login" element={<Login />} />
                 <Route path="register" element={<Register />} />
-                <Route path="approval-pending" element={<ApprovalPending />} />
                 <Route path="forgot-password" element={<ForgotPassword />} />
                 <Route path="reset-password/:token" element={<ResetPassword />} />
                 <Route path="reset-password" element={<ResetPassword />} />
@@ -441,7 +443,6 @@ export function App() {
                 }
               >
                 <Route index element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
                 <Route path="members" element={<AdminMembers />} />
                 <Route path="members/:id" element={<AdminMemberDetail />} />
                 <Route path="member-ids" element={<AdminMemberIds />} />

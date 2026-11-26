@@ -8,11 +8,7 @@ import { Button, ButtonLink } from '../../components/ui/button'
 import { Input, Select } from '../../components/ui/field'
 import { POPULAR_TOPICS } from '../../data/site'
 
-const learnHero = media(
-  '/images/learning/developer-desk',
-  'A laptop showing code in a shared workspace',
-  'Stock photograph · Pexels. Not a KIUT Digital Club session.',
-)
+const learnHero = media('/images/learning/developer-desk', 'A laptop showing code in a shared workspace')
 
 const resources = [
   {
@@ -29,7 +25,7 @@ const resources = [
   },
   {
     title: 'Code repository',
-    description: 'Sample projects, templates and starter code from the club organisation.',
+    description: 'Starter projects, templates and starter code from the club organisation.',
     icon: Github,
     action: { label: 'Link not published', to: '' },
   },
@@ -139,7 +135,7 @@ export function Learn() {
             <EmptyState
               icon={<FileText className="h-4 w-4" aria-hidden />}
               title="No published notes yet"
-              description="Learning notes will appear here when a quizmaster publishes a quiz with attached material. The current site has two uploaded resources whose publication status could not be verified in the content handoff."
+              description="Learning notes appear here when a quizmaster publishes a quiz with attached material."
               action={
                 query || field !== 'all' || topic !== 'all' ? (
                   <Button
@@ -179,14 +175,14 @@ export function Learn() {
               const Icon = resource.icon
               const disabled = !resource.action.to
               return (
-                <div key={resource.title} className="flex flex-col justify-between gap-4 bg-white p-5">
+                <div key={resource.title} className="flex flex-col justify-between gap-4 bg-surface p-5">
                   <div>
                     <Icon className="h-4 w-4 text-brand-700" aria-hidden />
                     <h3 className="mt-3 text-[0.9375rem] font-semibold text-ink-950">{resource.title}</h3>
                     <p className="mt-1.5 text-[0.8125rem] leading-6 text-ink-500">{resource.description}</p>
                   </div>
                   {disabled ? (
-                    <span className="inline-flex items-center gap-1 text-[0.75rem] text-ink-400" title="The destination was not available in the content handoff">
+                    <span className="inline-flex items-center gap-1 text-[0.75rem] text-ink-400">
                       {resource.action.label}
                     </span>
                   ) : (

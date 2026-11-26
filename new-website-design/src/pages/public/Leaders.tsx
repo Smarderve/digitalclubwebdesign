@@ -1,22 +1,20 @@
 import { useMemo, useState } from 'react'
 import { Search, ShieldCheck, Users } from 'lucide-react'
-import { LEADERS, LEADERSHIP_STRUCTURE } from '../../data/site'
+import { LEADERSHIP_STRUCTURE } from '../../data/site'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
-import { PageHero, media } from '../../components/site/hero'
-import { Badge, EmptyState } from '../../components/ui'
+import { PageHero, clubMedia } from '../../components/site/hero'
+import { Alert, EmptyState } from '../../components/ui'
 import { Input } from '../../components/ui/field'
 import { Button } from '../../components/ui/button'
 import { LeaderCard } from '../../components/site/cards'
+import { usePublicData } from '../../lib/usePublicData'
+import { publicApi } from '../../lib/publicApi'
 import { cn } from '../../lib/utils'
 
-const leadersHero = media(
-  '/images/lab/library-computers',
-  'Two students working together at a computer in a library',
-  'Stock photograph · Pexels. Not club leaders or members.',
-)
+const leadersHero = clubMedia('/images/club/devfest-crowd', 'Club members at a DevFest event')
 
 const electionPrinciples = [
-  { title: 'Democratic process', description: 'All leadership positions are elected democratically by club members through transparent voting processes.' },
+  { title: 'Democratic process' },
   { title: 'Annual elections', description: 'Elections are held annually, giving every member the opportunity to participate and contribute to club leadership.' },
   { title: 'Mentorship programme', description: 'New leaders receive mentorship from outgoing executives to ensure smooth transitions and continuity.' },
 ]
@@ -24,20 +22,23 @@ const electionPrinciples = [
 export function Leaders() {
   const [query, setQuery] = useState('')
   const [group, setGroup] = useState('all')
+  const { data, loading, error } = usePublicData(() => publicApi.leaders(), [])
+  const leaders = data ?? []
 
-  const groups = useMemo(() => {
-    return [
-      { value: 'all', label: 'All roles', count: LEADERS.length },
-      { value: 'executive', label: 'Executive board', count: LEADERS.filter((l) => /chair|secretary|coordination/i.test(l.position)).length },
-      { value: 'technical', label: 'Technical & projects', count: LEADERS.filter((l) => /project|mentorship/i.test(l.position)).length },
-      { value: 'comms', label: 'Communication', count: LEADERS.filter((l) => /communication/i.test(l.position)).length },
-    ]
-  }, [])
+  const groups = useMemo(
+    () => [
+      { value: 'all', label: 'All roles', count: leaders.length },
+      { value: 'executive', label: 'Executive board', count: leaders.filter((l) => /chair|secretary|coordination/i.test(l.position)).length },
+      { value: 'technical', label: 'Technical & projects', count: leaders.filter((l) => /project|mentorship/i.test(l.position)).length },
+      { value: 'comms', label: 'Communication', count: leaders.filter((l) => /communication/i.test(l.position)).length },
+    ],
+    [leaders],
+  )
 
-  const filtered = LEADERS.filter((leader) => {
+  const filtered = leaders.filter((leader) => {
     const matchesQuery =
       !query.trim() ||
-      `${leader.name} ${leader.position} ${leader.programme}`.toLowerCase().includes(query.trim().toLowerCase())
+      `${leader.name} ${leader.position} ${leader.programme ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())
     const matchesGroup =
       group === 'all' ||
       (group === 'executive' && /chair|secretary|coordination/i.test(leader.position)) ||
@@ -57,7 +58,9 @@ export function Leaders() {
           <dl className="grid gap-3 rounded-lg border border-line bg-canvas p-4 sm:grid-cols-3">
             <div>
               <dt className="text-[0.625rem] uppercase tracking-[0.1em] text-ink-400">Team size</dt>
-              <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">{LEADERS.length} published profiles</dd>
+              <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">
+                {loading ? '—' : `${leaders.length} published profiles`}
+              </dd>
             </div>
             <div>
               <dt className="text-[0.625rem] uppercase tracking-[0.1em] text-ink-400">Term</dt>
@@ -80,7 +83,7 @@ export function Leaders() {
           />
           <div className="mt-8 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
             {LEADERSHIP_STRUCTURE.map((item, index) => (
-              <div key={item.title} className="bg-white p-5">
+              <div key={item.title} className="bg-surface p-5">
                 <span className="font-mono text-[0.6875rem] text-brand-700">{String(index + 1).padStart(2, '0')}</span>
                 <h3 className="mt-3 text-[0.9375rem] font-semibold text-ink-950">{item.title}</h3>
                 <p className="mt-1.5 text-[0.8125rem] leading-6 text-ink-500">{item.description}</p>
@@ -125,7 +128,7 @@ export function Leaders() {
                   'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.75rem] font-medium transition-colors',
                   group === item.value
                     ? 'border-brand-700 bg-brand-700 text-white'
-                    : 'border-ink-200 bg-white text-ink-600 hover:border-ink-300',
+                    : 'border-ink-200 bg-surface text-ink-600 hover:border-ink-300',
                 )}
               >
                 {item.label}
@@ -136,7 +139,7 @@ export function Leaders() {
 
           <div className="mt-3 flex items-center justify-between">
             <p className="text-[0.75rem] text-ink-500" role="status">
-              {filtered.length} {filtered.length === 1 ? 'profile' : 'profiles'}
+              {loading ? 'Loading profiles…' : `${filtered.length} ${filtered.length === 1 ? 'profile' : 'profiles'}`}
             </p>
             <p className="hidden items-center gap-1.5 text-[0.6875rem] text-ink-400 sm:flex">
               <Users className="h-3 w-3" aria-hidden />
@@ -144,23 +147,27 @@ export function Leaders() {
             </p>
           </div>
 
-          {filtered.length ? (
+          {error ? (
+            <Alert tone="warning" title="Leadership could not be loaded" className="mt-6">
+              {error}
+            </Alert>
+          ) : filtered.length ? (
             <div className="mt-6 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((leader) => (
                 <LeaderCard
-                  key={leader.name}
+                  key={leader.id}
                   name={leader.name}
                   position={leader.position}
-                  programme={leader.programme}
-                  year={leader.year}
-                  bio={leader.bio}
+                  programme={leader.programme ?? 'Programme not recorded'}
+                  year={leader.year ?? undefined}
+                  bio={leader.bio ?? undefined}
                 />
               ))}
             </div>
           ) : (
             <EmptyState
               className="mt-6"
-              title="No leaders match that search"
+              title={loading ? 'Loading profiles…' : 'No leaders match that search'}
               description="Try a different name or clear the role filter."
               action={
                 <Button
@@ -176,12 +183,6 @@ export function Leaders() {
               }
             />
           )}
-
-          <p className="mt-6 max-w-[80ch] text-[0.75rem] leading-5 text-ink-400">
-            Portraits were not available for most profiles in the supplied material, so the redesign uses initials instead
-            of inventing or substituting photographs. Leadership spellings, roles and years are preserved as published and
-            require the club's confirmation for the current term.
-          </p>
         </div>
       </section>
 
@@ -197,11 +198,10 @@ export function Leaders() {
             <div className="mt-5 rounded-md border border-line bg-canvas p-4">
               <p className="flex items-center gap-2 text-[0.8125rem] font-medium text-ink-800">
                 <ShieldCheck className="h-4 w-4 text-brand-700" aria-hidden />
-                No public election is currently published
+                {leaders.length ? 'Current leadership published' : 'No public election is currently published'}
               </p>
               <p className="mt-1 text-[0.75rem] leading-5 text-ink-500">
-                The current site's election records were not included in the content handoff. Signed-in members see any
-                election they are eligible for.
+                Signed-in members see any election they are eligible for.
               </p>
               <div className="mt-3">
                 <a href="/elections" className="text-[0.75rem] font-semibold text-brand-800 underline decoration-brand-300 underline-offset-4">
