@@ -2,6 +2,7 @@ import { Minus, X } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { useKiutbot } from '../context'
 import type { ConnectionState } from '../types'
+import { KiutbotSoundMenu } from './KiutbotSoundMenu'
 
 const statusCopy: Record<ConnectionState, { label: string; dot: string; text: string }> = {
   idle: { label: 'Not connected', dot: 'bg-ink-300', text: 'text-ink-400' },
@@ -43,6 +44,7 @@ export function KiutbotHeader() {
       </div>
 
       <div className="flex shrink-0 items-center gap-0.5">
+        <KiutbotSoundMenu />
         <button
           type="button"
           onClick={minimize}

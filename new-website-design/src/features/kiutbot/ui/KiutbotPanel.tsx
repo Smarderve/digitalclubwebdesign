@@ -42,11 +42,22 @@ function usePhoneViewport() {
 }
 
 export function KiutbotPanel({ launcherRef }: { launcherRef: RefObject<HTMLButtonElement> }) {
-  const { view, phase, connection, close, expand } = useKiutbot()
+  const { view, phase, connection, close, minimize, expand } = useKiutbot()
   const [step, setStep] = useState<'name' | 'contact'>('name')
   const { phone, height, top } = usePhoneViewport()
   const panelRef = useRef<HTMLDivElement>(null)
   const wasOpenRef = useRef(false)
+  /* Keeps the panel mounted for one exit animation after it closes. */
+  const [rendered, setRendered] = useState(view !== 'closed')
+
+  useEffect(() => {
+    if (view !== 'closed') {
+      setRendered(true)
+      return
+    }
+    const timer = window.setTimeout(() => setRendered(false), 190)
+    return () => window.clearTimeout(timer)
+  }, [view])
 
   /* Lock the page behind the full-screen phone panel only. */
   useEffect(() => {
@@ -67,6 +78,20 @@ export function KiutbotPanel({ launcherRef }: { launcherRef: RefObject<HTMLButto
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [view, close])
+
+  /* Clicking outside the panel collapses it and keeps the conversation. The
+     launcher is excluded so its own click toggles instead of double-firing. */
+  useEffect(() => {
+    if (view !== 'open' || phone) return
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (panelRef.current?.contains(target)) return
+      if (launcherRef.current?.contains(target)) return
+      minimize()
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [view, phone, launcherRef, minimize])
 
   useEffect(() => {
     if (view === 'open') {
@@ -90,12 +115,12 @@ export function KiutbotPanel({ launcherRef }: { launcherRef: RefObject<HTMLButto
     target?.focus()
   }, [view, phone, phase, step])
 
-  if (view === 'closed') return null
+  if (!rendered) return null
 
   if (view === 'minimized') {
     return (
       <div
-        className="fixed z-[60] flex w-[300px] max-w-[calc(100vw-2rem)] items-center gap-2.5 rounded-xl border border-line bg-white py-2 pl-2 pr-1.5 shadow-pop kb-panel-in"
+        className="kb-panel-in fixed z-[60] flex w-[300px] max-w-[calc(100vw-2rem)] items-center gap-2.5 rounded-xl border border-line bg-surface py-2 pl-2 pr-1.5 shadow-pop"
         style={{
           right: 'max(1.25rem, env(safe-area-inset-right))',
           bottom: 'max(1.25rem, env(safe-area-inset-bottom))',
@@ -147,12 +172,14 @@ export function KiutbotPanel({ launcherRef }: { launcherRef: RefObject<HTMLButto
       aria-modal={phone || undefined}
       aria-labelledby="kiutbot-title"
       tabIndex={-1}
+      aria-hidden={view === 'closed' || undefined}
       className={cn(
-        'kb-panel-in fixed z-[60] flex flex-col overflow-hidden bg-white outline-none',
+        'fixed z-[60] flex flex-col overflow-hidden bg-surface outline-none',
+        view === 'closed' ? 'kb-panel-out' : 'kb-panel-in',
         phone
           ? 'bottom-auto left-0 right-0 rounded-none border-0 shadow-none'
-          : 'bottom-5 right-5 w-[400px] rounded-[18px] border border-line shadow-pop',
-        !phone && 'h-[min(660px,calc(100dvh-2.5rem))]',
+          : 'bottom-[5.75rem] right-5 w-[400px] rounded-[18px] border border-line shadow-pop',
+        !phone && 'h-[min(660px,calc(100dvh-8rem))]',
       )}
       style={
         phone

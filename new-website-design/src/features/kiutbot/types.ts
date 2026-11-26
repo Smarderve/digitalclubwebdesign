@@ -4,6 +4,9 @@ export type ChatRole = 'user' | 'assistant' | 'system'
 
 export type ChatTone = 'neutral' | 'success' | 'error'
 
+/** Visitor feedback on one assistant answer. One value per message. */
+export type MessageFeedback = 'like' | 'dislike'
+
 export type ChatMessage = {
   id: string
   role: ChatRole

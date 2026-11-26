@@ -1,18 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, Copy, RefreshCw } from 'lucide-react'
+import { Pencil, RefreshCw } from 'lucide-react'
 import { cn } from '../../../lib/utils'
+import { KIUTBOT } from '../config'
 import { useKiutbot } from '../context'
 import { messageTime } from '../text'
 import type { ChatMessage } from '../types'
+import { KiutbotMessageActions } from './KiutbotMessageActions'
 import { KiutbotWelcome } from './KiutbotWelcome'
 
 const GROUP_WINDOW_MS = 5 * 60 * 1000
 const TIME_DIVIDER_MS = 10 * 60 * 1000
 
+/** Reveal-on-hover on pointer devices, always visible on touch. */
+const HOVER_REVEAL =
+  '[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/msg:opacity-100 [@media(hover:hover)]:group-focus-within/msg:opacity-100'
+
+const QUIET_ACTION =
+  'inline-flex items-center gap-1 rounded-[6px] px-1.5 py-0.5 text-[0.6875rem] font-medium text-ink-400 transition-colors hover:bg-ink-50 hover:text-ink-800 focus-visible:ring-2 focus-visible:ring-brand-600'
+
 export function KiutbotConversation({ onboardingStep }: { onboardingStep: 'name' | 'contact' }) {
-  const { phase, messages, typing, suggestions, send, canSend, retry } = useKiutbot()
+  const { phase, messages, typing, suggestions, send, canSend, retry, editMessage, feedback, rateMessage } =
+    useKiutbot()
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const editorRef = useRef<HTMLTextAreaElement>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
 
   useEffect(() => {
     const node = scrollRef.current
@@ -20,19 +32,37 @@ export function KiutbotConversation({ onboardingStep }: { onboardingStep: 'name'
     node.scrollTop = node.scrollHeight
   }, [messages, typing, phase, onboardingStep])
 
+  /* The editor grows with its text, up to a few lines, like the composer. */
   useEffect(() => {
-    if (!copiedId) return
-    const timer = window.setTimeout(() => setCopiedId(null), 1800)
-    return () => window.clearTimeout(timer)
-  }, [copiedId])
+    const node = editorRef.current
+    if (!node) return
+    node.style.height = 'auto'
+    node.style.height = `${Math.min(node.scrollHeight, 132)}px`
+  }, [draft, editingId])
 
-  const copy = async (message: ChatMessage) => {
-    try {
-      await navigator.clipboard.writeText(message.text)
-      setCopiedId(message.id)
-    } catch {
-      /* clipboard blocked; the action stays silent rather than lying */
-    }
+  useEffect(() => {
+    if (!editingId) return
+    const node = editorRef.current
+    if (!node) return
+    node.focus()
+    node.setSelectionRange(node.value.length, node.value.length)
+  }, [editingId])
+
+  const startEdit = (message: ChatMessage) => {
+    setEditingId(message.id)
+    setDraft(message.text)
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setDraft('')
+  }
+
+  const saveEdit = () => {
+    const text = draft.trim()
+    if (!editingId || !text || !canSend) return
+    editMessage(editingId, text)
+    cancelEdit()
   }
 
   const hasConversation = messages.some((message) => message.role !== 'system')
@@ -95,26 +125,89 @@ export function KiutbotConversation({ onboardingStep }: { onboardingStep: 'name'
 
                 <div className={cn('kb-msg-in', newGroup ? 'mt-1' : 'mt-0.5')}>
                   {message.role === 'user' ? (
-                    <div className="flex flex-col items-end gap-1">
-                      <div
-                        className={cn(
-                          'max-w-[86%] whitespace-pre-wrap break-words rounded-[14px] rounded-br-[5px] bg-brand-600 px-3 py-2 text-[0.8125rem] leading-[1.6] text-white',
-                          message.failed && 'bg-brand-700/80',
-                        )}
-                        title={messageTime(message.at)}
-                      >
-                        {message.text}
-                      </div>
-                      {message.failed ? (
-                        <button
-                          type="button"
-                          onClick={() => retry(message.id)}
-                          className="inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[0.6875rem] font-medium text-danger hover:bg-danger-soft focus-visible:ring-2 focus-visible:ring-brand-600"
-                        >
-                          <RefreshCw size={12} aria-hidden />
-                          Not delivered · Retry
-                        </button>
-                      ) : null}
+                    <div className="group/msg flex flex-col items-end gap-1">
+                      {editingId === message.id ? (
+                        <div className="w-full max-w-[86%]">
+                          <textarea
+                            ref={editorRef}
+                            value={draft}
+                            onChange={(event) => setDraft(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Escape') {
+                                /* Cancel the edit only: the panel also closes on
+                                   Escape, and losing the chat is not what the
+                                   visitor asked for here. */
+                                event.preventDefault()
+                                event.stopPropagation()
+                                cancelEdit()
+                                return
+                              }
+                              /* Enter saves, Shift+Enter adds a line. */
+                              if (event.key === 'Enter' && !event.shiftKey) {
+                                event.preventDefault()
+                                saveEdit()
+                              }
+                            }}
+                            rows={1}
+                            maxLength={KIUTBOT.maxMessageLength}
+                            aria-label="Edit your message"
+                            className="w-full resize-none rounded-[14px] rounded-br-[5px] border border-brand-300 bg-white px-3 py-2 text-[0.8125rem] leading-[1.6] text-ink-900 focus-visible:border-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600/30"
+                          />
+                          <div className="mt-1.5 flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={cancelEdit}
+                              className="inline-flex h-7 items-center rounded-[6px] px-2 text-[0.6875rem] font-semibold text-ink-600 transition-colors hover:bg-ink-50 hover:text-ink-900 focus-visible:ring-2 focus-visible:ring-brand-600"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={saveEdit}
+                              disabled={!draft.trim() || !canSend}
+                              className="inline-flex h-7 items-center rounded-[6px] bg-brand-600 px-2.5 text-[0.6875rem] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Save and resend
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            className={cn(
+                              'max-w-[86%] whitespace-pre-wrap break-words rounded-[14px] rounded-br-[5px] bg-brand-600 px-3 py-2 text-[0.8125rem] leading-[1.6] text-white',
+                              message.failed && 'bg-brand-700/80',
+                            )}
+                            title={messageTime(message.at)}
+                          >
+                            {message.text}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {message.failed ? (
+                              <button
+                                type="button"
+                                onClick={() => retry(message.id)}
+                                className="inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[0.6875rem] font-medium text-danger hover:bg-danger-soft focus-visible:ring-2 focus-visible:ring-brand-600"
+                              >
+                                <RefreshCw size={12} aria-hidden />
+                                Not delivered · Retry
+                              </button>
+                            ) : null}
+                            {canSend ? (
+                              <button
+                                type="button"
+                                onClick={() => startEdit(message)}
+                                className={cn(QUIET_ACTION, 'transition-opacity', HOVER_REVEAL)}
+                                aria-label="Edit message"
+                                title="Edit message"
+                              >
+                                <Pencil size={11} aria-hidden />
+                                Edit
+                              </button>
+                            ) : null}
+                          </div>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div className="group/msg flex max-w-[92%] flex-col items-start gap-1">
@@ -126,15 +219,11 @@ export function KiutbotConversation({ onboardingStep }: { onboardingStep: 'name'
                         {message.text ? renderText(message.text) : <span className="text-ink-400">…</span>}
                       </div>
                       {!message.streaming && message.text ? (
-                        <button
-                          type="button"
-                          onClick={() => copy(message)}
-                          className="inline-flex items-center gap-1 rounded-sm px-1 py-0.5 text-[0.625rem] font-medium text-ink-400 transition-opacity hover:text-ink-700 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-brand-600 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/msg:opacity-100"
-                          aria-label="Copy answer"
-                        >
-                          {copiedId === message.id ? <Check size={12} aria-hidden /> : <Copy size={12} aria-hidden />}
-                          {copiedId === message.id ? 'Copied' : 'Copy'}
-                        </button>
+                        <KiutbotMessageActions
+                          message={message}
+                          feedback={feedback[message.id] ?? null}
+                          onRate={(value) => rateMessage(message.id, value)}
+                        />
                       ) : null}
                     </div>
                   )}
