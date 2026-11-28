@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Download, ExternalLink, IdCard, RefreshCw, ShieldCheck } from 'lucide-react'
-import { demoMember, DEMO_LABEL } from '../../data/demo'
+import { SITE } from '../../data/site'
+import { ApiError } from '../../lib/api'
+import { memberApi } from '../../lib/memberApi'
+import { useMemberData } from '../../lib/useMemberData'
+import { ErrorBlock, LoadingBlock } from '../../components/app/DataState'
 import { PageHeader } from '../../components/app/primitives'
-import { Avatar, Badge, ConfirmDialog } from '../../components/ui'
+import { Alert, Avatar, Badge, ConfirmDialog } from '../../components/ui'
 import { Button } from '../../components/ui/button'
 import { useToast } from '../../context/ToastContext'
-import { cn } from '../../lib/utils'
+import { cn, formatDate } from '../../lib/utils'
 
 function QrPattern({ value, className }: { value: string; className?: string }) {
   const cells = 21
-  const seed = Array.from(value).reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  const seed = Array.from(value || '0').reduce((acc, char) => acc + char.charCodeAt(0), 0)
   return (
     <div
       className={cn('grid aspect-square grid-cols-[repeat(21,1fr)] gap-px rounded-[3px] bg-surface p-1.5', className)}
@@ -32,49 +36,104 @@ function QrPattern({ value, className }: { value: string; className?: string }) 
 
 export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
   const [confirmRegenerate, setConfirmRegenerate] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
   const { push } = useToast()
+  const { data, loading, error, reload, setData } = useMemberData(() => memberApi.digitalId(), [])
 
-  function simulateDownload(side: string) {
-    push({
-      tone: 'info',
-      title: `${side} card prepared`,
-    })
+  async function regenerate() {
+    setRegenerating(true)
+    try {
+      const result = await memberApi.regenerateDigitalId()
+      setData(result)
+      push({ tone: 'success', title: 'Card regenerated', description: 'Your digital ID now matches your current profile.' })
+    } catch (err) {
+      push({
+        tone: 'error',
+        title: 'Card not regenerated',
+        description: err instanceof ApiError ? err.message : 'The card could not be rebuilt. Try again later.',
+      })
+    } finally {
+      setRegenerating(false)
+      setConfirmRegenerate(false)
+    }
+  }
+
+  const actions = (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={!data?.image_urls.front}
+        onClick={() => data?.image_urls.front && window.open(data.image_urls.front, '_blank', 'noopener')}
+        iconLeft={<Download className="h-3.5 w-3.5" />}
+      >
+        Front
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={!data?.image_urls.back}
+        onClick={() => data?.image_urls.back && window.open(data.image_urls.back, '_blank', 'noopener')}
+        iconLeft={<Download className="h-3.5 w-3.5" />}
+      >
+        Back
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        loading={regenerating}
+        onClick={() => setConfirmRegenerate(true)}
+        iconLeft={<RefreshCw className="h-3.5 w-3.5" />}
+      >
+        Regenerate
+      </Button>
+    </>
+  )
+
+  const header = embedded ? (
+    <div className="mb-4 flex flex-wrap justify-end gap-2">{actions}</div>
+  ) : (
+    <PageHeader
+      title="Digital member ID"
+      breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Digital ID' }]}
+      actions={actions}
+      badge={
+        data ? (
+          <Badge tone={data.status === 'active' ? 'green' : 'amber'} dot>
+            {data.status === 'active' ? 'Active' : 'Pending'}
+          </Badge>
+        ) : undefined
+      }
+    />
+  )
+
+  if (loading && !data) {
+    return (
+      <>
+        {header}
+        <LoadingBlock rows={4} />
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        {header}
+        <ErrorBlock message={error ?? 'Your digital ID could not be loaded.'} onRetry={reload} />
+      </>
+    )
   }
 
   return (
     <>
-      {embedded ? (
-        <div className="mb-4 flex flex-wrap justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={() => simulateDownload('Front')} iconLeft={<Download className="h-3.5 w-3.5" />}>
-            Front
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => simulateDownload('Back')} iconLeft={<Download className="h-3.5 w-3.5" />}>
-            Back
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setConfirmRegenerate(true)} iconLeft={<RefreshCw className="h-3.5 w-3.5" />}>
-            Regenerate
-          </Button>
-        </div>
-      ) : (
-      <PageHeader
-        title="Digital member ID"
-        breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Digital ID' }]}
-        actions={
-          <>
-            <Button variant="outline" size="sm" onClick={() => simulateDownload('Front')} iconLeft={<Download className="h-3.5 w-3.5" />}>
-              Front
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => simulateDownload('Back')} iconLeft={<Download className="h-3.5 w-3.5" />}>
-              Back
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setConfirmRegenerate(true)} iconLeft={<RefreshCw className="h-3.5 w-3.5" />}>
-              Regenerate
-            </Button>
-          </>
-        }
-        badge={<Badge tone="green" dot>Active</Badge>}
-      />
-      )}
+      {header}
+
+      {data.status !== 'active' ? (
+        <Alert tone="info" title="No card image yet" className="mb-4">
+          Use Regenerate to build your digital ID from your current profile details. Your member number does not change.
+        </Alert>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
         <div className="space-y-6">
@@ -96,31 +155,34 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
                     </div>
                   </div>
                   <Badge tone="green" className="border-brand-500/40 bg-brand-500/15 text-brand-200">
-                    {demoMember.digitalId.status}
+                    {data.status === 'active' ? 'Active' : 'Pending'}
                   </Badge>
                 </div>
 
                 <div className="flex items-end justify-between gap-4">
                   <div className="flex items-end gap-3">
-                    <Avatar name={demoMember.name} size="lg" className="ring-2 ring-white/20" />
+                    <Avatar name={data.display_name} size="lg" className="ring-2 ring-white/20" />
                     <div>
-                      <p className="text-[1.0625rem] font-semibold leading-tight sm:text-[1.25rem]">{demoMember.name}</p>
-                      <p className="mt-0.5 font-mono text-[0.6875rem] text-brand-300">{demoMember.memberId}</p>
-                      <p className="mt-0.5 text-[0.625rem] text-ink-400">{demoMember.course}</p>
+                      <p className="text-[1.0625rem] font-semibold leading-tight sm:text-[1.25rem]">{data.display_name}</p>
+                      <p className="mt-0.5 font-mono text-[0.6875rem] text-brand-300">
+                        {data.member_number ?? 'Number pending'}
+                      </p>
+                      <p className="mt-0.5 text-[0.625rem] text-ink-400">{data.course ?? 'Course not set'}</p>
                     </div>
                   </div>
-                  <QrPattern value={demoMember.memberId} className="h-[62px] w-[62px] shrink-0 sm:h-[78px] sm:w-[78px]" />
+                  <QrPattern
+                    value={data.qr_payload ?? data.member_number ?? '0'}
+                    className="h-[62px] w-[62px] shrink-0 sm:h-[78px] sm:w-[78px]"
+                  />
                 </div>
 
                 <div className="flex items-end justify-between border-t border-white/10 pt-2.5 text-[0.5625rem] uppercase tracking-[0.08em] text-ink-400">
-                  <span>Kampala International University in Tanzania</span>
-                  <span>Valid through Sep 2028</span>
+                  <span>{SITE.university}</span>
+                  <span>{data.valid_until ? `Valid through ${formatDate(data.valid_until)}` : 'Validity pending'}</span>
                 </div>
               </div>
             </div>
-            <p className="mt-2 text-center text-[0.625rem] text-ink-400">
-              Front of the digital member card.
-            </p>
+            <p className="mt-2 text-center text-[0.625rem] text-ink-400">Front of the digital member card.</p>
           </div>
 
           {/* Card back */}
@@ -136,15 +198,18 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
                 </span>
               </div>
               <p className="mt-4 text-[0.8125rem] leading-6 text-ink-600">
-                Digital Club is the student technology community at Kampala International University in Tanzania. This card
-                identifies an approved member and links to a public verification record.
+                Digital Club is the student technology community at {SITE.university}. This card identifies an approved
+                member and links to a public verification record.
               </p>
               <dl className="mt-4 grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2">
                 {[
-                  { label: 'Contact', value: 'digitalclub@kiut.ac.tz' },
-                  { label: 'Phone', value: '+255 716 153 399' },
-                  { label: 'Verification', value: `/verify-id/${demoMember.memberId}` },
-                  { label: 'Membership', value: 'Valid through 31 Dec 2026' },
+                  { label: 'Contact', value: SITE.email },
+                  { label: 'Phone', value: SITE.phone },
+                  { label: 'Verification', value: data.verify_url ?? 'Not available' },
+                  {
+                    label: 'Membership',
+                    value: data.valid_until ? `Valid through ${formatDate(data.valid_until)}` : 'No membership on record',
+                  },
                 ].map((item) => (
                   <div key={item.label} className="bg-surface px-3.5 py-2.5">
                     <dt className="text-[0.5625rem] uppercase tracking-[0.08em] text-ink-400">{item.label}</dt>
@@ -169,23 +234,27 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
             <p className="mt-1.5 text-[0.75rem] leading-5 text-ink-500">
               Anyone can verify this card by scanning its QR code or entering the member ID on the public verification page.
             </p>
-            <Link
-              to={`/verify-id/${demoMember.memberId}`}
-              className="mt-3 inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-brand-800 hover:underline"
-            >
-              Open verification page
-              <ExternalLink className="h-3 w-3" aria-hidden />
-            </Link>
+            {data.member_number ? (
+              <Link
+                to={`/verify-id/${data.member_number}`}
+                className="mt-3 inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-brand-800 hover:underline"
+              >
+                Open verification page
+                <ExternalLink className="h-3 w-3" aria-hidden />
+              </Link>
+            ) : (
+              <p className="mt-3 text-[0.75rem] text-ink-500">A member number is issued with your card.</p>
+            )}
           </div>
 
           <div className="rounded-lg border border-line bg-surface p-5">
             <p className="text-[0.8125rem] font-semibold text-ink-900">Card details</p>
             <dl className="mt-3 space-y-2 text-[0.75rem]">
               {[
-                { label: 'Member ID', value: demoMember.memberId },
-                { label: 'Issued', value: '12 Oct 2025' },
-                { label: 'Valid through', value: '30 Sep 2028' },
-                { label: 'Status', value: demoMember.digitalId.status },
+                { label: 'Member ID', value: data.member_number ?? 'Pending' },
+                { label: 'Issued', value: data.issued_at ? formatDate(data.issued_at) : '—' },
+                { label: 'Valid through', value: data.valid_until ? formatDate(data.valid_until) : '—' },
+                { label: 'Status', value: data.status === 'active' ? 'Active' : 'Pending' },
               ].map((item) => (
                 <div key={item.label} className="flex justify-between gap-3">
                   <dt className="text-ink-500">{item.label}</dt>
@@ -201,7 +270,6 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
               Regenerating creates a new card image with your current profile details. Your member ID does not change.
             </p>
           </div>
-
         </div>
       </div>
 
@@ -209,12 +277,10 @@ export function DigitalId({ embedded = false }: { embedded?: boolean } = {}) {
         open={confirmRegenerate}
         onOpenChange={setConfirmRegenerate}
         title="Regenerate the card?"
-        description="The card image would be rebuilt with your current profile details."
+        description="The card image is rebuilt with your current profile details."
         confirmLabel="Regenerate"
         destructive={false}
-        onConfirm={() =>
-          push({ tone: 'success', title: 'Card regenerated' })
-        }
+        onConfirm={regenerate}
       />
     </>
   )

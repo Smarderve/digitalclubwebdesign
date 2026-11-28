@@ -6,6 +6,7 @@ import { PageHeader } from '../../components/app/primitives'
 import { Alert, Card, CardBody, CardHeader, Field, Input } from '../../components/ui'
 import { Button } from '../../components/ui/button'
 import { useToast } from '../../context/ToastContext'
+import { api, ApiError } from '../../lib/api'
 
 type PasswordValues = { current: string; next: string; confirm: string }
 
@@ -18,6 +19,7 @@ export function ChangePassword() {
     handleSubmit,
     watch,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<PasswordValues>()
   const next = watch('next', '')
@@ -34,21 +36,37 @@ export function ChangePassword() {
           <CardHeader title="Password" description="You stay signed in on this device after changing your password." />
           <form
             noValidate
-            onSubmit={handleSubmit(async () => {
-              await new Promise((resolve) => setTimeout(resolve, 700))
-              setDone(true)
-              reset()
-              push({
-                tone: 'success',
-                title: 'Password validated',
-              })
+            onSubmit={handleSubmit(async (values) => {
+              setDone(false)
+              try {
+                await api.changePassword(values.current, values.next)
+                setDone(true)
+                reset()
+                push({ tone: 'success', title: 'Password updated' })
+              } catch (error) {
+                if (error instanceof ApiError) {
+                  if (error.details.current_password) {
+                    setError('current', { message: error.details.current_password })
+                  }
+                  if (error.details.new_password) {
+                    setError('next', { message: error.details.new_password })
+                  }
+                  push({ tone: 'error', title: 'Password not changed', description: error.message })
+                } else {
+                  push({
+                    tone: 'error',
+                    title: 'Password not changed',
+                    description: 'Check your connection and try again.',
+                  })
+                }
+              }
             })}
           >
             <CardBody className="space-y-4">
               {done ? (
                 <Alert tone="success" title="Password updated">
-                  Your new password passed validation. In production, the backend would hash and store it and invalidate
-                  other sessions.
+                  Your password was changed. You stay signed in on this device; other sessions keep their current
+                  password until they sign out.
                 </Alert>
               ) : null}
 

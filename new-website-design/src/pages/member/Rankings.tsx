@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowUpRight, Medal, Search, Star, Trophy } from 'lucide-react'
-import { demoMember, demoRankings, demoTeams } from '../../data/demo'
+import { memberApi } from '../../lib/memberApi'
+import { useMemberData } from '../../lib/useMemberData'
+import { ErrorBlock, LoadingBlock } from '../../components/app/DataState'
 import { PageHeader } from '../../components/app/primitives'
 import {
   Badge,
@@ -21,56 +23,69 @@ import {
   TR,
 } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
-import { memberByName } from '../../features/social/directory'
 import { Teams } from './Teams'
 
-/** Member leaderboard. Ranks and points come from the demo ranking records;
-    nothing is recalculated in the frontend. */
+/** Member leaderboard. Ranks and points come from the server; nothing is recalculated here. */
 export function Rankings({ embedded = false }: { embedded?: boolean } = {}) {
   const [query, setQuery] = useState('')
-  const members = demoRankings
-    .slice()
-    .sort((a, b) => a.rank - b.rank)
-    .filter((member) => member.name.toLowerCase().includes(query.trim().toLowerCase()))
+  const { data, loading, error, reload } = useMemberData(() => memberApi.rankings(), [])
 
-  const memberLink = (name: string, className: string) => {
-    const member = memberByName(name)
-    return member ? (
-      <Link to={`/member/members/${member.username}`} className={className}>
-        {name}
-      </Link>
-    ) : (
-      <span className={className.replace('hover:text-brand-800 hover:underline', '')}>{name}</span>
+  const header = embedded ? null : (
+    <PageHeader
+      title="Rankings"
+      breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Rankings' }]}
+      actions={
+        <ButtonLink to="/member/rankings/points-transactions" variant="outline" size="sm">
+          Points ledger
+        </ButtonLink>
+      }
+    />
+  )
+
+  if (loading && !data) {
+    return (
+      <>
+        {header}
+        <LoadingBlock rows={5} />
+      </>
     )
   }
 
+  if (error || !data) {
+    return (
+      <>
+        {header}
+        <ErrorBlock message={error ?? 'The leaderboard could not be loaded.'} onRetry={reload} />
+      </>
+    )
+  }
+
+  const term = query.trim().toLowerCase()
+  const members = data.leaderboard.filter(
+    (member) =>
+      !term ||
+      member.name.toLowerCase().includes(term) ||
+      (member.course ?? '').toLowerCase().includes(term) ||
+      (member.team ?? '').toLowerCase().includes(term),
+  )
+
+  const isMe = (memberId: number) => data.my_entry?.member_id === memberId
+  const top = data.leaderboard.slice(0, 3)
+
   return (
     <>
-      {embedded ? null : (
-        <PageHeader
-          title="Rankings"
-          breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Rankings' }]}
-          actions={
-            <ButtonLink to="/member/rankings/points-transactions" variant="outline" size="sm">
-              Points ledger
-            </ButtonLink>
-          }
-        />
-      )}
+      {header}
 
       <div className="grid gap-3 sm:grid-cols-3">
-        {members.slice(0, 3).map((member) => (
-          <div key={member.name} className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4">
+        {top.map((member) => (
+          <div key={member.member_id} className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning-soft text-[0.8125rem] font-semibold tabular text-warning">
               {member.rank}
             </span>
             <div className="min-w-0">
-              {memberLink(
-                member.name,
-                'block truncate text-[0.8125rem] font-semibold text-ink-900 hover:text-brand-800 hover:underline',
-              )}
+              <p className="block truncate text-[0.8125rem] font-semibold text-ink-900">{member.name}</p>
               <p className="truncate text-[0.6875rem] text-ink-500">
-                {member.points} points · {member.team}
+                {member.points} points{member.team ? ` · ${member.team}` : ''}
               </p>
             </div>
             <Medal className="ml-auto h-4 w-4 shrink-0 text-gold" aria-hidden />
@@ -92,7 +107,9 @@ export function Rankings({ embedded = false }: { embedded?: boolean } = {}) {
             className="pl-9"
           />
         </div>
-        <p className="text-[0.75rem] text-ink-500">Showing the top {members.length} members</p>
+        <p className="text-[0.75rem] text-ink-500">
+          Showing {members.length} of {data.leaderboard.length} ranked members
+        </p>
       </div>
 
       <Card className="mt-3 overflow-hidden">
@@ -105,27 +122,28 @@ export function Rankings({ embedded = false }: { embedded?: boolean } = {}) {
                 <TH>Points</TH>
                 <TH>Competitions</TH>
                 <TH>Warmups</TH>
-                <TH>Best rank</TH>
                 <TH>Team</TH>
               </TR>
             </THead>
             <TBody>
               {members.map((member) => (
-                <TR key={member.name} className={member.name === demoMember.name ? 'bg-brand-50/50' : undefined}>
+                <TR key={member.member_id} className={isMe(member.member_id) ? 'bg-brand-50/50' : undefined}>
                   <TD className="font-semibold tabular text-ink-700">#{member.rank}</TD>
                   <TD>
-                    {memberLink(member.name, 'font-medium text-ink-900 hover:text-brand-800 hover:underline')}
-                    {member.name === demoMember.name ? (
+                    <span className="font-medium text-ink-900">{member.name}</span>
+                    {isMe(member.member_id) ? (
                       <Badge tone="green" className="ml-2">
                         You
                       </Badge>
                     ) : null}
+                    <span className="ml-2 text-[0.6875rem] text-ink-400">
+                      {[member.course, member.year].filter(Boolean).join(' · ')}
+                    </span>
                   </TD>
                   <TD className="font-semibold tabular text-ink-900">{member.points}</TD>
                   <TD className="tabular">{member.competitions}</TD>
                   <TD className="tabular">{member.warmups}</TD>
-                  <TD className="tabular">{member.best ? `#${member.best}` : '—'}</TD>
-                  <TD className="text-ink-500">{member.team}</TD>
+                  <TD className="text-ink-500">{member.team ?? '—'}</TD>
                 </TR>
               ))}
             </TBody>
@@ -134,36 +152,97 @@ export function Rankings({ embedded = false }: { embedded?: boolean } = {}) {
           <div className="p-4">
             <EmptyState
               compact
-              title="No members match that search"
-              description="Try a different name."
+              title={term ? 'No members match that search' : 'No ranked members yet'}
+              description={term ? 'Try a different name, course or team.' : 'Members appear here once points are awarded.'}
               action={
-                <Button variant="outline" size="sm" onClick={() => setQuery('')}>
-                  Clear search
-                </Button>
+                term ? (
+                  <Button variant="outline" size="sm" onClick={() => setQuery('')}>
+                    Clear search
+                  </Button>
+                ) : undefined
               }
             />
           </div>
         )}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3">
-          <p className="text-[0.6875rem] text-ink-400">Rankings include approved members and use all-time points.</p>
-          <Link
-            to="/member/rankings/points-transactions"
-            className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-brand-800 hover:underline"
-          >
-            How points are recorded
-            <ArrowUpRight className="h-3 w-3" aria-hidden />
-          </Link>
-        </div>
+        {data.my_entry ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3">
+            <p className="text-[0.6875rem] text-ink-400">
+              You are ranked #{data.my_entry.rank} with {data.my_entry.points} points.
+            </p>
+            <Link
+              to="/member/rankings/points-transactions"
+              className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-brand-800 hover:underline"
+            >
+              How points are recorded
+              <ArrowUpRight className="h-3 w-3" aria-hidden />
+            </Link>
+          </div>
+        ) : (
+          <div className="border-t border-line px-4 py-3">
+            <p className="text-[0.6875rem] text-ink-400">Rankings include approved members and use all-time points.</p>
+          </div>
+        )}
       </Card>
 
       <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-line bg-canvas/50 p-4">
         <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-brand-700" aria-hidden />
         <p className="text-[0.75rem] leading-5 text-ink-500">
-          Points are awarded by administrators for competition results, event check-ins, warmups and contributions. If a
-          points entry looks wrong, contact the club with the date and reason.
+          Points are awarded by administrators for competition results, event check-ins, warmups and contributions. If a points
+          entry looks wrong, contact the club with the date and reason.
         </p>
       </div>
     </>
+  )
+}
+
+function TeamStandings() {
+  const { data, loading, error, reload } = useMemberData(() => memberApi.rankings(), [])
+
+  if (loading && !data) return <LoadingBlock rows={4} />
+  if (error || !data) return <ErrorBlock message={error ?? 'Team standings could not be loaded.'} onRetry={reload} />
+
+  return (
+    <Card className="mb-5 overflow-hidden">
+      <CardHeader title="Team standings" description="Teams are ranked by the points their members earn." />
+      {data.teams.length ? (
+        <TableWrap>
+          <THead>
+            <TR>
+              <TH className="w-[70px]">Rank</TH>
+              <TH>Team</TH>
+              <TH>Points</TH>
+              <TH>Rating</TH>
+              <TH>Members</TH>
+              <TH>Entries</TH>
+            </TR>
+          </THead>
+          <TBody>
+            {data.teams.map((team) => (
+              <TR key={team.id}>
+                <TD className="font-semibold tabular text-ink-700">#{team.rank}</TD>
+                <TD className="font-medium text-ink-900">{team.name}</TD>
+                <TD className="font-semibold tabular">{team.points}</TD>
+                <TD>
+                  <span className="inline-flex items-center gap-1 tabular">
+                    {team.rating}
+                    <Star className="h-3 w-3 fill-gold text-gold" aria-hidden />
+                  </span>
+                </TD>
+                <TD className="tabular">{team.members_count}</TD>
+                <TD className="tabular">{team.participations}</TD>
+              </TR>
+            ))}
+          </TBody>
+        </TableWrap>
+      ) : (
+        <div className="p-4">
+          <EmptyState compact title="No team standings yet" description="Teams appear here once they are formed and compete." />
+        </div>
+      )}
+      <div className="border-t border-line px-4 py-3">
+        <p className="text-[0.6875rem] text-ink-400">Suspended teams remain visible but do not compete.</p>
+      </div>
+    </Card>
   )
 }
 
@@ -205,50 +284,7 @@ export function RankingsHub() {
 
         <TabsContent value="teams">
           <div className="pt-5">
-            <Card className="mb-5 overflow-hidden">
-              <CardHeader
-                title="Team standings"
-                description="Teams are ranked by total points, then rating, then name."
-              />
-              <TableWrap>
-                <THead>
-                  <TR>
-                    <TH className="w-[70px]">Rank</TH>
-                    <TH>Team</TH>
-                    <TH>Points</TH>
-                    <TH>Rating</TH>
-                    <TH>Members</TH>
-                    <TH>Status</TH>
-                  </TR>
-                </THead>
-                <TBody>
-                  {demoTeams
-                    .slice()
-                    .sort((a, b) => b.points - a.points || b.rating - a.rating || a.name.localeCompare(b.name))
-                    .map((team, index) => (
-                      <TR key={team.id}>
-                        <TD className="font-semibold tabular text-ink-700">#{index + 1}</TD>
-                        <TD className="font-medium text-ink-900">{team.name}</TD>
-                        <TD className="font-semibold tabular">{team.points}</TD>
-                        <TD>
-                          <span className="inline-flex items-center gap-1 tabular">
-                            {team.rating}
-                            <Star className="h-3 w-3 fill-gold text-gold" aria-hidden />
-                          </span>
-                        </TD>
-                        <TD className="tabular">{team.members}</TD>
-                        <TD>
-                          <Badge tone={team.status === 'active' ? 'green' : 'red'}>{team.status}</Badge>
-                        </TD>
-                      </TR>
-                    ))}
-                </TBody>
-              </TableWrap>
-              <div className="border-t border-line px-4 py-3">
-                <p className="text-[0.6875rem] text-ink-400">Suspended teams remain visible but do not compete.</p>
-              </div>
-            </Card>
-
+            <TeamStandings />
             <Teams embedded />
           </div>
         </TabsContent>

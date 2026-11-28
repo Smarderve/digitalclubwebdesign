@@ -1,7 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Save } from 'lucide-react'
-import { demoMemberProjects } from '../../data/demo'
+import { ApiError } from '../../lib/api'
+import { memberApi } from '../../lib/memberApi'
+import type { MemberProject } from '../../lib/memberApi'
+import { useMemberData } from '../../lib/useMemberData'
+import { ErrorBlock, LoadingBlock } from '../../components/app/DataState'
 import { PageHeader } from '../../components/app/primitives'
 import { Alert, Card, CardBody, Field, Input, Select, Textarea } from '../../components/ui'
 import { Button } from '../../components/ui/button'
@@ -18,23 +22,51 @@ type ProjectValues = {
 
 export function ProjectForm() {
   const { id } = useParams()
+  const editing = Boolean(id)
+
+  const { data, loading, error, reload } = useMemberData(
+    () => (editing ? memberApi.project(Number(id)) : Promise.resolve(null)),
+    [id],
+  )
+
+  if (editing && loading && data === null) {
+    return (
+      <>
+        <PageHeader title="Edit project" breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Projects', to: '/member/projects' }, { label: 'Edit' }]} />
+        <LoadingBlock rows={4} />
+      </>
+    )
+  }
+
+  if (editing && error) {
+    return (
+      <>
+        <PageHeader title="Edit project" breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Projects', to: '/member/projects' }, { label: 'Edit' }]} />
+        <ErrorBlock message={error} onRetry={reload} />
+      </>
+    )
+  }
+
+  return <ProjectFields existing={data} editing={editing} />
+}
+
+function ProjectFields({ existing, editing }: { existing: MemberProject | null; editing: boolean }) {
   const navigate = useNavigate()
   const { push } = useToast()
-  const existing = demoMemberProjects.find((project) => String(project.id) === id)
-  const editing = Boolean(id)
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<ProjectValues>({
     defaultValues: {
       title: existing?.title ?? '',
       description: existing?.description ?? '',
-      technologies: existing?.technologies ?? '',
-      link: existing?.link ?? '',
-      demo: existing?.demo ?? '',
-      visibility: existing?.visibility ?? 'Private',
+      technologies: existing?.technologies.join(', ') ?? '',
+      link: existing?.links.github ?? '',
+      demo: existing?.links.demo ?? '',
+      visibility: existing ? (existing.is_public ? 'Public' : 'Private') : 'Private',
     },
   })
 
@@ -44,7 +76,7 @@ export function ProjectForm() {
         title={editing ? 'Edit project' : 'Add a project'}
         description={
           editing
-            ? 'Update your project details. Changes would be reviewed before appearing publicly.'
+            ? 'Update your project details. Public changes appear on your profile immediately.'
             : 'Add a project to your member profile. You can keep it private until it is ready to share.'
         }
         breadcrumbs={[
@@ -58,12 +90,36 @@ export function ProjectForm() {
         <Card>
           <form
             noValidate
-            onSubmit={handleSubmit(async () => {
-              await new Promise((resolve) => setTimeout(resolve, 700))
-              push({
-                tone: 'success',
-                title: editing ? 'Project validated' : 'Project validated',
-              })
+            onSubmit={handleSubmit(async (values) => {
+              const payload = {
+                title: values.title,
+                description: values.description || null,
+                technologies: values.technologies,
+                github_link: values.link || null,
+                demo_link: values.demo || null,
+                is_public: values.visibility === 'Public',
+              }
+              try {
+                if (editing && existing) {
+                  await memberApi.updateProject(existing.id, payload)
+                  push({ tone: 'success', title: 'Project saved' })
+                } else {
+                  await memberApi.createProject(payload)
+                  push({ tone: 'success', title: 'Project added', description: 'It is listed in My projects.' })
+                }
+              } catch (err) {
+                if (err instanceof ApiError) {
+                  if (err.details.title) setError('title', { message: err.details.title })
+                  if (err.details.description) setError('description', { message: err.details.description })
+                  if (err.details.technologies) setError('technologies', { message: err.details.technologies })
+                  if (!Object.keys(err.details).length) {
+                    push({ tone: 'error', title: 'Project not saved', description: err.message })
+                  }
+                  return
+                }
+                push({ tone: 'error', title: 'Project not saved', description: 'Check your connection and try again.' })
+                return
+              }
               navigate('/member/projects')
             })}
           >
@@ -73,14 +129,16 @@ export function ProjectForm() {
                   id="project-title"
                   placeholder="e.g. Library Seat Finder"
                   aria-invalid={Boolean(errors.title)}
-                  {...register('title', { required: 'Enter a project title.' })}
+                  {...register('title', {
+                    required: 'Enter a project title.',
+                    maxLength: { value: 200, message: 'Keep the title under 200 characters.' },
+                  })}
                 />
               </Field>
 
               <Field
                 label="Description"
                 htmlFor="project-description"
-                required
                 hint="Explain the problem, what the project does and what you learned. Avoid claiming outcomes you cannot evidence."
                 error={errors.description?.message}
               >
@@ -89,11 +147,11 @@ export function ProjectForm() {
                   rows={5}
                   placeholder="What does this project do?"
                   aria-invalid={Boolean(errors.description)}
-                  {...register('description', { required: 'Describe the project.' })}
+                  {...register('description', { maxLength: { value: 5000, message: 'Keep the description under 5000 characters.' } })}
                 />
               </Field>
 
-              <Field label="Technologies" htmlFor="project-technologies" hint="Separate with commas, e.g. React, TypeScript, Firebase.">
+              <Field label="Technologies" htmlFor="project-technologies" hint="Separate with commas, e.g. React, TypeScript, Firebase." error={errors.technologies?.message}>
                 <Input id="project-technologies" placeholder="React, TypeScript, Firebase" {...register('technologies')} />
               </Field>
 
@@ -109,7 +167,7 @@ export function ProjectForm() {
               <Field
                 label="Visibility"
                 htmlFor="project-visibility"
-                hint="Private projects are visible only to you and administrators. Public projects can be listed in the catalogue."
+                hint="Private projects are visible only to you and administrators. Public projects are listed in the catalogue."
               >
                 <Select id="project-visibility" {...register('visibility')}>
                   <option value="Private">Private</option>
@@ -118,8 +176,8 @@ export function ProjectForm() {
               </Field>
 
               <Alert tone="info" title="Project publication">
-                Public projects are reviewed before they appear on the website. Do not include confidential information or
-                other people's work without permission.
+                Publishing makes the project visible on your member profile straight away. Do not include confidential
+                information or other people's work without permission.
               </Alert>
             </CardBody>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-3.5">

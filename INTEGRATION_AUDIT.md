@@ -1322,6 +1322,25 @@ shape.
 All require a session. Identity always resolves from `current_user.member`; no
 endpoint accepts a `member_id` for "self".
 
+> **Phase 8 status (2026-11-27).** The API surface in `app/api/member.py` is
+> complete: MD1–MD4, MD6–MD15, MD16–MD34, MD35–MD41, MD42–MD46, MD47–MD50, plus
+> AU8 `POST /me/password` and the ME1 aggregates (53 rules).
+>
+> **MD5 `PUT /member/profile/privacy` is not implemented**: no `Member` column
+> stores a visibility map, so the endpoint would have to invent a setting or
+> change the schema. It stays a documented gap until a migration is approved
+> (§12.18 D1/D2, R16).
+>
+> **MD15** publishes a member project (`is_public = true`) and answers `202`
+> with `review_required: false`: the original application has no moderation
+> queue for member projects, and claiming one would be a fabricated workflow.
+>
+> **MD51** remains a gap: there is no message model; admin messaging writes
+> `NotificationBatch`/`MemberNotification` rows that MD24–MD26 already serve.
+>
+> Outstanding inside the phase: the React member pages still read demo data.
+> See `INTEGRATION_PROGRESS.md` §14–§15.
+
 | # | Path | Response | Notes / existing logic |
 | --- | --- | --- | --- |
 | MD1 | `GET /member/dashboard` | `{greeting_name, membership, points, rank, tier, next_tier, profile_completion, active_quiz, next_event, current_week, recent_rewards[≤5], team, unread}` | Replaces 12 separate `demoMember` reads; uses `member.dashboard` queries |

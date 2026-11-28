@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ArrowDown, ArrowUp, Inbox, MoreHorizontal, Search } from 'lucide-react'
-import { Badge, Dropdown, DropdownContent, DropdownItem, DropdownSeparator, DropdownTrigger, EmptyState, Pagination, TableWrap, TBody, TD, TH, THead, TR } from '../../components/ui'
+import { Alert, Badge, Dropdown, DropdownContent, DropdownItem, DropdownSeparator, DropdownTrigger, EmptyState, Pagination, TableWrap, TBody, TD, TH, THead, TR } from '../../components/ui'
 import { Input } from '../../components/ui/field'
 import { cn } from '../../lib/utils'
 
@@ -161,8 +161,17 @@ export function RowActions({ children, label = 'Record actions' }: { children: R
 export { DropdownItem, DropdownSeparator }
 
 /** Kept as a no-op wrapper so existing console pages stay unchanged. */
-export function DemoNotice(_props: { children?: ReactNode }) {
-  return null
+export function DemoNotice({ children }: { children?: ReactNode }) {
+  return (
+    <Alert tone="warning" title="Preview data">
+      {children ?? (
+        <>
+          This page is not connected to the club database yet. The records below are sample content for layout
+          review, not real club records, and nothing on this page is saved.
+        </>
+      )}
+    </Alert>
+  )
 }
 
 export function FilterChips<T extends string>({

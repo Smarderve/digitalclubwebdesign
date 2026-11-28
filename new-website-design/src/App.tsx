@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { usePublicTheme } from './features/settings/preferences'
@@ -7,6 +7,7 @@ import { TooltipProvider } from './components/ui/tooltip'
 import { SiteHeader } from './components/site/SiteHeader'
 import { SiteFooter } from './components/site/SiteFooter'
 import { AppShell, type NavSection } from './components/app/AppShell'
+import { memberApi } from './lib/memberApi'
 import {
   Activity,
   Award,
@@ -297,7 +298,28 @@ function ScrollToTop() {
   return null
 }
 
+/** The notification badge counts what the server reports; it never shows a sample number. */
+function useUnreadNotifications() {
+  const [unread, setUnread] = useState(0)
+  useEffect(() => {
+    let active = true
+    memberApi
+      .notifications()
+      .then((page) => {
+        if (active) setUnread(page.unread)
+      })
+      .catch(() => {
+        if (active) setUnread(0)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+  return unread
+}
+
 function MemberLayout() {
+  const unread = useUnreadNotifications()
   return (
     <AppShell
       nav={memberNav}
@@ -307,7 +329,7 @@ function MemberLayout() {
       profileTo="/member/profile"
       notificationsTo="/member/notifications"
       settingsTo="/member/settings"
-      unread={2}
+      unread={unread}
     />
   )
 }
@@ -328,6 +350,7 @@ function AdminLayout() {
 }
 
 function QuizmasterLayout() {
+  const unread = useUnreadNotifications()
   return (
     <AppShell
       nav={quizmasterNav}
@@ -336,7 +359,7 @@ function QuizmasterLayout() {
       homeTo="/quizmaster"
       profileTo="/member/profile"
       notificationsTo="/member/notifications"
-      unread={1}
+      unread={unread}
     />
   )
 }

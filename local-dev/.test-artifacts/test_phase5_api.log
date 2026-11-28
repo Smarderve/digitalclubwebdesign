@@ -1,0 +1,72 @@
+test_health_envelope_and_request_id (__main__.ApiFoundationTests.test_health_envelope_and_request_id) ... ok
+test_html_healthz_still_works (__main__.ApiFoundationTests.test_html_healthz_still_works) ... ok
+test_original_plaintext_404_path_is_not_json (__main__.ApiFoundationTests.test_original_plaintext_404_path_is_not_json)
+/api paths are JSON; a normal unknown page still redirects to home. ... ok
+test_ready_endpoint (__main__.ApiFoundationTests.test_ready_endpoint) ... ok
+test_unexpected_exception_is_safe_json_500 (__main__.ApiFoundationTests.test_unexpected_exception_is_safe_json_500) ... [2026-11-27 06:13:17,948] ERROR in errors: Unhandled API exception (request_id=, GET /api/v1/_boom)
+Traceback (most recent call last):
+  File "C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\errors.py", line 101, in wrapper
+    return view(*args, **kwargs)
+  File "C:\Users\Smarderve\Desktop\Projects\Digital Club\local-dev\test_phase5_api.py", line 64, in _boom
+    raise RuntimeError('boom: sqlite:///secret.db admin@example.com 42')
+RuntimeError: boom: sqlite:///secret.db admin@example.com 42
+ok
+test_unknown_api_path_returns_envelope_404 (__main__.ApiFoundationTests.test_unknown_api_path_returns_envelope_404) ... ok
+test_unwrapped_exception_is_safe_json_500 (__main__.ApiFoundationTests.test_unwrapped_exception_is_safe_json_500) ... [2026-11-27 06:13:17,950] ERROR in app: Exception on /api/v1/_boom-unwrapped [GET]
+Traceback (most recent call last):
+  File "C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Smarderve\Desktop\Projects\Digital Club\local-dev\test_phase5_api.py", line 71, in _boom_unwrapped
+    raise ValueError('raw failure sqlite:///secret.db')
+ValueError: raw failure sqlite:///secret.db
+ok
+test_wrong_method_returns_envelope_405 (__main__.ApiFoundationTests.test_wrong_method_returns_envelope_405) ... ok
+test_diagnostics_allowed_for_admin_and_leaks_nothing (__main__.AuthTests.test_diagnostics_allowed_for_admin_and_leaks_nothing) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\__init__.py:666: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  return User.query.get(int(user_id))
+ok
+test_diagnostics_forbidden_for_member (__main__.AuthTests.test_diagnostics_forbidden_for_member) ... ok
+test_diagnostics_requires_login (__main__.AuthTests.test_diagnostics_requires_login) ... ok
+test_inactive_account_is_rejected (__main__.AuthTests.test_inactive_account_is_rejected) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+ok
+test_me_requires_authentication (__main__.AuthTests.test_me_requires_authentication) ... ok
+test_me_returns_own_identity_and_is_uncacheable (__main__.AuthTests.test_me_returns_own_identity_and_is_uncacheable) ... ok
+test_same_origin_is_allowed (__main__.CsrfTests.test_same_origin_is_allowed) ... ok
+test_token_is_issued (__main__.CsrfTests.test_token_is_issued) ... ok
+test_untrusted_origin_is_rejected_even_with_valid_token (__main__.CsrfTests.test_untrusted_origin_is_rejected_even_with_valid_token) ... ok
+test_verify_accepts_valid_header_token (__main__.CsrfTests.test_verify_accepts_valid_header_token) ... ok
+test_verify_rejects_invalid_token (__main__.CsrfTests.test_verify_rejects_invalid_token) ... ok
+test_verify_rejects_missing_token (__main__.CsrfTests.test_verify_rejects_missing_token) ... ok
+test_form_with_token_succeeds (__main__.ExistingFormCompatibilityTests.test_form_with_token_succeeds) ... ok
+test_form_without_token_is_rejected (__main__.ExistingFormCompatibilityTests.test_form_without_token_is_rejected) ... ok
+test_forms_render_a_token_field (__main__.ExistingFormCompatibilityTests.test_forms_render_a_token_field) ... ok
+test_login_form_passes_csrf (__main__.ExistingFormCompatibilityTests.test_login_form_passes_csrf) ... ok
+test_logout_is_post_only (__main__.ExistingFormCompatibilityTests.test_logout_is_post_only) ... ok
+test_public_pages_still_render (__main__.ExistingFormCompatibilityTests.test_public_pages_still_render) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\routes\main.py:24: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  Event.event_date >= datetime.utcnow(),
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\routes\main.py:388: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now = datetime.utcnow()
+ok
+test_cookie_and_origin_defaults (__main__.ProductionSecretTests.test_cookie_and_origin_defaults) ... ok
+test_development_uses_documented_fallback (__main__.ProductionSecretTests.test_development_uses_documented_fallback) ... ok
+test_explicit_secret_is_used_verbatim (__main__.ProductionSecretTests.test_explicit_secret_is_used_verbatim) ... ok
+test_missing_secret_refuses_to_start_outside_development (__main__.ProductionSecretTests.test_missing_secret_refuses_to_start_outside_development) ... ok
+test_missing_secret_refuses_when_environment_unset (__main__.ProductionSecretTests.test_missing_secret_refuses_when_environment_unset) ... ok
+test_process_level_refusal (__main__.ProductionSecretTests.test_process_level_refusal)
+A real import in a production env with no key must exit non-zero. ... ok
+test_third_request_is_rate_limited (__main__.RateLimitTests.test_third_request_is_rate_limited) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 1.885s
+
+OK
+backed by temp database: C:\Users\Smarderve\Desktop\Projects\Digital Club\local-dev\.test-artifacts\test_phase5.sqlite
+tables created in temp database: 59
+<sys>:0: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000002A6404D5990>

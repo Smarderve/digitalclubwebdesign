@@ -1,0 +1,143 @@
+test_anonymous_write_is_401 (__main__.AccessControl.test_anonymous_write_is_401) ... ok
+test_write_without_csrf_is_rejected (__main__.AccessControl.test_write_without_csrf_is_rejected) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask_login\login_manager.py:488: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  expires = datetime.utcnow() + duration
+ok
+test_invalid_type_is_422 (__main__.AvatarTests.test_invalid_type_is_422) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\__init__.py:666: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  return User.query.get(int(user_id))
+ok
+test_missing_file_is_422 (__main__.AvatarTests.test_missing_file_is_422) ... ok
+test_upload_replaces_the_avatar (__main__.AvatarTests.test_upload_replaces_the_avatar) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1830: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  stored = f"{current_user.id}_{int(datetime.utcnow().timestamp())}{extension}"
+ok
+test_new_capabilities_are_advertised (__main__.CapabilityTests.test_new_capabilities_are_advertised) ... ok
+test_closed_competition_is_409 (__main__.CompetitionWriteTests.test_closed_competition_is_409) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2429: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  competition = Competition.query.get(competition_id)
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\time_utils.py:29: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return datetime.utcnow() + timedelta(hours=offset)
+ok
+test_enrol_requires_terms (__main__.CompetitionWriteTests.test_enrol_requires_terms) ... ok
+test_enrol_then_duplicate (__main__.CompetitionWriteTests.test_enrol_then_duplicate) ... ok
+test_missing_submission_url_is_422 (__main__.CompetitionWriteTests.test_missing_submission_url_is_422) ... ok
+test_submission_then_duplicate (__main__.CompetitionWriteTests.test_submission_then_duplicate) ... ok
+test_submission_without_enrolment_is_409 (__main__.CompetitionWriteTests.test_submission_without_enrolment_is_409) ... ok
+test_team_enrol_by_leader (__main__.CompetitionWriteTests.test_team_enrol_by_leader) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2518: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  enrolled_at=datetime.utcnow(),
+ok
+test_apply_requires_a_manifesto_and_passport (__main__.ElectionWriteTests.test_apply_requires_a_manifesto_and_passport) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1514: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  election = Election.query.get(election_id)
+ok
+test_apply_then_withdraw (__main__.ElectionWriteTests.test_apply_then_withdraw) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2743: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  candidate.submitted_at = datetime.utcnow()
+ok
+test_apply_when_window_closed_is_409 (__main__.ElectionWriteTests.test_apply_when_window_closed_is_409) ... ok
+test_cannot_vote_for_yourself (__main__.ElectionWriteTests.test_cannot_vote_for_yourself) ... ok
+test_rejects_a_candidate_from_another_position (__main__.ElectionWriteTests.test_rejects_a_candidate_from_another_position) ... ok
+test_vote_then_duplicate (__main__.ElectionWriteTests.test_vote_then_duplicate) ... ok
+test_another_members_project_is_404 (__main__.ProjectWriteTests.test_another_members_project_is_404) ... ok
+test_create_read_update_delete (__main__.ProjectWriteTests.test_create_read_update_delete) ... ok
+test_missing_title_is_422 (__main__.ProjectWriteTests.test_missing_title_is_422) ... ok
+test_another_members_attempt_is_404 (__main__.QuizAttemptTests.test_another_members_attempt_is_404) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2094: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  quiz = Quiz.query.get(quiz_id)
+ok
+test_answer_after_submit_is_409 (__main__.QuizAttemptTests.test_answer_after_submit_is_409) ... ok
+test_answers_score_on_the_server_and_survive_submit (__main__.QuizAttemptTests.test_answers_score_on_the_server_and_survive_submit) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2151: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  question = QuizQuestion.query.get(row.get('question_id'))
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2156: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  option = QuizOption.query.get(row.get('choice_id') or row.get('option_id'))
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2169: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  answer.submitted_at = datetime.utcnow()
+ok
+test_closed_quiz_is_409 (__main__.QuizAttemptTests.test_closed_quiz_is_409) ... ok
+test_leaderboard_is_released_for_a_finished_quiz (__main__.QuizAttemptTests.test_leaderboard_is_released_for_a_finished_quiz) ... ok
+test_live_quiz_leaderboard_is_closed (__main__.QuizAttemptTests.test_live_quiz_leaderboard_is_closed) ... ok
+test_owner_cannot_attempt (__main__.QuizAttemptTests.test_owner_cannot_attempt) ... ok
+test_result_withholds_review_until_release (__main__.QuizAttemptTests.test_result_withholds_review_until_release) ... ok
+test_start_creates_one_attempt (__main__.QuizAttemptTests.test_start_creates_one_attempt) ... ok
+test_unknown_option_is_422 (__main__.QuizAttemptTests.test_unknown_option_is_422) ... ok
+test_violations_reduce_remaining_and_auto_submit (__main__.QuizAttemptTests.test_violations_reduce_remaining_and_auto_submit) ... ok
+test_approved_report_is_locked (__main__.SessionReportTests.test_approved_report_is_locked) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2032: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  session = SessionSchedule.query.get(session_id)
+ok
+test_instructor_files_a_report (__main__.SessionReportTests.test_instructor_files_a_report) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2072: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  report.submitted_at = datetime.utcnow()
+ok
+test_only_the_assigned_instructor_can_report (__main__.SessionReportTests.test_only_the_assigned_instructor_can_report) ... ok
+test_invalid_decision_is_422 (__main__.TeamWriteTests.test_invalid_decision_is_422) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2866: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  team = Team.query.get(team_id)
+ok
+test_leader_cannot_be_removed (__main__.TeamWriteTests.test_leader_cannot_be_removed) ... ok
+test_member_already_in_a_team_cannot_request (__main__.TeamWriteTests.test_member_already_in_a_team_cannot_request) ... ok
+test_non_leader_cannot_decide_or_remove (__main__.TeamWriteTests.test_non_leader_cannot_decide_or_remove) ... ok
+test_request_decision_and_removal (__main__.TeamWriteTests.test_request_decision_and_removal) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2927: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  requested_at=datetime.utcnow(),
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2976: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  request_row = TeamMember.query.get(request_id)
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:2997: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  request_row.approved_at = datetime.utcnow()
+[2026-11-27 06:13:14,390] ERROR in sms: BEEM credentials are missing. Set BEEM_API_KEY and BEEM_SECRET_KEY in .env.
+[2026-11-27 06:13:14,390] WARNING in utils: SMS delivery failed for 255700000001
+ok
+
+----------------------------------------------------------------------
+Ran 41 tests in 22.317s
+
+OK
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+<sys>:0: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x0000021E345C3970>

@@ -1,0 +1,100 @@
+C:\Users\Smarderve\Desktop\Projects\Digital Club\local-dev\test_phase8_member.py:83: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  NOW = datetime.utcnow()
+test_anonymous_is_401 (__main__.AccessControl.test_anonymous_is_401) ... ok
+test_another_members_notification_is_404 (__main__.AccessControl.test_another_members_notification_is_404) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask_login\login_manager.py:488: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  expires = datetime.utcnow() + duration
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\__init__.py:666: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  return User.query.get(int(user_id))
+ok
+test_every_member_read_route_requires_a_session (__main__.AccessControl.test_every_member_read_route_requires_a_session) ... ok
+test_detail (__main__.CompetitionTests.test_detail) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\models.py:153: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  today = datetime.utcnow().date()
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\models.py:634: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  today = datetime.utcnow().date()
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1289: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  competition = Competition.query.get(competition_id)
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\time_utils.py:29: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return datetime.utcnow() + timedelta(hours=offset)
+ok
+test_finalized_leaderboard_has_no_email (__main__.CompetitionTests.test_finalized_leaderboard_has_no_email) ... ok
+test_leaderboard_closed_until_finalized (__main__.CompetitionTests.test_leaderboard_closed_until_finalized) ... ok
+test_list_buckets_active_and_past (__main__.CompetitionTests.test_list_buckets_active_and_past) ... ok
+test_dashboard_aggregates (__main__.DashboardTests.test_dashboard_aggregates) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:327: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  Event.event_date >= datetime.utcnow(),
+ok
+test_dashboard_is_no_store (__main__.DashboardTests.test_dashboard_is_no_store) ... ok
+test_me_includes_member_aggregates (__main__.DashboardTests.test_me_includes_member_aggregates) ... ok
+test_digital_id (__main__.DigitalIdTests.test_digital_id) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:180: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+  issued_at = datetime.utcfromtimestamp(os.path.getmtime(path))
+ok
+test_image_is_served_no_store (__main__.DigitalIdTests.test_image_is_served_no_store) ... C:\Users\Smarderve\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\unittest\case.py:606: ResourceWarning: unclosed file <_io.BufferedReader name='C:\\Users\\Smarderve\\Desktop\\Projects\\Digital Club\\local-dev\\.test-artifacts\\uploads_phase8\\digital_ids\\test-id_front.png'>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_invalid_side_is_422 (__main__.DigitalIdTests.test_invalid_side_is_422) ... ok
+test_regenerate (__main__.DigitalIdTests.test_regenerate) ... ok
+test_detail_lists_ballot (__main__.ElectionTests.test_detail_lists_ballot) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1514: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  election = Election.query.get(election_id)
+ok
+test_list (__main__.ElectionTests.test_list) ... ok
+test_results_are_closed (__main__.ElectionTests.test_results_are_closed) ... ok
+test_cancel_without_rsvp_is_404 (__main__.EventTests.test_cancel_without_rsvp_is_404) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+ok
+test_past_scope (__main__.EventTests.test_past_scope) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:688: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now = datetime.utcnow()
+ok
+test_rsvp_cancel (__main__.EventTests.test_rsvp_cancel) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:719: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  event = Event.query.get(event_id)
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:734: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  if event.event_date < datetime.utcnow():
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:786: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  event = Event.query.get(event_id)
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:787: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  if event is not None and event.event_date < datetime.utcnow():
+ok
+test_rsvp_create_then_duplicate (__main__.EventTests.test_rsvp_create_then_duplicate) ... ok
+test_rsvp_for_a_past_event_is_409 (__main__.EventTests.test_rsvp_for_a_past_event_is_409) ... ok
+test_upcoming_scope_and_audience (__main__.EventTests.test_upcoming_scope_and_audience) ... ok
+test_membership_and_payments (__main__.MembershipTests.test_membership_and_payments) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\models.py:624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  today = datetime.utcnow().date()
+ok
+test_detail_does_not_mark_as_read (__main__.NotificationTests.test_detail_does_not_mark_as_read) ... ok
+test_list_reports_unread (__main__.NotificationTests.test_list_reports_unread) ... ok
+test_mark_read_is_idempotent (__main__.NotificationTests.test_mark_read_is_idempotent) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1091: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  notification.read_at = datetime.utcnow()
+ok
+test_read_all (__main__.NotificationTests.test_read_all) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1102: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now = datetime.utcnow()
+ok
+test_password_changes (__main__.PasswordTests.test_password_changes) ... ok
+test_short_new_password (__main__.PasswordTests.test_short_new_password) ... ok
+test_wrong_current_password (__main__.PasswordTests.test_wrong_current_password) ... ok
+test_invalid_course_is_422 (__main__.ProfileTests.test_invalid_course_is_422) ... ok
+test_missing_required_field_is_422 (__main__.ProfileTests.test_missing_required_field_is_422) ... ok
+test_profile_is_the_full_self_record (__main__.ProfileTests.test_profile_is_the_full_self_record) ... ok
+test_update_profile (__main__.ProfileTests.test_update_profile) ... ok
+test_only_own_projects_including_private (__main__.ProjectTests.test_only_own_projects_including_private) ... ok
+test_draft_quiz_is_404 (__main__.QuizTests.test_draft_quiz_is_404) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1177: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  quiz = Quiz.query.get(quiz_id)
+ok
+test_only_published_quizzes_are_listed (__main__.QuizTests.test_only_published_quizzes_are_listed) ... ok
+test_quiz_detail_withholds_answers (__main__.QuizTests.test_quiz_detail_withholds_answers) ... ok
+test_leaderboard_order_and_my_entry (__main__.RankingTests.test_leaderboard_order_and_my_entry) ... ok
+test_points_transactions_are_own (__main__.RankingTests.test_points_transactions_are_own) ... ok
+test_history_is_own_ledger_only (__main__.RewardsTests.test_history_is_own_ledger_only) ... ok
+test_rewards_ladder (__main__.RewardsTests.test_rewards_ladder) ... ok
+test_results_expose_no_contact_details (__main__.SearchTests.test_results_expose_no_contact_details) ... ok
+test_short_query_is_422 (__main__.SearchTests.test_short_query_is_422) ... ok
+test_instructors (__main__.SessionTests.test_instructors) ... ok
+test_timetable (__main__.SessionTests.test_timetable) ... ok
+test_detail (__main__.TeamTests.test_detail) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\api\member.py:1728: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  team = Team.query.get(team_id)
+ok
+test_overview (__main__.TeamTests.test_overview) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 17.312s
+
+OK
+<sys>:0: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001F4B1827F10>

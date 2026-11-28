@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { Vote } from 'lucide-react'
-import { demoElection } from '../../data/demo'
+import { memberApi } from '../../lib/memberApi'
+import { useMemberData } from '../../lib/useMemberData'
 import { PageHeader } from '../../components/app/primitives'
 import { ButtonLink, Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui'
 import { formatDate } from '../../lib/utils'
@@ -9,19 +10,22 @@ import { MyProjects } from './MyProjects'
 
 const TABS = ['events', 'projects'] as const
 
-/** An election is only surfaced while voting is actually open. */
-function activeElection() {
-  if (demoElection.status !== 'voting') return null
-  return new Date(demoElection.votingClose).getTime() > Date.now() ? demoElection : null
-}
-
 /** Activities contains exactly Events and Projects. Competitions and Rankings
     are primary destinations of their own. */
 export function ActivitiesHub() {
   const [params, setParams] = useSearchParams()
   const requested = params.get('tab')
   const tab = TABS.includes(requested as (typeof TABS)[number]) ? (requested as string) : 'events'
-  const election = activeElection()
+  const { data } = useMemberData(() => memberApi.elections(), [])
+
+  const election =
+    data?.active.find(
+      (entry) =>
+        entry.can_vote &&
+        !entry.has_voted &&
+        entry.phase === 'voting' &&
+        (!entry.voting.close || new Date(entry.voting.close).getTime() > Date.now()),
+    ) ?? null
 
   return (
     <>
@@ -36,8 +40,10 @@ export function ActivitiesHub() {
             <div className="min-w-0">
               <p className="text-[0.8125rem] font-semibold text-ink-900">Voting is open — {election.title}</p>
               <p className="mt-0.5 text-[0.75rem] text-ink-500">
-                {election.positions.length} positions · closes{' '}
-                {formatDate(election.votingClose, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                {election.positions_count} positions
+                {election.voting.close
+                  ? ` · closes ${formatDate(election.voting.close, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`
+                  : ''}
               </p>
             </div>
           </div>

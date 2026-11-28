@@ -9,15 +9,15 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock,
-  Trophy,
   UserMinus,
   UserPlus,
   Users,
-  Wallet,
   X,
 } from 'lucide-react'
-import { demoNotifications } from '../../data/demo'
-import { PageHeader, SectionTitle } from '../../components/app/primitives'
+import { memberApi, type MemberNotification } from '../../lib/memberApi'
+import { useMemberData } from '../../lib/useMemberData'
+import { ErrorBlock, LoadingBlock } from '../../components/app/DataState'
+import { PageHeader } from '../../components/app/primitives'
 import { Badge, Button, ButtonLink, Card, EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui'
 import { cn, formatDate } from '../../lib/utils'
 import { useToast } from '../../context/ToastContext'
@@ -32,11 +32,6 @@ import {
 import type { SocialNotification } from '../../features/social/types'
 
 const kindLabel: Record<string, string> = {
-  competition: 'Competition',
-  session: 'Session',
-  membership: 'Membership',
-  team: 'Team',
-  quiz: 'Warmup',
   follow: 'New follower',
   follow_request: 'Follow request',
   request_approved: 'Request approved',
@@ -63,14 +58,15 @@ function socialIcon(kind: SocialNotification['kind']) {
 
 type CombinedItem =
   | { type: 'social'; id: string; date: string; read: boolean; item: SocialNotification }
-  | { type: 'demo'; id: string; date: string; read: boolean; item: (typeof demoNotifications)[number] }
+  | { type: 'server'; id: string; date: string; read: boolean; item: MemberNotification }
 
 export function MemberNotifications() {
   useSocial()
   const viewer = useViewer()
   const { push } = useToast()
-  const [items, setItems] = useState(demoNotifications)
+  const { data, loading, error, reload } = useMemberData(() => memberApi.notifications(), [])
   const [tab, setTab] = useState('all')
+  const [marking, setMarking] = useState(false)
 
   const social = notificationsFor(viewer)
   const requests = viewer ? requestViews(viewer) : { incoming: [], outgoing: [] }
@@ -78,11 +74,53 @@ export function MemberNotifications() {
 
   const combined: CombinedItem[] = [
     ...social.map((item) => ({ type: 'social' as const, id: item.id, date: item.createdAt, read: item.read, item })),
-    ...items.map((item) => ({ type: 'demo' as const, id: String(item.id), date: item.date, read: item.read, item })),
+    ...(data?.items ?? []).map((item) => ({
+      type: 'server' as const,
+      id: String(item.id),
+      date: item.created_at,
+      read: item.is_read,
+      item,
+    })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  const unread = combined.filter((item) => !item.read).length
-  const visible = tab === 'unread' ? combined.filter((item) => !item.read) : combined
+  const unread = combined.filter((entry) => !entry.read).length
+  const visible = tab === 'unread' ? combined.filter((entry) => !entry.read) : combined
+
+  async function markAllRead() {
+    setMarking(true)
+    try {
+      await memberApi.markAllNotificationsRead()
+      markSocialNotificationsRead(viewer)
+      push({ tone: 'success', title: 'Notifications marked as read' })
+      reload()
+    } catch (catchError) {
+      push({
+        tone: 'error',
+        title: 'Could not mark notifications as read',
+        description: catchError instanceof Error ? catchError.message : 'Try again.',
+      })
+    } finally {
+      setMarking(false)
+    }
+  }
+
+  if (loading && !data) {
+    return (
+      <>
+        <PageHeader title="Notifications" breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Notifications' }]} />
+        <LoadingBlock rows={4} />
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        <PageHeader title="Notifications" breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Notifications' }]} />
+        <ErrorBlock message={error ?? 'Your notifications could not be loaded.'} onRetry={reload} />
+      </>
+    )
+  }
 
   return (
     <>
@@ -94,14 +132,10 @@ export function MemberNotifications() {
             variant="outline"
             size="sm"
             iconLeft={<CheckCheck className="h-3.5 w-3.5" />}
-            disabled={unread === 0}
-            onClick={() => {
-              setItems((current) => current.map((item) => ({ ...item, read: true })))
-              markSocialNotificationsRead(viewer)
-              push({ tone: 'info', title: 'Notifications marked as read' })
-            }}
+            disabled={unread === 0 || marking}
+            onClick={markAllRead}
           >
-            Mark all as read
+            {marking ? 'Marking…' : 'Mark all as read'}
           </Button>
         }
       />
@@ -183,13 +217,13 @@ export function MemberNotifications() {
                       </div>
                     </li>
                   ) : (
-                    <li key={`demo-${entry.id}`}>
+                    <li key={`server-${entry.id}`}>
                       <Link
                         to={`/member/notifications/${entry.id}`}
-                        onClick={() =>
-                          setItems((current) => current.map((item) => (item.id === entry.item.id ? { ...item, read: true } : item)))
-                        }
-                        className={cn('group flex items-start gap-3 px-4 py-4 transition-colors hover:bg-ink-50/60', !entry.read && 'bg-brand-50/25')}
+                        className={cn(
+                          'group flex items-start gap-3 px-4 py-4 transition-colors hover:bg-ink-50/60',
+                          !entry.read && 'bg-brand-50/25',
+                        )}
                       >
                         <span
                           className={cn(
@@ -197,10 +231,7 @@ export function MemberNotifications() {
                             !entry.read ? 'bg-brand-50 text-brand-700' : 'bg-ink-50 text-ink-400',
                           )}
                         >
-                          {entry.item.kind === 'competition' ? <Trophy className="h-3.5 w-3.5" aria-hidden /> : null}
-                          {entry.item.kind === 'team' ? <Users className="h-3.5 w-3.5" aria-hidden /> : null}
-                          {entry.item.kind === 'membership' ? <Wallet className="h-3.5 w-3.5" aria-hidden /> : null}
-                          {!['competition', 'team', 'membership'].includes(entry.item.kind) ? <Bell className="h-3.5 w-3.5" aria-hidden /> : null}
+                          <Bell className="h-3.5 w-3.5" aria-hidden />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex flex-wrap items-center gap-2">
@@ -209,13 +240,18 @@ export function MemberNotifications() {
                             </span>
                             {!entry.read ? <span className="h-1.5 w-1.5 rounded-full bg-brand-600" aria-label="Unread" /> : null}
                           </span>
-                          <span className="mt-1 block text-[0.75rem] leading-5 text-ink-500">{entry.item.body}</span>
+                          {entry.item.message ? (
+                            <span className="mt-1 block text-[0.75rem] leading-5 text-ink-500">{entry.item.message}</span>
+                          ) : null}
                           <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[0.6875rem] text-ink-400">
-                            <Badge tone="outline">{kindLabel[entry.item.kind] ?? 'Notice'}</Badge>
-                            <span>{relativeTime(entry.item.date)}</span>
+                            <Badge tone="outline">Club notice</Badge>
+                            <span>{relativeTime(entry.item.created_at)}</span>
                           </span>
                         </span>
-                        <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-ink-300 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                        <ChevronRight
+                          className="mt-1 h-4 w-4 shrink-0 text-ink-300 transition-transform group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
                       </Link>
                     </li>
                   ),
@@ -225,12 +261,18 @@ export function MemberNotifications() {
               <div className="p-4">
                 <EmptyState
                   icon={<BellOff className="h-4 w-4" aria-hidden />}
-                  title="No unread notifications"
-                  description="You have read everything in this list. New notifications will appear here."
+                  title={tab === 'unread' ? 'No unread notifications' : 'No notifications yet'}
+                  description={
+                    tab === 'unread'
+                      ? 'You have read everything in this list. New notifications will appear here.'
+                      : 'Club updates, competition results and team notices will appear here.'
+                  }
                   action={
-                    <Button variant="outline" size="sm" onClick={() => setTab('all')}>
-                      View all notifications
-                    </Button>
+                    tab === 'unread' ? (
+                      <Button variant="outline" size="sm" onClick={() => setTab('all')}>
+                        View all notifications
+                      </Button>
+                    ) : undefined
                   }
                 />
               </div>
@@ -240,8 +282,7 @@ export function MemberNotifications() {
       </Tabs>
 
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
-        Follow activity and requests are stored with the same notification records used by the member account. Club broadcasts
-        remain demonstration data.
+        Club notices are sent by administrators. Follow activity and requests are listed alongside them.
       </p>
     </>
   )
@@ -254,14 +295,22 @@ export function MemberNotificationDetail() {
   const { push } = useToast()
   const social = notificationsFor(viewer)
   const socialItem = social.find((entry) => entry.id === id)
-  const item = demoNotifications.find((entry) => String(entry.id) === id)
   const requests = viewer ? requestViews(viewer) : { incoming: [], outgoing: [] }
   const pending = socialItem?.requestId ? requests.incoming.some((request) => request.id === socialItem.requestId) : false
+
+  const { data: item, loading, error, reload } = useMemberData(
+    () => (socialItem ? Promise.resolve(null) : memberApi.notification(Number(id))),
+    [id, Boolean(socialItem)],
+  )
+  const [marking, setMarking] = useState(false)
 
   if (socialItem) {
     return (
       <>
-        <Link to="/member/notifications" className="mb-4 inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-ink-500 hover:text-ink-900">
+        <Link
+          to="/member/notifications"
+          className="mb-4 inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-ink-500 hover:text-ink-900"
+        >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           All notifications
         </Link>
@@ -271,7 +320,13 @@ export function MemberNotificationDetail() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="outline">{kindLabel[socialItem.kind]}</Badge>
               <span className="text-[0.6875rem] text-ink-400">
-                {formatDate(socialItem.createdAt, { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                {formatDate(socialItem.createdAt, {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
             </div>
             <h1 className="mt-2 text-[1.375rem] font-semibold leading-snug tracking-[-0.01em] text-ink-950">{socialItem.title}</h1>
@@ -316,41 +371,70 @@ export function MemberNotificationDetail() {
     )
   }
 
-  if (!item) {
+  if (loading && !item) {
     return (
       <>
-        <PageHeader title="Notification not found" breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Notifications', to: '/member/notifications' }]} />
-        <Card>
-          <div className="p-4">
-            <EmptyState
-              title="This notification is not available"
-              description="It may have been removed, or the link is incorrect. Open the notification list to see current updates."
-              action={
-                <ButtonLink to="/member/notifications" size="sm">
-                  Back to notifications
-                </ButtonLink>
-              }
-            />
-          </div>
-        </Card>
+        <PageHeader
+          title="Notification"
+          breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Notifications', to: '/member/notifications' }]}
+        />
+        <LoadingBlock rows={2} />
       </>
     )
   }
 
-  const related =
-    item.kind === 'competition'
-      ? { to: '/member/rankings', label: 'View rankings' }
-      : item.kind === 'session'
-        ? { to: '/member/sessions/timetable', label: 'Open timetable' }
-        : item.kind === 'membership'
-          ? { to: '/member/membership', label: 'View membership' }
-          : item.kind === 'team'
-            ? { to: '/member/teams', label: 'Open team hub' }
-            : { to: '/member/quizzes', label: 'Open warmups' }
+  if (error || !item) {
+    return (
+      <>
+        <PageHeader
+          title="Notification"
+          breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Notifications', to: '/member/notifications' }]}
+        />
+        {error ? (
+          <ErrorBlock message={error} onRetry={reload} />
+        ) : (
+          <Card>
+            <div className="p-4">
+              <EmptyState
+                title="This notification is not available"
+                description="It may have been removed, or the link is incorrect. Open the notification list to see current updates."
+                action={
+                  <ButtonLink to="/member/notifications" size="sm">
+                    Back to notifications
+                  </ButtonLink>
+                }
+              />
+            </div>
+          </Card>
+        )}
+      </>
+    )
+  }
+
+  async function markRead() {
+    if (!item) return
+    setMarking(true)
+    try {
+      await memberApi.markNotificationRead(item.id)
+      push({ tone: 'success', title: 'Marked as read' })
+      reload()
+    } catch (catchError) {
+      push({
+        tone: 'error',
+        title: 'Could not mark as read',
+        description: catchError instanceof Error ? catchError.message : 'Try again.',
+      })
+    } finally {
+      setMarking(false)
+    }
+  }
 
   return (
     <>
-      <Link to="/member/notifications" className="mb-4 inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-ink-500 hover:text-ink-900">
+      <Link
+        to="/member/notifications"
+        className="mb-4 inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-ink-500 hover:text-ink-900"
+      >
         <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
         All notifications
       </Link>
@@ -358,49 +442,34 @@ export function MemberNotificationDetail() {
       <article className="rounded-lg border border-line bg-surface">
         <header className="border-b border-line px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge tone="outline">{kindLabel[item.kind] ?? 'Notice'}</Badge>
+            <Badge tone="outline">Club notice</Badge>
+            <Badge tone={item.is_read ? 'neutral' : 'green'}>{item.is_read ? 'Read' : 'Unread'}</Badge>
             <span className="text-[0.6875rem] text-ink-400">
-              {formatDate(item.date, { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              {formatDate(item.created_at, {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </span>
           </div>
           <h1 className="mt-2 text-[1.375rem] font-semibold leading-snug tracking-[-0.01em] text-ink-950">{item.title}</h1>
         </header>
         <div className="px-5 py-5">
-          <p className="max-w-[68ch] text-[0.875rem] leading-7 text-ink-700">{item.body}</p>
-          <p className="mt-3 max-w-[68ch] text-[0.8125rem] leading-6 text-ink-500">
-            If this update changes something you have already planned for, check the related page for the current schedule or result.
-            Contact the club if you think the notification is wrong.
+          <p className="max-w-[68ch] whitespace-pre-line text-[0.875rem] leading-7 text-ink-700">
+            {item.message ?? 'This notice has no further detail.'}
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <ButtonLink to={related.to} size="sm">
-              {related.label}
+            <ButtonLink to="/member" size="sm">
+              Back to dashboard
             </ButtonLink>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => push({ tone: 'info', title: 'Marked as read' })}
-            >
-              Mark as read
+            <Button variant="outline" size="sm" disabled={item.is_read || marking} onClick={markRead}>
+              {item.is_read ? 'Already read' : marking ? 'Marking…' : 'Mark as read'}
             </Button>
           </div>
         </div>
       </article>
-
-      <SectionTitle className="mt-6" title="Other updates" description="Recent notifications in this list" />
-      <div className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface">
-        {demoNotifications
-          .filter((entry) => entry.id !== item.id)
-          .slice(0, 3)
-          .map((entry) => (
-            <Link key={entry.id} to={`/member/notifications/${entry.id}`} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-ink-50/60">
-              <div className="min-w-0">
-                <p className="truncate text-[0.8125rem] font-medium text-ink-900">{entry.title}</p>
-                <p className="text-[0.6875rem] text-ink-400">{formatDate(entry.date)}</p>
-              </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-ink-300" aria-hidden />
-            </Link>
-          ))}
-      </div>
     </>
   )
 }

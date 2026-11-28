@@ -170,6 +170,50 @@ newsletter validation/deduplication, CSRF/Origin enforcement, and 404/422 shapes
 The suite also covers populated response shapes; the live schema-only database
 shows empty states instead.
 
+## Phase 8 member-endpoint suite
+
+Same isolation: a temporary SQLite file under `local-dev/.test-artifacts/`,
+seeded member records, never `instance/dev_local.db`.
+
+```bash
+current-website/DIgital-Club/.venv/Scripts/python.exe local-dev/test_phase8_member.py
+```
+
+49 tests covering the member read surface (MD1–MD50): anonymous access is 401 on
+every route, a foreign notification is 404, dashboard/profile/digital-ID/
+membership/rewards/ledger/projects/events/RSVP/sessions/rankings/notifications/
+quizzes/competitions/elections/teams/search shapes and rules, no-store headers,
+answer withholding on quizzes, eligibility reasons, closed leaderboard and
+results, plus `POST /me/password`. It also asserts that `/me` now carries the
+points/rank/tier/membership aggregates.
+
+## Phase 8 member-write suite
+
+Separate database (`local-dev/.test-artifacts/test_phase8_writes.sqlite`) so the
+read suite's seeded state is never disturbed, and a separate uploads folder
+(`uploads_phase8_writes/`) so no real file is replaced.
+
+```bash
+current-website/DIgital-Club/.venv/Scripts/python.exe local-dev/test_phase8_writes.py
+```
+
+41 tests covering avatar upload and replacement, project create/read/update/
+delete/publish and cross-member 404s, the instructor-only session report and its
+approved lock, quiz start/answer/violation/submit/result/leaderboard (server-side
+scoring, forged `is_correct` ignored, auto-submit at three violations, review
+withheld until release), competition enrolment (individual and team) and
+submission, election apply/withdraw/vote (self-vote and duplicate-vote
+rejection), team join requests/decisions/removals with leader-only rules, and
+the new capability strings on `/me`.
+
+The fixture seeds times with `app_now_naive()` — the application compares quiz
+windows against application-local time, so a UTC fixture makes every seeded quiz
+look finished.
+
+Remaining Phase 8 work is the React member-page rewiring; the API surface itself
+is complete apart from MD5 (needs a migration) and MD51 (no message model). See
+`INTEGRATION_PROGRESS.md` §15.
+
 ## Both repositories
 
 The backend is a nested Git repository recorded as a gitlink. It is not a

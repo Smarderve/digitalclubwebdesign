@@ -42,6 +42,7 @@ os.chdir(BACKEND)
 import app.models  # noqa: E402,F401
 from app import create_app, db  # noqa: E402
 from app.api.ratelimit import reset_rate_limits  # noqa: E402
+from app.time_utils import app_now_naive  # noqa: E402
 from app.models import (  # noqa: E402
     Blog,
     Competition,
@@ -66,10 +67,13 @@ from app.models import (  # noqa: E402
 app = create_app()
 app.config.update(TESTING=True, PROPAGATE_EXCEPTIONS=False, RATELIMIT_ENABLED=True)
 
-NOW = datetime.utcnow()
+# Window columns (event dates, election windows) are application-local; seed
+# them on the same clock the API rules compare against.
+with app.app_context():
+    NOW = app_now_naive()
 
 
-def _user(email, name, *, approved=True, role='student'):
+def _user(email, name, *, approved=True, role='student', visibility='public'):
     user = User(email=email, role=role, is_approved=approved)
     user.set_password('phase7-password')
     db.session.add(user)
@@ -86,6 +90,10 @@ def _user(email, name, *, approved=True, role='student'):
         areas_of_interest='Web development, Data science',
         member_id_number=f'DC-2026-{user.id:04d}',
         created_at=datetime(2025, 10, 4),
+        # Mirrors the privacy migration: approved members are public, and a
+        # new profile would default to private.
+        profile_visibility=visibility,
+        discoverable=visibility == 'public',
     )
     db.session.add(member)
     db.session.flush()
@@ -101,6 +109,9 @@ def seed():
         alumni_member.status = 'alumni'
         alumni_member.year = 'Graduate'
         pending, pending_member = _user('pending.phase7@test.local', 'Pending Person', approved=False)
+        _, private_member = _user('private.phase7@test.local', 'Private Person', visibility='private')
+        _, partial_member = _user('partial.phase7@test.local', 'Partial Person')
+        partial_member.privacy_sections = '{"bio": false, "links": false}'
 
         news = News(
             title='Hackathon registration open',
@@ -279,6 +290,8 @@ def seed():
             'private_project_id': private_project.id,
             'pending_slug': f'pending-person-{pending_member.id}',
             'pending_email': pending.email,
+            'private_slug': f'private-person-{private_member.id}',
+            'partial_slug': f'partial-person-{partial_member.id}',
         }
 
 
@@ -328,8 +341,10 @@ class HomeAndStats(Base):
 
     def test_stats_counts(self):
         data = self.data('/api/v1/public/stats')
-        self.assertEqual(data['members']['total'], 3)  # admin has no member; 3 approved members
-        self.assertEqual(data['members']['students'], 2)
+        # admin has no member; Amina + Old Graduate, plus the two MD5 fixtures
+        # (one private profile, one with hidden sections).
+        self.assertEqual(data['members']['total'], 5)
+        self.assertEqual(data['members']['students'], 4)
         self.assertEqual(data['members']['alumni'], 1)
         self.assertEqual(data['projects']['total'], 3)
         self.assertEqual(data['projects']['published'], 2)
@@ -548,7 +563,23 @@ class MemberEndpoints(Base):
         self.assertEqual(
             self.client.get(f"/api/v1/public/members/{IDS['pending_slug']}").status_code, 404
         )
+        self.assertEqual(
+            self.client.get(f"/api/v1/public/members/{IDS['private_slug']}").status_code, 404
+        )
         self.assertEqual(self.client.get('/api/v1/public/members/unknown-1').status_code, 404)
+
+    def test_private_profile_is_not_listed(self):
+        names = [item['display_name'] for item in self.data('/api/v1/public/members')]
+        self.assertNotIn('Private Person', names)
+        self.assertIn('Partial Person', names)
+
+    def test_hidden_sections_carry_no_data(self):
+        data = self.data(f"/api/v1/public/members/{IDS['partial_slug']}")
+        self.assertIsNone(data['bio'])
+        self.assertEqual(data['links'], {})
+        # A section that was not hidden still shows.
+        self.assertEqual(data['interests'], ['Web development', 'Data science'])
+        self.assertEqual(data['display_name'], 'Partial Person')
 
 
 class VerifyEndpoints(Base):

@@ -195,7 +195,7 @@ export function AppShell({
   profileTo,
   notificationsTo,
   settingsTo,
-  unread = 2,
+  unread = 0,
 }: {
   nav: NavSection[]
   areaLabel: string

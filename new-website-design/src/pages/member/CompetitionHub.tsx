@@ -1,16 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
-import {
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  SlidersHorizontal,
-  Sparkles,
-  Trophy,
-  Users,
-} from 'lucide-react'
-import { demoCompetitions, demoLeaderboard, demoMember, DEMO_LABEL } from '../../data/demo'
+import { ArrowRight, CalendarDays, CheckCircle2, Clock, SlidersHorizontal, Sparkles, Trophy, Users } from 'lucide-react'
+import { memberApi, type CompetitionEntry } from '../../lib/memberApi'
+import { useMemberData } from '../../lib/useMemberData'
+import { ErrorBlock, LoadingBlock } from '../../components/app/DataState'
 import { PageHeader } from '../../components/app/primitives'
 import {
   Badge,
@@ -29,8 +22,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../components/ui'
-import { formatDate } from '../../lib/utils'
-import { cn } from '../../lib/utils'
+import { cn, formatDate } from '../../lib/utils'
 
 const TABS = ['overview', 'weekly', 'monthly', 'hackathons'] as const
 type TabValue = (typeof TABS)[number]
@@ -45,41 +37,61 @@ function statusLabel(status: string, startsAt: string) {
   return status
 }
 
+type CompetitionData = { weekly: CompetitionEntry[]; monthly: CompetitionEntry[] }
+
 export function CompetitionsHub() {
   const [params, setParams] = useSearchParams()
   const { pathname } = useLocation()
-  const pathTab: TabValue | null = pathname.endsWith('/weekly')
-    ? 'weekly'
-    : pathname.endsWith('/monthly')
-      ? 'monthly'
-      : null
+  const pathTab: TabValue | null = pathname.endsWith('/weekly') ? 'weekly' : pathname.endsWith('/monthly') ? 'monthly' : null
   const requested = params.get('tab')
   const tab: TabValue = TABS.includes(requested as TabValue) ? (requested as TabValue) : pathTab ?? 'overview'
 
-  const published = demoCompetitions.filter((competition) => competition.status !== 'draft')
-  const open = published.filter(
-    (competition) => competition.status === 'published' && new Date(competition.endsAt).getTime() > Date.now(),
+  const { data, loading, error, reload } = useMemberData(
+    () =>
+      Promise.all([memberApi.competitions('weekly'), memberApi.competitions('monthly')]).then(
+        ([weekly, monthly]) => ({ weekly: weekly.active, monthly: monthly.active }) as CompetitionData,
+      ),
+    [],
   )
-  const upcoming = published
-    .filter((competition) => new Date(competition.startsAt).getTime() > Date.now())
-    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
-  const completed = published.filter((competition) => competition.status === 'finalized')
-  const myResult = demoLeaderboard.find((entry) => entry.name === demoMember.name)
+
+  const header = (
+    <PageHeader
+      title="Competitions"
+      actions={
+        <Link
+          to="/member/rankings"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line px-3 text-[0.75rem] font-medium text-ink-700 hover:bg-ink-50"
+        >
+          Rankings
+          <ArrowRight className="h-3 w-3" aria-hidden />
+        </Link>
+      }
+    />
+  )
+
+  if (loading && !data) {
+    return (
+      <>
+        {header}
+        <LoadingBlock rows={4} />
+      </>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <>
+        {header}
+        <ErrorBlock message={error ?? 'Competitions could not be loaded.'} onRetry={reload} />
+      </>
+    )
+  }
+
+  const all = [...data.weekly, ...data.monthly]
 
   return (
     <>
-      <PageHeader
-        title="Competitions"
-        actions={
-          <Link
-            to="/member/rankings"
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line px-3 text-[0.75rem] font-medium text-ink-700 hover:bg-ink-50"
-          >
-            Rankings
-            <ArrowRight className="h-3 w-3" aria-hidden />
-          </Link>
-        }
-      />
+      {header}
 
       <Tabs
         value={tab}
@@ -99,10 +111,7 @@ export function CompetitionsHub() {
 
         <TabsContent value="overview">
           <Overview
-            open={open}
-            upcoming={upcoming}
-            completed={completed}
-            myResult={myResult}
+            all={all}
             onNavigate={(value) => {
               const next = new URLSearchParams(params)
               next.set('tab', value)
@@ -113,13 +122,13 @@ export function CompetitionsHub() {
 
         <TabsContent value="weekly">
           <div className="pt-5">
-            <ChallengeBrowser frequency="weekly" />
+            <ChallengeBrowser frequency="weekly" entries={data.weekly} />
           </div>
         </TabsContent>
 
         <TabsContent value="monthly">
           <div className="pt-5">
-            <ChallengeBrowser frequency="monthly" />
+            <ChallengeBrowser frequency="monthly" entries={data.monthly} />
           </div>
         </TabsContent>
 
@@ -131,19 +140,16 @@ export function CompetitionsHub() {
   )
 }
 
-function Overview({
-  open,
-  upcoming,
-  completed,
-  myResult,
-  onNavigate,
-}: {
-  open: typeof demoCompetitions
-  upcoming: typeof demoCompetitions
-  completed: typeof demoCompetitions
-  myResult: (typeof demoLeaderboard)[number] | undefined
-  onNavigate: (tab: string) => void
-}) {
+function Overview({ all, onNavigate }: { all: CompetitionEntry[]; onNavigate: (tab: string) => void }) {
+  const open = all.filter((entry) => entry.status === 'published' && new Date(entry.ends_at).getTime() > Date.now())
+  const upcoming = all
+    .filter((entry) => new Date(entry.starts_at).getTime() > Date.now())
+    .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+  const completed = all.filter((entry) => entry.status === 'finalized')
+  const myEntry = all
+    .filter((entry) => entry.submission)
+    .sort((a, b) => new Date(b.submission?.submitted_at ?? 0).getTime() - new Date(a.submission?.submitted_at ?? 0).getTime())[0]
+
   return (
     <div className="space-y-5 pt-5">
       <div className="grid gap-3 sm:grid-cols-3">
@@ -187,13 +193,13 @@ function Overview({
                     <StatusBadge status={competition.status} />
                   </div>
                   <p className="mt-0.5 text-[0.6875rem] text-ink-500">
-                    {competition.frequency === 'weekly' ? 'Weekly' : 'Monthly'} · {competition.category} ·{' '}
-                    {difficulty(competition.level)}
+                    {competition.frequency === 'weekly' ? 'Weekly' : 'Monthly'}
+                    {competition.category ? ` · ${competition.category}` : ''} · {difficulty(competition.level)}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 text-[0.6875rem] text-ink-500">
                   <span className="inline-flex items-center gap-1">
-                    <Clock className="h-3 w-3" aria-hidden /> Closes {formatDate(competition.endsAt)}
+                    <Clock className="h-3 w-3" aria-hidden /> Closes {formatDate(competition.ends_at)}
                   </span>
                   <ArrowRight className="h-3.5 w-3.5 text-ink-300 transition-transform group-hover:translate-x-0.5" aria-hidden />
                 </div>
@@ -215,7 +221,8 @@ function Overview({
                   <div className="min-w-0">
                     <p className="truncate text-[0.8125rem] font-medium text-ink-900">{competition.title}</p>
                     <p className="text-[0.6875rem] text-ink-400">
-                      Opens {formatDate(competition.startsAt)} · {competition.category}
+                      Opens {formatDate(competition.starts_at)}
+                      {competition.category ? ` · ${competition.category}` : ''}
                     </p>
                   </div>
                   <CalendarDays className="h-4 w-4 shrink-0 text-ink-300" aria-hidden />
@@ -232,31 +239,40 @@ function Overview({
         <Card>
           <CardHeader title="Your participation" description="From submitted and judged records." />
           <CardBody className="space-y-3">
-            {myResult ? (
+            {myEntry?.submission ? (
               <>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-brand-700" aria-hidden />
-                  <p className="text-[0.8125rem] font-medium text-ink-900">Latest judged entry</p>
+                  <p className="text-[0.8125rem] font-medium text-ink-900">Latest entry · {myEntry.title}</p>
                 </div>
                 <dl className="space-y-2 text-[0.75rem]">
                   <div className="flex justify-between gap-3">
                     <dt className="text-ink-500">Rank</dt>
-                    <dd className="font-semibold tabular text-ink-900">#{myResult.rank}</dd>
+                    <dd className="font-semibold tabular text-ink-900">
+                      {myEntry.submission.rank !== null ? `#${myEntry.submission.rank}` : '—'}
+                    </dd>
                   </div>
                   <div className="flex justify-between gap-3">
                     <dt className="text-ink-500">Score</dt>
-                    <dd className="font-semibold tabular text-ink-900">{myResult.score}</dd>
+                    <dd className="font-semibold tabular text-ink-900">{myEntry.submission.final_score ?? '—'}</dd>
                   </div>
                   <div className="flex justify-between gap-3">
                     <dt className="text-ink-500">Points awarded</dt>
-                    <dd className="font-semibold tabular text-brand-700">+{myResult.points}</dd>
+                    <dd className="font-semibold tabular text-brand-700">+{myEntry.submission.points_awarded}</dd>
                   </div>
                 </dl>
+                <Link
+                  to={`/member/competitions/${myEntry.id}`}
+                  className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-brand-800 hover:underline"
+                >
+                  Open competition
+                  <ArrowRight className="h-3 w-3" aria-hidden />
+                </Link>
               </>
             ) : (
-              <p className="text-[0.8125rem] text-ink-500">No judged competition entries yet.</p>
+              <p className="text-[0.8125rem] text-ink-500">No competition entries yet.</p>
             )}
-            {completed.length ? (
+            {completed[0] ? (
               <Link
                 to={`/member/competitions/${completed[0].id}/leaderboard`}
                 className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-brand-800 hover:underline"
@@ -268,12 +284,11 @@ function Overview({
           </CardBody>
         </Card>
       </div>
-
     </div>
   )
 }
 
-function ChallengeBrowser({ frequency }: { frequency: 'weekly' | 'monthly' }) {
+function ChallengeBrowser({ frequency, entries }: { frequency: 'weekly' | 'monthly'; entries: CompetitionEntry[] }) {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [level, setLevel] = useState('all')
@@ -281,26 +296,26 @@ function ChallengeBrowser({ frequency }: { frequency: 'weekly' | 'monthly' }) {
   const [sort, setSort] = useState('deadline')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  const records = useMemo(
-    () => demoCompetitions.filter((competition) => competition.frequency === frequency && competition.status !== 'draft'),
-    [frequency],
+  const records = entries
+  const categories = useMemo(
+    () => Array.from(new Set(records.map((competition) => competition.category).filter((value): value is string => Boolean(value)))).sort(),
+    [records],
   )
-  const categories = useMemo(() => Array.from(new Set(records.map((competition) => competition.category))).sort(), [records])
   const levels = useMemo(() => Array.from(new Set(records.map((competition) => competition.level))).sort(), [records])
 
   const visible = records
     .filter((competition) => {
       if (category !== 'all' && competition.category !== category) return false
       if (level !== 'all' && competition.level !== Number(level)) return false
-      if (status !== 'all' && statusLabel(competition.status, competition.startsAt).toLowerCase() !== status) return false
-      if (search.trim() && !`${competition.title} ${competition.category}`.toLowerCase().includes(search.trim().toLowerCase()))
+      if (status !== 'all' && statusLabel(competition.status, competition.starts_at).toLowerCase() !== status) return false
+      if (search.trim() && !`${competition.title} ${competition.category ?? ''}`.toLowerCase().includes(search.trim().toLowerCase()))
         return false
       return true
     })
     .sort((a, b) => {
-      if (sort === 'newest') return new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime()
+      if (sort === 'newest') return new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime()
       if (sort === 'difficulty') return a.level - b.level
-      return new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime()
+      return new Date(a.ends_at).getTime() - new Date(b.ends_at).getTime()
     })
 
   const activeFilters = [category !== 'all', level !== 'all', status !== 'all'].filter(Boolean).length + (sort !== 'deadline' ? 1 : 0)
@@ -441,30 +456,31 @@ function ChallengeBrowser({ frequency }: { frequency: 'weekly' | 'monthly' }) {
                         <h2 className="text-[0.875rem] font-semibold text-ink-950">{competition.title}</h2>
                         <StatusBadge status={competition.status} />
                         <Badge tone="outline">{difficulty(competition.level)}</Badge>
+                        {competition.enrolled ? <Badge tone="green">Entered</Badge> : null}
                       </div>
-                      <p className="mt-0.5 line-clamp-2 max-w-[70ch] text-[0.75rem] leading-5 text-ink-500">
-                        {competition.description}
-                      </p>
+                      {competition.submission?.value ? (
+                        <p className="mt-0.5 line-clamp-1 text-[0.75rem] text-ink-500">{competition.submission.value}</p>
+                      ) : null}
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.625rem] text-ink-400">
                         <span className="inline-flex items-center gap-1">
                           <CalendarDays className="h-3 w-3" aria-hidden />
-                          {formatDate(competition.startsAt)} – {formatDate(competition.endsAt)}
+                          {formatDate(competition.starts_at)} – {formatDate(competition.ends_at)}
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <Users className="h-3 w-3" aria-hidden />
-                          {competition.enrolled} enrolled
+                          {competition.submission_type}
                         </span>
-                        {competition.rewards[0] ? (
+                        {competition.submission?.final_score !== null && competition.submission?.final_score !== undefined ? (
                           <span className="inline-flex items-center gap-1">
                             <Sparkles className="h-3 w-3" aria-hidden />
-                            {competition.rewards[0].points} points for first place
+                            {competition.submission.final_score} points scored
                           </span>
                         ) : null}
                       </div>
                     </div>
                   </div>
                   <span className="inline-flex shrink-0 items-center gap-1 text-[0.75rem] font-medium text-brand-800">
-                    {competition.category}
+                    {competition.category ?? 'Open'}
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
                   </span>
                 </Link>
@@ -474,12 +490,18 @@ function ChallengeBrowser({ frequency }: { frequency: 'weekly' | 'monthly' }) {
         ) : (
           <EmptyState
             icon={<Trophy className="h-4 w-4" aria-hidden />}
-            title={`No ${frequency} challenges match these filters`}
-            description="Try a different category, difficulty or status. Draft competitions are never shown."
+            title={records.length ? `No ${frequency} challenges match these filters` : `No ${frequency} challenges published`}
+            description={
+              records.length
+                ? 'Try a different category, difficulty or status.'
+                : 'Challenges appear here once an administrator publishes them.'
+            }
             action={
-              <Button variant="outline" size="sm" onClick={clear}>
-                Clear filters
-              </Button>
+              records.length ? (
+                <Button variant="outline" size="sm" onClick={clear}>
+                  Clear filters
+                </Button>
+              ) : undefined
             }
           />
         )}
@@ -511,9 +533,6 @@ function ChallengeBrowser({ frequency }: { frequency: 'weekly' | 'monthly' }) {
 }
 
 function Hackathons() {
-  /* The competition records in this prototype only carry weekly and monthly
-     challenges. No hackathon competition, team or result records exist, so this
-     surface reports the gap instead of inventing events. */
   return (
     <div className="space-y-5 pt-5">
       <EmptyState
@@ -536,8 +555,7 @@ function Hackathons() {
             <li>Published judging results and project submissions for past hackathons.</li>
           </ul>
           <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
-            These are backend data-model gaps, not interface work. Adding sample hackathons would misrepresent the club's
-            records.
+            These are backend data-model gaps, not interface work. Adding sample hackathons would misrepresent the club's records.
           </p>
         </CardBody>
       </Card>

@@ -139,6 +139,12 @@ export const api = {
 
   logout: () => apiRequest<void>('/auth/logout', { method: 'POST', body: {} }),
 
+  changePassword: (currentPassword: string, newPassword: string) =>
+    apiRequest<void>('/me/password', {
+      method: 'POST',
+      body: { current_password: currentPassword, new_password: newPassword },
+    }),
+
   register: (input: {
     fullName: string
     email: string

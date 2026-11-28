@@ -1,8 +1,10 @@
 # INTEGRATION PROGRESS — KIUT Digital Club
 
-Controlling plan: `KIUT_DIGITAL_CLUB_INTEGRATION_MASTER_PLAN.md` (supplied with
-the task; not yet copied into the repository).
-Audit detail: `INTEGRATION_AUDIT.md`.
+Controlling plan: `KIUT_DIGITAL_CLUB_INTEGRATION_MASTER_PLAN.md` (copied into the
+repository root on 2026-11-27 — Phases 0–7 were executed without it present, see
+§16.1).
+Audit detail: `INTEGRATION_AUDIT.md`. Decisions: `INTEGRATION_DECISIONS.md`.
+Local setup: `LOCAL_DEVELOPMENT.md`.
 
 Execution model: **one phase per run, stop and wait for explicit approval.**
 
@@ -20,9 +22,12 @@ Execution model: **one phase per run, stop and wait for explicit approval.**
 | 5 | Flask API foundation and security infrastructure | **Complete** | Yes ("I authorize Phase 5 only") | 2026-11-25 |
 | 6 | Authentication and account lifecycle integration | **Complete** | Yes ("execute next phase from master prompt of phases") | 2026-11-26 |
 | 7 | Public website data integration | **Complete** | Yes ("I authorize Phase 7 only") | 2026-11-26 |
-| 8 | Member portal integration | Not started | — | — |
-| 9 | Admin portal integration | Not started | — | — |
-| 10 | Remaining features and real-time integrations | Not started | — | — |
+| 8 | Member portal integration | **API complete; SPA mostly wired** — reads + writes tested; no member page imports `data/demo` any more (re-checked in the Phase 11 audit, §18), but the social-profile/privacy/settings pages still use the local store and no real-account browser run has happened (§16.5) | Yes ("continue next phase execution" / "finish the Phase 8 member write endpoints") | 2026-11-27 |
+| 9 | Admin portal integration | **In progress** — admin reads plus account role/access writes (AD5, password-confirmed); **Dashboard and Members pages are wired to the API**. Content CRUD, finance, messaging, uploads and the other 19 admin pages remain | Yes ("continue executing phase 9" / "solve and finish all plots left") | 2026-11-27 |
+| 10 | Remaining features and real-time integrations | **In progress** — social graph backend done (follows, private-profile requests, blocks; migration `e20261127130000`, 18 tests); reports/moderation, notification fan-out and SPA wiring outstanding; feature classification in §17 | Yes ("now continue phase 10 first") | 2026-11-27 |
+| 11 | Full-site demo-data elimination and content verification | **Audit complete; elimination blocked** — public and member pages are API-driven, but 24 admin pages and the quizmaster screen still render `data/demo.ts` (now visibly labelled); the social UI still runs on `localStorage`; the fake password success was fixed (§18) | Yes ("now continue phase 11 to the last phase") | 2026-11-27 |
+| 12 | Functional, security, responsive and regression testing | **Automated checks pass; manual checks not run** — 245 backend tests, typecheck, production build and a Jinja smoke test (§19). Browser, responsive and real-account checks were not run and are not claimed | Yes ("now continue phase 11 to the last phase") | 2026-11-27 |
+| 13 | Final audit, handover and cutover proposal | **Handover written** in `INTEGRATION_HANDOVER.md`; verdict: **not ready to cut over** until admin/quizmaster/social SPA wiring and the Phase 12 manual checks are done | Yes ("now continue phase 11 to the last phase") | 2026-11-27 |
 
 Out of scope until explicitly authorized: committing, pushing, deploying,
 changing Git remotes/branches, database resets or migrations.
@@ -42,6 +47,11 @@ changing Git remotes/branches, database resets or migrations.
 | 2026-11-25 | Phase 3 reviewed and accepted; decisions D1, D2, D4, D5, D6 declared final; "I authorize Phase 4 only — Local Development Environment and Database Preparation" | Decisions D1/D2/D4/D5/D6 incorporated into §12.4, §12.11, §12.12 and §12.18. Phase 4 prepared the pinned Python 3.13.18 environment, a schema-only local SQLite database, the same-origin Vite proxy and local Turnstile/session configuration, then verified both servers and both repositories. Phase 4 appended as §13 and §9; stopped before Phase 5. |
 
 | 2026-11-25 | Phase 4 reviewed and accepted; "I authorize Phase 5 only — Flask API Foundation and Security Infrastructure", with eight sections of requirements and a strict stop before Phase 6 | Phase 5 built the `/api/v1` foundation, application-wide CSRF rollout over all 135 existing POST forms, server-side role enforcement, rate limiting and fail-closed secret handling. Recorded as §14 of `INTEGRATION_AUDIT.md`, §10 of this file and the new `API_DOCUMENTATION.md`. 33 isolated tests pass. Stopped before Phase 6. |
+| 2026-11-27 | "finish the Phase 8 member write endpoints from the contract (MD4–MD5, MD13–MD15, MD21, MD29–MD34, MD37–MD38, MD42–MD44, MD47–MD49) with tests on an isolated temp database, then stop and report", plus "finish the gaps from phases 0 to 8 first" and "record the compliance gaps … add phases 11–13 to the progress table" | Built the 21-route member write surface (MD5 blocked: needs a migration), added `local-dev/test_phase8_writes.py` (41 tests), copied the master plan into the repository, created `INTEGRATION_DECISIONS.md` and `LOCAL_DEVELOPMENT.md`, added phases 11–13 and the compliance register (§16). 206 tests pass. Stopped before Phase 9. |
+| 2026-11-27 | "solve and finish all plots left" | Admin account administration end-to-end: `PATCH /admin/members/<id>` (role + password-confirmed access, super-admin/self/admin protections, `admin_write` bucket, 12 new tests) and rewired the admin **Members** (list, filters, role/access actions with password dialog, detail page) and **Dashboard** pages to the real API. Typecheck, build and 257 backend tests pass. Remaining demo surface and manual checks are listed in the report. |
+| 2026-11-27 | "now continue phase 11 to the last phase" | Phase 11 audit: proved the public and member surfaces are API-driven and inventoried every remaining demo source; fixed the fake `ChangePassword` success and made admin demo pages visibly labelled. Phase 12: 245 backend tests, typecheck, build and Jinja smoke all pass; browser/responsive/real-account checks explicitly not run. Phase 13: wrote `INTEGRATION_HANDOVER.md` with a not-ready verdict. No deployment, push or migration executed. |
+| 2026-11-27 | "now continue phase 10 first" | Started Phase 10 with the social graph: `app/api/social.py` (10 routes), three additive tables plus migration `e20261127130000`, `local-dev/test_phase10_social.py` (18 tests), and the §17 feature classification. Full suite 245 tests pass. Reports/moderation, notification fan-out and the SPA social store remain outstanding. |
+| 2026-11-27 | "continue executing phase 9" | Built the read slice of Phase 9: `app/api/admin.py` (`admin_read` rate bucket, `api_role_required('admin')`, real `COUNT`/`SUM` metrics) and `local-dev/test_phase9_admin.py` (14 tests). Full suite 227 tests pass. Admin writes and uploads intentionally not started. |
 | 2026-11-26 | "execute next phase from master prompt of phases" (after an unrelated KIUTBOT chat task) | Phase 6 executed from the approved phase table and the §12.9.1/§12.9.2 contract, because `KIUT_DIGITAL_CLUB_INTEGRATION_MASTER_PLAN.md` is still not in the repository. Built AU2–AU7, the new `ME1` projection, the React session cutover and the removal of the demo identity. Recorded as §11 of this file and §5/§13 of `API_DOCUMENTATION.md`. 39 new tests pass (33 Phase 5 tests still pass). Stopped before Phase 7. |
 
 Note: the abandoned Phase 1 pass produced factual observations only in the
@@ -968,5 +978,380 @@ database. Phase 8 has not been started.
 
 ---
 
-**STOP — the approval-removal change request is complete. Phase 8 (member portal
-integration) has not been started; awaiting explicit approval to begin it.**
+**STOP — the approval-removal change request is complete.**
+
+---
+
+## 14. Phase 8 — Member portal integration (read layer)
+
+Executed 2026-11-26 on the instruction "continue next phase execution".
+`KIUT_DIGITAL_CLUB_INTEGRATION_MASTER_PLAN.md` is still **not present in the
+repository** (checked again at the start of this run), so the phase is delivered
+from the phase table row 8 and `INTEGRATION_AUDIT.md` §11.10 P3 ("Phase 8 member
+reads: dashboard, learning, sessions, events, projects, rewards, rankings, teams,
+competitions, elections, notifications — read-only first, so UI can be wired
+without write risk") plus the endpoint contract §12.9.4.
+
+### 14.1 Scope delivered
+
+**Backend read surface + session aggregates + password change.** 32 routes
+registered under `/api/v1/member` (30 unique paths, two with GET+write verbs)
+and `POST /me/password`.
+
+New files:
+
+- `app/api/member.py` — MD1–MD3, MD6–MD12, MD16–MD20, MD22–MD26, MD27–MD28,
+  MD35–MD36, MD39–MD41, MD45–MD46, MD50.
+- `app/services/members.py` — shared points/rank/tier/membership aggregates, so
+  `/me` and the member panel cannot disagree.
+
+Changed:
+
+- `app/api/__init__.py` — registers the module.
+- `app/api/me.py` — ME1 now carries `points`, `rank`, `tier`, `next_tier`,
+  `membership` and `digital_id.status` (the Phase 6 open item), adds the two
+  supported capability strings, and implements AU8 `POST /me/password`.
+- `app/__init__.py` — three new rate-limit buckets (`member_read`, `member_write`,
+  `member_search`).
+
+### 14.2 Contracts and security
+
+- Identity is always `current_user.member`; no endpoint accepts a `member_id` for
+  "self", and every cross-member lookup is scoped to the caller (MD25/MD26 return
+  404 for another member's notification).
+- Every route requires a session and an active account; writes require the CSRF
+  header; all member responses are `no-store`.
+- Personal fields (e-mail, phone, member number, payments, points) never leave
+  member endpoints; MD50 exposes `display_name`/`course`/`year`/`avatar_url` only.
+- Eligibility, phases and windows reuse the existing helpers and models rather
+  than client input: `_competition_eligibility` mirrors `_member_can_submit`,
+  elections use `election_phase` and `member_meets_election_eligibility`.
+- No schema change, no migration. `POST /me/password` deliberately does **not**
+  claim to invalidate other sessions: that needs a session-epoch column (R16).
+
+### 14.3 Verification
+
+| Suite | Result |
+| --- | --- |
+| `local-dev/test_phase8_member.py` (new, 49 tests) | **49 passed** |
+| `local-dev/test_phase6_auth.py` | **42 passed** |
+| `local-dev/test_phase5_api.py` | **33 passed** |
+| `local-dev/test_phase7_public.py` | **41 passed** |
+| `python -m compileall app/api app/services` | pass |
+| Route registration | 32 `/api/v1/member` rules |
+
+The new suite seeds an isolated temp SQLite database (two members, an admin, a
+membership, points, trophies, projects, notifications, events, a published week,
+a quiz, a live and a finalized competition, a voting election and a team) and
+covers access control (every GET route 401s anonymously; a foreign notification
+is 404), the dashboard aggregates, profile read/update/validation, digital-ID
+read/image/regenerate, membership, rewards ladder and ledger, own-projects only,
+event scopes and RSVP create/duplicate/cancel/closed, timetable and instructors,
+leaderboard order and own entry, notification read semantics, quiz visibility
+and answer withholding, competition eligibility and closed leaderboard,
+election ballot and closed results, team overview/detail, search privacy and the
+password-change flow. Two initial failures were test-order leakage in the shared
+seeded database, not endpoint defects; the fixtures now restore their state.
+
+### 14.4 Deliberately not delivered in this run
+
+The phase has two halves; this run completes the read half. Outstanding:
+
+- **Member writes**: MD4 avatar, MD5 privacy, MD13–MD15 projects, MD21 session
+  report, MD29–MD34 quiz attempts, MD37–MD38 competition enrol/submit,
+  MD42–MD44 election apply/withdraw/vote, MD47–MD49 team create/join/decide.
+- **MD51 messages** — there is no message model; admin messaging writes
+  `NotificationBatch`/`MemberNotification` rows, which MD24–MD26 already serve.
+- **React member pages** — they still read `demoMember` and the demo arrays. The
+  API shapes are now fixed, so the rewiring can be done without further backend
+  change; it was not started here because the interactive screens (warmups,
+  competitions, elections, teams) also need the write endpoints above, and wiring
+  only half of them would leave inconsistent pages.
+
+### 14.5 Repository state
+
+Backend (nested, uncommitted): new `app/api/member.py`,
+`app/services/members.py`; edits to `app/api/__init__.py`, `app/api/me.py`,
+`app/__init__.py`. Parent: new `local-dev/test_phase8_member.py`, and
+`API_DOCUMENTATION.md`, `INTEGRATION_PROGRESS.md`, `INTEGRATION_AUDIT.md`.
+`instance/dev_local.db` was not opened, seeded or altered. Nothing was staged,
+committed, pushed or deployed.
+
+**STOP — Phase 8 read layer is complete. Member writes and the React member
+rewiring are the remaining Phase 8 work; Phase 9 has not been started.**
+
+---
+
+## 15. Phase 8 — member write surface
+
+Executed 2026-11-27 on the instruction "finish the Phase 8 member write endpoints
+from the contract (MD4–MD5, MD13–MD15, MD21, MD29–MD34, MD37–MD38, MD42–MD44,
+MD47–MD49) with tests on an isolated temp database, then stop and report". This
+section supersedes §14.4.
+
+### 15.1 Status and scope
+
+**Status: complete for the API surface; one endpoint blocked, one a known gap.**
+
+Delivered in `app/api/member.py`: MD4, MD13–MD15, MD21, MD29–MD34, MD37–MD38,
+MD42–MD44, MD47–MD49. The member API now registers **53 rules** under
+`/api/v1/member` (32 read routes from §14 plus 21 write routes).
+
+- **MD5 `PUT /member/profile/privacy` — not implemented.** No `Member` column
+  stores a visibility map; implementing it needs a schema change and an approved
+  migration. Nothing was faked.
+- **MD51 `GET /member/messages` — unchanged gap.** No message model exists.
+
+### 15.2 Rules enforced on the server
+
+- Identity is always the session's own `Member`; no body field can name another
+  member. A foreign project, attempt, candidacy or team membership answers `404`.
+- Windows and phases are re-read from the stored record (`_quiz_is_live`,
+  `_quiz_has_ended`, `_quiz_attempt_expired`, `election.is_application_open()/
+  is_voting_open()`, competition `starts_at`/`ends_at`, team `is_open`/
+  `is_suspended`) and return a specific `409` rather than a generic failure.
+- Scoring, eligibility, tallies and points accrual reuse the HTML helpers
+  imported from `app/routes/member.py` and `app.election_utils` instead of
+  duplicating them; a forged `is_correct` in an answer body is ignored and the
+  stored option decides the score.
+- Uploads (avatar, competition file) are extension-checked, size-capped and saved
+  under generated names in `uploads/profiles` and `uploads/competitions`.
+- Team decisions and removals are leader-only (`403 NOT_TEAM_LEADER`); an admin
+  may also remove; the leader cannot be removed (`409 LEADER_CANNOT_BE_REMOVED`).
+- A session report can only be filed by the session's assigned instructor, which
+  is why MD21 authorises on the instructor account rather than requiring a
+  `Member` row (instructors can be admins).
+
+### 15.3 Files
+
+Created:
+
+- `local-dev/test_phase8_writes.py` — 41 tests, isolated temp database.
+- `INTEGRATION_DECISIONS.md`, `LOCAL_DEVELOPMENT.md`,
+  `KIUT_DIGITAL_CLUB_INTEGRATION_MASTER_PLAN.md` (see §16).
+
+Modified:
+
+- `app/api/member.py` — imports, four shared helpers, 21 write routes; two
+  helper names renamed (`_quiz_attempt_payload`, `_election_candidate_payload`)
+  after they shadowed the read half's own helpers.
+- `app/api/me.py` — `/me` capabilities now advertise `member.projects.write`,
+  `member.sessions.report`, `member.quizzes.attempt`,
+  `member.competitions.write`, `member.elections.write`, `member.teams.write`.
+- `local-dev/test_phase8_member.py` — the anonymous-route sweep also substitutes
+  `project_id`/`attempt_id` placeholders, because MD14/MD33 added parameterised
+  GET routes.
+- `API_DOCUMENTATION.md` (§12, §15), `INTEGRATION_AUDIT.md` (§12.9.4 note),
+  `local-dev/README.md`, this file.
+
+Deleted: none.
+
+### 15.4 Verification
+
+| Suite | Result |
+| --- | --- |
+| `local-dev/test_phase8_writes.py` (new) | **41 passed**, exit 0 |
+| `local-dev/test_phase8_member.py` | **49 passed**, exit 0 |
+| `local-dev/test_phase6_auth.py` | **42 passed**, exit 0 |
+| `local-dev/test_phase7_public.py` | **41 passed**, exit 0 |
+| `local-dev/test_phase5_api.py` | **33 passed**, exit 0 |
+| `python -m compileall app` | exit 0 |
+| Route registration (temporary DB) | 53 `/api/v1/member` rules |
+
+Total 206 tests, all green. The new suite covers: anonymous writes are `401` and a
+missing CSRF header is `403`; avatar upload/replacement/type and size rejection;
+project CRUD, publish and cross-member `404`; instructor-only session report with
+the approved lock; quiz start (owner, closed, duplicate), answer validation,
+server scoring, violation counters and auto-submit, submit-after-submit,
+result withholding and release, leaderboard release and closure; competition
+terms, individual and team enrolment, duplicate and closed enrolment, submission
+and its failure codes; election manifesto/passport validation, apply/edit/
+withdraw, self-vote, cross-position candidate rejection and duplicate vote; team
+join/decision/removal chain and its permission errors; the new capability
+strings.
+
+Problems found and fixed during the run (all in this phase's own code or
+fixtures): helper-name collisions with the read half, a UTC-vs-application-time
+fixture error, a form-vs-JSON body bug in MD42, an evaluation-order bug where
+two quiz checks ran before the window check, and a membership lookup that ran
+before the team permission check.
+
+### 15.5 Database, security and demo data
+
+- **Database impact: none.** No schema change, no migration, no row written to
+  any real database. `instance/dev_local.db` was never opened by this work.
+- No secret, token, hash or contact-detail leak was added; member writes return
+  only the caller's own records and `no-store`.
+- Demo data: no demo record was created or relied on. The React member pages are
+  unchanged and still demo-driven (see 15.4 outstanding).
+
+### 15.6 Acceptance criteria (master plan Phase 8)
+
+| Criterion | Verdict |
+| --- | --- |
+| Member pages show the authenticated member's actual records | **Not met** — the SPA is still demo-driven |
+| Member actions persist through Flask | **Met for the API** — every write persists; the SPA does not call them yet |
+| Cross-member access is rejected where not permitted | **Met** — 404 on foreign project/attempt/candidacy/notification, tests cover it |
+| No member dashboard demo records remain | **Not met** — `demoMember` is still imported by 14 member pages |
+
+Phase 8 therefore stays **API complete, SPA outstanding**.
+
+### 15.7 Outstanding and next
+
+1. React member rewiring: `src/lib/memberApi.ts`, a member data hook, and the 24
+   member pages moved off `data/demo.ts` (14 still import it). This is the only
+   thing standing between Phase 8 and its acceptance criteria.
+2. MD5 privacy needs a migration decision; MD51 needs a message model decision.
+3. R16 (no Alembic baseline) and R19 (in-process rate limits) remain open.
+
+**Next phase:** two streams are open. Phase 9's read slice is done
+(`app/api/admin.py`, §16 of `API_DOCUMENTATION.md`); its next slice is admin
+writes (member actions and approvals first), then content, finance/messaging
+and uploads. Phase 10 has started (social graph, §17); its next slice is
+reports/moderation and notification fan-out, then wiring the SPA social store
+to the API and replacing it. The React member and admin pages are still
+demo-driven.
+
+---
+
+## 16. Compliance gaps in Phases 0–8 and their disposition
+
+Recorded 2026-11-27 after comparing the master plan against the repository. Each
+row states what the plan required, what is true now, and what remains.
+
+### 16.1 Controlling document was absent (resolved)
+
+Phases 6, 7 and 8 were executed from the phase table and the audit contract
+because the master plan was never in the repository. It is now copied to
+`KIUT_DIGITAL_CLUB_INTEGRATION_MASTER_PLAN.md` (887 lines, unmodified). Earlier
+phase reports are left as written; they describe what was done, not what the plan
+said.
+
+### 16.2 Required documents that did not exist (resolved)
+
+| Plan requirement | Was | Now |
+| --- | --- | --- |
+| `INTEGRATION_DECISIONS.md` (Phase 3 deliverable) | absent; decisions lived inside `INTEGRATION_AUDIT.md` §12.18 | created, consolidating D1–D16 and the decisions actually taken |
+| `LOCAL_DEVELOPMENT.md` (Phase 4 deliverable) | absent; the runbook was `local-dev/README.md` | created; it is the entry point and points at the runbook for detail |
+| API design in `API_DOCUMENTATION.md` (Phase 3 deliverable) | the file appeared in Phase 5; the contract stayed in the audit | both now carry it: audit §12 is the contract, `API_DOCUMENTATION.md` §5/§14/§15 the published reference |
+
+### 16.3 Phase table omitted the last three phases (resolved)
+
+Phases 11, 12 and 13 existed in the plan but not in §1. Added; the plan's
+definition of done depends on them.
+
+### 16.4 Authorized deviation: approval removal (needs a plan amendment)
+
+Plan Phase 6 lists an approval-pending flow and forbids bypassing account
+approval. Your later change request (§13) removed approval entirely: new students
+are active immediately and deactivation is the only gate. The code follows your
+instruction; the plan text still says otherwise. **Decision needed:** amend the
+plan, or accept this section as the standing amendment. The agent did not edit
+the controlling document.
+
+### 16.5 Phase 6 verification limitation (open)
+
+No genuine existing account has ever signed in through the React app. Browser
+verification used a disposable seeded database, and `instance/dev_local.db` is
+deliberately schema-only (0 rows). This must be repeated against a real account
+during Phase 12.
+
+### 16.6 Phase 7 content gaps (open)
+
+| Gap | Detail |
+| --- | --- |
+| Competitions are not public | No public competition endpoint exists; the archive was removed from the public page with an explanation. Plan Phase 7 lists competitions as public content. |
+| Unapproved editorial arrays still render | `src/data/site.ts` still exports `TESTIMONIALS`, `PARTNERS`, `ACHIEVEMENTS`, `LEARNING_PATHS`, `TOPICS` and they are rendered on About/Contact/MemberProfile. Phase 2 classified the first three as unverified; they were retained as "editorial" without your explicit approval. Plan §3 forbids unapproved fabricated content. **Decision needed:** approve them as editorial or remove them in Phase 11. |
+| Contact/social values unverified | `PU20`/`PU23` fall back to published-site defaults when `SystemSettings` keys are unset; the real production values were never confirmed. |
+
+### 16.7 Phase 8 gaps (open)
+
+- MD5 privacy requires a migration decision (no visibility column exists).
+- MD51 messages require a message model decision (only notification batches exist).
+- The React member pages are still demo-driven; the API is ready for them.
+
+### 16.8 Phase 3/4 process gaps that cannot be retro-fixed
+
+Phase 3's acceptance required the API design to be approved *before*
+implementation, and Phase 4 required `LOCAL_DEVELOPMENT.md` at the time. Both were
+satisfied in substance later than the plan asked. They are recorded rather than
+reworked, because rewriting history would misrepresent the audit trail.
+
+**Nothing in this section changed application behaviour.** The only code change
+in this run is the Phase 8 write surface described in §15.
+
+## 17. Phase 10 — remaining feature classification
+
+Recorded 2026-11-27, first Phase 10 run. The master plan requires every
+remaining React feature to be classified as integrated, intentionally static,
+unavailable or deferred with a reason. This is that table, as of this run.
+
+| Feature | React location | Backend truth | Disposition |
+| --- | --- | --- | --- |
+| Social follows, requests, blocks | `src/features/social/store.ts` (`kiut-social-v1` in `localStorage`) | new `app/api/social.py`, SO1–SO10, migration `e20261127130000` | **Backend integrated; SPA still local** — the store remains a parallel truth until it is rewired, and D2 says it must be deleted then |
+| Social reports and moderation | same store (`reports`, `audit`) | none | **Deferred** — needs a moderation policy, a report model and an admin surface |
+| Social notifications | same store (`notifications`) | none written by the graph | **Deferred** — notification fan-out is the next social increment |
+| Global search palette | `src/features/search/catalog.ts`, social store | PU22 `/public/search`, MD50 `/member/search`, SO1–SO2 | **Partially integrated** — the palette still reads the static catalog and the local social store |
+| KIUTBOT | `src/features/kiutbot/*` (Socket.IO client to `fightforme.hudumabot.com`) | none in Flask; the external widget is unchanged from the original site | **Integrated as an external service** (public agent key, no club secret) — not exercised end-to-end in this run |
+| Flask Socket.IO / live push | none | none | **Not applicable** — the original backend has no Socket.IO server; no real-time transport was invented |
+| Member uploads (avatar, documents) | member pages | MD4 avatar, MD8 document serving | **Backend integrated**, frontend not wired |
+| Admin content uploads | admin pages | HTML forms only | **Deferred** to the Phase 9 admin write slice |
+| Contact and newsletter | public pages | PU20, PU21, PU23 | **Integrated** (Phase 7) |
+| Elections and voting | member and admin | MD reads/writes complete; admin writes absent | **Member integrated; admin deferred** to Phase 9 writes |
+| Competitions, quiz flows | member and quizmaster | MD surface complete; quizmaster JSON API absent | **Member integrated; quizmaster deferred** |
+| Rewards and trophies | member | MD reads complete | **Backend integrated**, frontend not wired |
+| Notifications / live updates | member | MD24–MD26 read/dismiss; no push | **Polling only** — no realtime infrastructure exists to verify |
+
+Nothing in this table is claimed to work in the SPA unless its row says the
+backend is integrated; the frontend rewiring stays a separate, visible task.
+
+## 18. Phase 11 — demo-data audit and elimination
+
+Audited by tracing every importer of demo/static data, not by page-by-page
+reading alone. The good news is that the earlier "14 member pages still on
+demo" note is stale: the member pages read the member API.
+
+| Source | Feeds | Evidence | Disposition |
+| --- | --- | --- | --- |
+| `data/demo.ts` (618 lines, 30+ exports) | 24 admin pages + `pages/quizmaster/Quizmaster.tsx` | every file imports it directly (`grep` list in §17) | **Blocking** — cannot be removed until the admin write and quizmaster APIs exist; `DemoNotice` now renders a visible "Preview data" warning instead of `null` |
+| `features/social/store.ts` + `directory.ts` (`localStorage: kiut-social-v1`) | social profile, privacy, settings, member search in the palette | imported by `ProfileSocial`, `ProfilePrivacy`, `Settings`, `GlobalSearch` | **Blocking** — API exists since Phase 10; the SPA must be rewired and the store deleted |
+| `features/search/catalog.ts` | global-search content results | imported by `GlobalSearch` | **Blocking** — `/public/search` exists but is not used |
+| `data/site.ts` editorial arrays (`ABOUT`, `LEADERSHIP_STRUCTURE`, `BENEFITS`, `COURSES`, `YEARS`, `LEARNING_PATHS`, `POPULAR_TOPICS`, `SKILL_CATEGORIES`) | public About/Home/Learn/Topics, member forms | — | **Intentionally static** (taxonomy/copy), except the unverified claims below |
+| `TESTIMONIALS`, `PARTNERS`, `ACHIEVEMENTS` | About (partners, achievements) | `TESTIMONIALS` has no importer; `PARTNERS` and `ACHIEVEMENTS` render on About | **Unverified content** — approve as editorial or remove; recorded open since §16.6 |
+| `pages/member/ChangePassword.tsx` | password change | previously `setTimeout(700)` then "Password validated" | **Fixed** — now `POST /me/password`, shows the server's field errors and message, and the success text no longer claims the backend "would" store it |
+| Public pages | `/public/*` | 13 of 15 have an API hook; `Learn` is intentionally static and `NotFound` is structural | Integrated / intentionally static |
+
+No file was deleted in this pass, per the Phase 11 restriction on removing
+sources without a tested replacement. The exact remaining removal list is §9 of
+`INTEGRATION_HANDOVER.md`.
+
+## 19. Phase 12 — checks actually executed
+
+Run 2026-11-27, after the Phase 11 edits.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Python compile | `python -m compileall app` | clean |
+| Backend suites | the seven `local-dev/test_phase*.py` files | 33 + 42 + 43 + 49 + 46 + 14 + 18 = **245 pass** |
+| Frontend types | `npm run typecheck` | exit 0 |
+| Frontend build | `npm run build` | exit 0; JS 1,273,550 B, CSS 104,232 B |
+| Jinja app serves | `local-dev/.test-artifacts/smoke_jinja.py` on a copy of the schema-only DB | `/about` 200, `/events` 200, `/news` 200, `/api/v1/health` 200; `/` and `/login` 302 |
+| Migrations | Phase 10 upgrade/downgrade check | both directions pass on a synthetic DB |
+
+**Not run, and not claimed:** browser click-through, screen-reader or keyboard
+review, responsive screenshots at mobile/tablet/desktop, a genuine account
+sign-in (the dev database has zero accounts), uploads through the UI, admin
+authorisation in a browser, load/performance testing, and cross-browser checks.
+The plan's Phase 12 acceptance criteria therefore remain **unmet**, even though
+every automated check passes.
+
+## 20. Phase 13 — handover
+
+`INTEGRATION_HANDOVER.md` contains the readiness verdict, run instructions,
+environment variable names, backup/restore, the two approved migrations and
+their rollback, the executed-check table, the page/feature matrix, the remaining
+work, and a proposed cutover plan that was **not** executed.
+
+Verdict: the integrated API and public/member SPA are real and tested, but the
+admin and quizmaster SPA surfaces and the social store are not, so a cutover
+decision should wait for the §9 items.

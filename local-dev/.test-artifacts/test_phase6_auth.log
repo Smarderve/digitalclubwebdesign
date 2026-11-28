@@ -1,0 +1,129 @@
+test_anonymous_check_reports_an_active_account_as_approved (__main__.ApprovalStatusTests.test_anonymous_check_reports_an_active_account_as_approved) ... ok
+test_authenticated_member_sees_own_status (__main__.ApprovalStatusTests.test_authenticated_member_sees_own_status) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask_login\login_manager.py:488: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  expires = datetime.utcnow() + duration
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\__init__.py:666: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  return User.query.get(int(user_id))
+ok
+test_deactivated_account_reports_rejected (__main__.ApprovalStatusTests.test_deactivated_account_reports_rejected) ... ok
+test_missing_email_is_422 (__main__.ApprovalStatusTests.test_missing_email_is_422) ... ok
+test_unknown_email_is_404_and_leaks_nothing (__main__.ApprovalStatusTests.test_unknown_email_is_404_and_leaks_nothing) ... ok
+test_admin_deactivation_blocks_sign_in_and_restore_allows_it (__main__.HtmlCompatibilityTests.test_admin_deactivation_blocks_sign_in_and_restore_allows_it) ... C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\routes\admin.py:107: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  upcoming_events = Event.query.filter(Event.event_date >= datetime.utcnow()).count()
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\app\routes\admin.py:110: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  today_local = utc_to_app_naive(datetime.utcnow()).date()
+C:\Users\Smarderve\Desktop\Projects\Digital Club\current-website\DIgital-Club\.venv\Lib\site-packages\flask_sqlalchemy\query.py:30: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  rv = self.get(ident)
+ok
+test_html_login_page_still_renders (__main__.HtmlCompatibilityTests.test_html_login_page_still_renders) ... ok
+test_html_login_still_works (__main__.HtmlCompatibilityTests.test_html_login_still_works) ... ok
+test_html_register_still_creates_an_account (__main__.HtmlCompatibilityTests.test_html_register_still_creates_an_account) ... [2026-11-27 06:13:27,785] WARNING in utils: SMTP credentials not configured. Email not sent.
+[2026-11-27 06:13:27,786] ERROR in sms: BEEM credentials are missing. Set BEEM_API_KEY and BEEM_SECRET_KEY in .env.
+[2026-11-27 06:13:27,786] WARNING in utils: SMS delivery failed for 255713000000
+ok
+test_html_register_then_login_reaches_the_member_panel (__main__.HtmlCompatibilityTests.test_html_register_then_login_reaches_the_member_panel)
+End-to-end Jinja flow: register, sign in, open the dashboard. ... [2026-11-27 06:13:28,145] WARNING in utils: SMTP credentials not configured. Email not sent.
+[2026-11-27 06:13:28,145] ERROR in sms: BEEM credentials are missing. Set BEEM_API_KEY and BEEM_SECRET_KEY in .env.
+[2026-11-27 06:13:28,145] WARNING in utils: SMS delivery failed for 255713000001
+ok
+test_admin_without_member_row_can_sign_in (__main__.LoginTests.test_admin_without_member_row_can_sign_in) ... ok
+test_failed_human_verification_is_400 (__main__.LoginTests.test_failed_human_verification_is_400) ... ok
+test_inactive_account_is_403 (__main__.LoginTests.test_inactive_account_is_403) ... ok
+test_legacy_unapproved_account_can_sign_in (__main__.LoginTests.test_legacy_unapproved_account_can_sign_in)
+The legacy is_approved flag is not consulted any more. ... ok
+test_login_establishes_the_session (__main__.LoginTests.test_login_establishes_the_session) ... ok
+test_login_is_rate_limited (__main__.LoginTests.test_login_is_rate_limited) ... ok
+test_login_succeeds_and_returns_identity_and_fresh_csrf (__main__.LoginTests.test_login_succeeds_and_returns_identity_and_fresh_csrf) ... ok
+test_missing_csrf_is_rejected (__main__.LoginTests.test_missing_csrf_is_rejected) ... ok
+test_unconfigured_turnstile_refuses_rather_than_allows (__main__.LoginTests.test_unconfigured_turnstile_refuses_rather_than_allows) ... ok
+test_unknown_email_is_401_with_the_same_message (__main__.LoginTests.test_unknown_email_is_401_with_the_same_message) ... ok
+test_validation_error_lists_the_field (__main__.LoginTests.test_validation_error_lists_the_field) ... ok
+test_wrong_password_is_401 (__main__.LoginTests.test_wrong_password_is_401) ... ok
+test_admin_capability (__main__.MeProjectionTests.test_admin_capability) ... ok
+test_me_never_exposes_member_contact_details (__main__.MeProjectionTests.test_me_never_exposes_member_contact_details) ... ok
+test_me_reports_role_status_capabilities_and_completion (__main__.MeProjectionTests.test_me_reports_role_status_capabilities_and_completion) ... ok
+test_missing_profile_fields_are_reported (__main__.MeProjectionTests.test_missing_profile_fields_are_reported) ... ok
+test_forgot_password_returns_the_same_body_for_known_and_unknown (__main__.PasswordResetTests.test_forgot_password_returns_the_same_body_for_known_and_unknown) ... ok
+test_invalid_token_is_400 (__main__.PasswordResetTests.test_invalid_token_is_400) ... ok
+test_reset_token_changes_the_password (__main__.PasswordResetTests.test_reset_token_changes_the_password) ... ok
+test_short_password_is_422 (__main__.PasswordResetTests.test_short_password_is_422) ... ok
+test_course_must_come_from_the_fixed_list (__main__.RegisterTests.test_course_must_come_from_the_fixed_list) ... ok
+test_duplicate_email_is_409 (__main__.RegisterTests.test_duplicate_email_is_409) ... ok
+test_manual_approval_setting_no_longer_blocks_registration (__main__.RegisterTests.test_manual_approval_setting_no_longer_blocks_registration)
+A stale registration_approval_mode row has no effect any more. ... ok
+test_registered_account_can_sign_in_and_reach_the_member_panel (__main__.RegisterTests.test_registered_account_can_sign_in_and_reach_the_member_panel) ... ok
+test_registration_activates_the_account_immediately (__main__.RegisterTests.test_registration_activates_the_account_immediately) ... ok
+test_registration_does_not_start_a_session (__main__.RegisterTests.test_registration_does_not_start_a_session) ... ok
+test_short_password_is_rejected (__main__.RegisterTests.test_short_password_is_rejected) ... ok
+test_welcome_notification_is_always_sent (__main__.RegisterTests.test_welcome_notification_is_always_sent) ... ok
+test_year_must_come_from_the_fixed_list (__main__.RegisterTests.test_year_must_come_from_the_fixed_list) ... ok
+test_logout_ends_the_session (__main__.SessionTests.test_logout_ends_the_session) ... ok
+test_logout_requires_a_session (__main__.SessionTests.test_logout_requires_a_session) ... ok
+test_sign_in_replaces_the_anonymous_session (__main__.SessionTests.test_sign_in_replaces_the_anonymous_session)
+Session fixation: the pre-login CSRF token must not survive sign-in. ... ok
+
+----------------------------------------------------------------------
+Ran 42 tests in 20.694s
+
+OK
+backed by temp database: C:\Users\Smarderve\Desktop\Projects\Digital Club\local-dev\.test-artifacts\test_phase6.sqlite
+tables created in temp database: 59
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+Successfully loaded fonts: ['title', 'large', 'medium', 'small', 'tiny', 'micro']
+cairosvg error: no library called "cairo-2" was found
+no library called "cairo" was found
+no library called "libcairo-2" was found
+cannot load library 'libcairo.so.2': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.so.2'
+cannot load library 'libcairo.2.dylib': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo.2.dylib'
+cannot load library 'libcairo-2.dll': error 0x7e.  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libcairo-2.dll'
+<sys>:0: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x00000210B0DAF3D0>
+<sys>:0: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x00000210B27A0220>

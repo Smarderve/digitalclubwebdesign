@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { FolderGit2, Github, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
-import { demoMemberProjects } from '../../data/demo'
+import { FolderGit2, Github, MoreHorizontal, Pencil, Plus, Send, Trash2 } from 'lucide-react'
+import { ApiError } from '../../lib/api'
+import { memberApi } from '../../lib/memberApi'
+import { useMemberData } from '../../lib/useMemberData'
+import { ErrorBlock, LoadingBlock } from '../../components/app/DataState'
 import { PageHeader, DataToolbar } from '../../components/app/primitives'
 import { Badge, ConfirmDialog, EmptyState, StatusBadge, Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui'
-import { Teams } from './Teams'
 import { Button, ButtonLink } from '../../components/ui/button'
 import { Select } from '../../components/ui/field'
 import { Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from '../../components/ui/dropdown'
@@ -13,58 +15,65 @@ import { formatDate } from '../../lib/utils'
 
 export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab = searchParams.get('tab') === 'team' ? 'team' : 'projects'
-  const [projects, setProjects] = useState(demoMemberProjects)
   const [search, setSearch] = useState('')
   const [visibility, setVisibility] = useState('all')
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
+  const [busy, setBusy] = useState<number | null>(null)
   const { push } = useToast()
   const navigate = useNavigate()
+  const { data, loading, error, reload } = useMemberData(() => memberApi.projects(), [])
 
+  const projects = data ?? []
   const filtered = projects.filter((project) => {
-    const matchesSearch = `${project.title} ${project.technologies}`.toLowerCase().includes(search.trim().toLowerCase())
-    const matchesVisibility = visibility === 'all' || project.visibility.toLowerCase() === visibility
+    const matchesSearch = `${project.title} ${project.technologies.join(' ')}`
+      .toLowerCase()
+      .includes(search.trim().toLowerCase())
+    const matchesVisibility =
+      visibility === 'all' || (visibility === 'public' ? project.is_public : !project.is_public)
     return matchesSearch && matchesVisibility
   })
 
-  return (
+  async function removeProject(id: number) {
+    setBusy(id)
+    try {
+      await memberApi.deleteProject(id)
+      push({ tone: 'success', title: 'Project removed' })
+      reload()
+    } catch (err) {
+      push({
+        tone: 'error',
+        title: 'Project not removed',
+        description: err instanceof ApiError ? err.message : 'Try again in a moment.',
+      })
+    } finally {
+      setBusy(null)
+      setDeleteTarget(null)
+    }
+  }
+
+  async function publishProject(id: number) {
+    setBusy(id)
+    try {
+      await memberApi.submitProject(id)
+      push({ tone: 'success', title: 'Project published', description: 'It is now visible on your profile.' })
+      reload()
+    } catch (err) {
+      push({
+        tone: 'error',
+        title: 'Project not published',
+        description: err instanceof ApiError ? err.message : 'Try again in a moment.',
+      })
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const body = loading && !data ? (
+    <LoadingBlock rows={4} />
+  ) : error || !data ? (
+    <ErrorBlock message={error ?? 'Your projects could not be loaded.'} onRetry={reload} />
+  ) : (
     <>
-      {embedded ? null : (
-        <PageHeader
-          title="My projects"
-          breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Projects' }]}
-          actions={
-            <ButtonLink to="/member/projects/add" size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />}>
-              Add project
-            </ButtonLink>
-          }
-        />
-      )}
-
-      <Tabs
-        value="projects"
-        onValueChange={(value) => {
-          const next = new URLSearchParams(searchParams)
-          if (value === 'projects') next.delete('tab')
-          else next.set('tab', value)
-          setSearchParams(next, { replace: true })
-        }}
-      >
-        {embedded ? null : (
-          <TabsList ariaLabel="Projects sections">
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-          </TabsList>
-        )}
-
-        <TabsContent value="projects">
-          <div className={embedded ? 'pt-0' : 'pt-5'}>
-            {embedded ? (
-              <div className="mb-3 flex justify-end">
-                <ButtonLink to="/member/projects/add" size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />}>
-                  Add project
-                </ButtonLink>
-              </div>
-            ) : null}
       <div className="overflow-hidden rounded-lg border border-line bg-surface">
         <DataToolbar
           search={search}
@@ -86,15 +95,23 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-[0.9375rem] font-semibold text-ink-950">{project.title}</h2>
-                    <Badge tone={project.visibility === 'Public' ? 'green' : 'outline'}>{project.visibility}</Badge>
-                    <StatusBadge status={project.status.toLowerCase()} />
+                    <Badge tone={project.is_public ? 'green' : 'outline'}>{project.is_public ? 'Public' : 'Private'}</Badge>
+                    <StatusBadge status={project.is_public ? 'published' : 'draft'} />
+                    {project.is_featured ? <Badge tone="amber">Featured</Badge> : null}
                   </div>
-                  <p className="mt-1 max-w-[80ch] text-[0.8125rem] leading-6 text-ink-500">{project.description}</p>
+                  <p className="mt-1 max-w-[80ch] text-[0.8125rem] leading-6 text-ink-500">
+                    {project.description || 'No description yet.'}
+                  </p>
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.6875rem] text-ink-400">
-                    <span>{project.technologies}</span>
-                    <span>Updated {formatDate(project.updated)}</span>
-                    {project.link ? (
-                      <a href={project.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-brand-800 hover:underline">
+                    <span>{project.technologies.length ? project.technologies.join(', ') : 'No technologies listed'}</span>
+                    <span>Added {project.created_at ? formatDate(project.created_at) : '—'}</span>
+                    {project.links.github ? (
+                      <a
+                        href={project.links.github}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-brand-800 hover:underline"
+                      >
                         <Github className="h-3 w-3" aria-hidden />
                         Repository
                       </a>
@@ -102,7 +119,23 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => navigate(`/member/projects/edit/${project.id}`)} iconLeft={<Pencil className="h-3.5 w-3.5" />}>
+                  {!project.is_public ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      loading={busy === project.id}
+                      onClick={() => void publishProject(project.id)}
+                      iconLeft={<Send className="h-3.5 w-3.5" />}
+                    >
+                      Publish
+                    </Button>
+                  ) : null}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/member/projects/edit/${project.id}`)}
+                    iconLeft={<Pencil className="h-3.5 w-3.5" />}
+                  >
                     Edit
                   </Button>
                   <Dropdown>
@@ -159,7 +192,7 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
 
       <p className="mt-3 text-[0.6875rem] leading-5 text-ink-400">
         Projects marked private are visible only to you and club administrators. Public projects may be featured on the
-        club website after review.
+        club website.
       </p>
 
       <div className="mt-4 flex items-center justify-between rounded-md border border-line bg-canvas/50 px-4 py-3">
@@ -168,22 +201,60 @@ export function MyProjects({ embedded = false }: { embedded?: boolean } = {}) {
           Browse club projects
         </Link>
       </div>
+    </>
+  )
 
+  return (
+    <>
+      {embedded ? null : (
+        <PageHeader
+          title="My projects"
+          breadcrumbs={[{ label: 'Member', to: '/member' }, { label: 'Projects' }]}
+          actions={
+            <ButtonLink to="/member/projects/add" size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />}>
+              Add project
+            </ButtonLink>
+          }
+        />
+      )}
+
+      <Tabs
+        value="projects"
+        onValueChange={(value) => {
+          const next = new URLSearchParams(searchParams)
+          if (value === 'projects') next.delete('tab')
+          else next.set('tab', value)
+          setSearchParams(next, { replace: true })
+        }}
+      >
+        {embedded ? null : (
+          <TabsList ariaLabel="Projects sections">
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+          </TabsList>
+        )}
+
+        <TabsContent value="projects">
+          <div className={embedded ? 'pt-0' : 'pt-5'}>
+            {embedded ? (
+              <div className="mb-3 flex justify-end">
+                <ButtonLink to="/member/projects/add" size="sm" iconLeft={<Plus className="h-3.5 w-3.5" />}>
+                  Add project
+                </ButtonLink>
+              </div>
+            ) : null}
+            {body}
           </div>
         </TabsContent>
-
       </Tabs>
 
       <ConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Delete this project?"
-        description="The project would be removed from your profile and the public catalogue."
+        description="The project is removed from your profile and the public catalogue."
         confirmLabel="Delete project"
         onConfirm={() => {
-          if (deleteTarget === null) return
-          setProjects((current) => current.filter((project) => project.id !== deleteTarget))
-          push({ tone: 'success', title: 'Project removed' })
+          if (deleteTarget !== null) void removeProject(deleteTarget)
         }}
       />
     </>
