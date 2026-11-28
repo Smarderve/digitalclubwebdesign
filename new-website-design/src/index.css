@@ -1538,3 +1538,168 @@ html[data-motion='reduced'] *::after {
     mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Public redesign additions: illustration layer, masthead furniture, and
+   form-control fixes that both themes share.
+   ------------------------------------------------------------------------- */
+
+@layer utilities {
+  /* Illustration scenes. Colour comes from the ink scale so the line art
+     follows every theme; only the accent stays brand green. */
+  .art-scene {
+    color: rgb(var(--ink-500));
+  }
+
+  .art-scene .art-strong {
+    color: rgb(var(--ink-800));
+  }
+
+  .art-scene .art-accent {
+    color: rgb(var(--brand-600));
+  }
+
+  .art-scene .art-screen {
+    fill: rgb(var(--brand-500) / 0.08);
+  }
+
+  .art-scene .art-dash {
+    stroke-dasharray: 3 7;
+    opacity: 0.75;
+  }
+
+  .art-drift {
+    animation: art-float 18s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  }
+
+  .art-sway {
+    animation: art-sway 22s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+    transform-origin: 50% 85%;
+  }
+
+  .art-draw :is(path, circle, rect, ellipse, line) {
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    animation: art-draw 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* Fine paper grid used by mastheads. Kept separate from surface-grid so it
+     can be stronger in one composition without affecting cards elsewhere. */
+  .paper-grid {
+    background-image:
+      linear-gradient(to right, rgb(var(--ink-900) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--ink-900) / 0.05) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+
+  .dot-grid {
+    background-image: radial-gradient(rgb(var(--ink-900) / 0.14) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Outlined display type for a single word in a masthead. */
+  .outline-word {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(var(--ink-400) / 0.55);
+  }
+
+  /* Hairline rules stronger than `border-line`, for editorial headers. */
+  .rule-strong {
+    border-color: rgb(var(--ink-900) / 0.2);
+  }
+
+  /* A subtle top/bottom fade for full-bleed photo bands. */
+  .band-fade {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .scene-mask {
+    -webkit-mask-image: radial-gradient(70% 70% at 55% 45%, #000 20%, transparent 100%);
+    mask-image: radial-gradient(70% 70% at 50% 50%, #000 25%, transparent 100%);
+  }
+
+  /* Legacy white-auth panel hard-coded light values; resolve through tokens. */
+  .auth-card {
+    background-color: rgb(var(--surface) / 0.92);
+    border-color: rgb(var(--line));
+    box-shadow:
+      0 1px 2px rgb(var(--panel-shadow) / 0.06),
+      0 30px 70px -46px rgb(var(--panel-shadow) / 0.4);
+  }
+
+  .auth-grid {
+    background-image:
+      linear-gradient(to right, rgb(var(--ink-900) / 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--ink-900) / 0.055) 1px, transparent 1px);
+  }
+
+  /* Form controls in both themes: autofill, dropdown options, checkboxes. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: rgb(var(--ink-900));
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--surface)) inset;
+    box-shadow: 0 0 0 1000px rgb(var(--surface)) inset;
+    caret-color: rgb(var(--ink-900));
+  }
+
+  select option,
+  select optgroup {
+    background-color: rgb(var(--surface));
+    color: rgb(var(--ink-900));
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(var(--ink-400));
+    opacity: 1;
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    accent-color: rgb(var(--brand-600));
+  }
+
+  /* Keep date/time pickers legible on dark surfaces. */
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'] {
+    color-scheme: inherit;
+  }
+}
+
+@keyframes art-float {
+  from {
+    transform: translate3d(0, 6px, 0) rotate(-0.4deg);
+  }
+  to {
+    transform: translate3d(0, -10px, 0) rotate(0.5deg);
+  }
+}
+
+@keyframes art-sway {
+  from {
+    transform: rotate(-1.6deg);
+  }
+  to {
+    transform: rotate(1.6deg);
+  }
+}
+
+@keyframes art-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-drift,
+  .art-sway,
+  .art-draw :is(path, circle, rect, ellipse, line) {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}

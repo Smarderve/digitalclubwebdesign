@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import type { Article } from '../../data/site'
-import { BENEFITS, LEARNING_PATHS } from '../../data/site'
+import { BENEFITS, LEARNING_PATHS, SKILL_CATEGORIES } from '../../data/site'
 import { ButtonLink } from '../../components/ui/button'
 import { Badge, EmptyState } from '../../components/ui'
 import { ArticleCard } from '../../components/site/cards'
 import { JoinBand, LinkArrow, SectionHead } from '../../components/site/primitives'
 import { EditorialFigure, clubMedia, media } from '../../components/site/hero'
 import { HomeHero } from '../../components/site/HomeHero'
+import { ArtBackdrop, SignalDiagram } from '../../components/site/art'
 import { homeForRole, useAuth } from '../../context/AuthContext'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi, type PublicBlog, type PublicEvent } from '../../lib/publicApi'
@@ -66,7 +67,12 @@ export function Home() {
       <HomeHero />
 
       {/* The club */}
-      <section className="section border-b border-line">
+      <section className="section relative isolate overflow-hidden border-b border-line">
+        <ArtBackdrop
+          scene="coding"
+          tone="soft"
+          className="right-[-6%] top-10 hidden w-[420px] lg:block"
+        />
         <div className="container-editorial">
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
             <h2 className="max-w-[16ch] text-display-lg text-ink-950" data-reveal>
@@ -128,6 +134,21 @@ export function Home() {
         </div>
       </section>
 
+      {/* Skills band: the club's published skill categories, moving slowly. */}
+      <section aria-label="Skill categories" className="overflow-hidden border-b border-line bg-brand-50/60 py-3">
+        <div className="rail-horizontal rail-paused">
+          {[...SKILL_CATEGORIES, ...SKILL_CATEGORIES].map((category, index) => (
+            <span
+              key={`${category.title}-${index}`}
+              className="flex shrink-0 items-center gap-3 px-5 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-ink-500"
+            >
+              <span aria-hidden className="h-1 w-1 rounded-full bg-brand-500" />
+              {category.title}
+            </span>
+          ))}
+        </div>
+      </section>
+
       {/* Learning paths */}
       <section className="section border-b border-line">
         <div className="container-editorial">
@@ -169,7 +190,8 @@ export function Home() {
               })}
             </div>
 
-            <div key={path.slug} className="page-enter" role="tabpanel" aria-label={path.title}>
+            <div key={path.slug} className="page-enter relative" role="tabpanel" aria-label={path.title}>
+              <SignalDiagram motion className="absolute -right-2 -top-10 hidden h-20 w-28 text-brand-600/70 sm:block" />
               <EditorialFigure
                 media={sessionImage}
                 ratio="aspect-[16/10]"
@@ -308,7 +330,13 @@ export function Home() {
       </section>
 
       {/* Community */}
-      <section className="section border-b border-line bg-canvas/60">
+      <section className="section relative isolate overflow-hidden border-b border-line bg-canvas/60">
+        <ArtBackdrop
+          scene="study"
+          tone="soft"
+          flip
+          className="bottom-[-10%] left-[-4%] hidden w-[380px] lg:block"
+        />
         <div className="container-editorial">
           <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <div data-reveal>

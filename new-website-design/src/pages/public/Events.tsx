@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { CalendarX2, ClipboardCheck, MailCheck, MapPin, ShieldCheck } from 'lucide-react'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
-import { PageHero, clubMedia } from '../../components/site/hero'
+import { EventsMasthead } from '../../components/site/mastheads'
 import { ButtonLink } from '../../components/ui/button'
 import { Alert, Badge, EmptyState } from '../../components/ui'
-import { EventRow } from '../../components/site/cards'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi, type PublicEvent } from '../../lib/publicApi'
 import { cn, formatDate } from '../../lib/utils'
@@ -16,8 +15,6 @@ const categories = [
   { value: 'tech_talk', label: 'Tech talk' },
   { value: 'social_event', label: 'Social event' },
 ]
-
-const eventsHero = clubMedia('/images/club/api-audience', 'Club members at the API Conference 2026')
 
 function timeOf(event: PublicEvent) {
   if (!event.starts_at) return undefined
@@ -46,30 +43,7 @@ export function Events() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Events & activities"
-        title="Public events"
-        description="Workshops, bootcamps and meetups open to the KIUT community. Registration is reviewed by the event organiser before attendance is confirmed."
-        media={eventsHero}
-        actions={
-          <ButtonLink to="/events#calendar" variant="outline" size="md">
-            See the calendar
-          </ButtonLink>
-        }
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-5 lg:max-w-[320px]">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Member events</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              Some events are published only to members or paid members inside the member dashboard.
-            </p>
-            <div className="mt-3">
-              <a href="/member/events" className="text-[0.75rem] font-semibold text-brand-800 underline decoration-brand-300 underline-offset-4">
-                Member event list
-              </a>
-            </div>
-          </div>
-        }
-      />
+      <EventsMasthead />
 
       <section className="section border-b border-line" id="calendar">
         <div className="container-editorial">
@@ -114,20 +88,45 @@ export function Events() {
               </div>
               <div className="divide-y divide-line border-y border-line">
                 {filteredUpcoming.length ? (
-                  filteredUpcoming.map((event) => (
-                    <EventRow
-                      key={event.id}
-                      title={event.title}
-                      date={event.starts_at ?? ''}
-                      time={timeOf(event)}
-                      location={event.venue ?? 'Venue to be announced'}
-                      description={event.description}
-                      tags={[labelOf(event.category)]}
-                      to={`/events/${event.id}/rsvp`}
-                      status={{ label: event.rsvp.state === 'open' ? 'Open' : 'Closed', tone: event.rsvp.state === 'open' ? 'green' : 'neutral' }}
-                      actionLabel="Register"
-                    />
-                  ))
+                  filteredUpcoming.map((event) => {
+                    const start = event.starts_at ? new Date(event.starts_at) : null
+                    return (
+                      <article key={event.id} className="group grid gap-4 py-5 sm:grid-cols-[84px_1fr] lg:grid-cols-[84px_1fr_auto]">
+                        <div className="flex items-baseline gap-2 border-l-2 border-brand-600 pl-3 sm:flex-col sm:items-start sm:gap-0.5 sm:self-stretch">
+                          <p className="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-brand-800">
+                            {start ? start.toLocaleDateString('en-GB', { month: 'short' }) : '—'}
+                          </p>
+                          <p className="text-[1.75rem] font-semibold leading-none tracking-tight text-ink-950 sm:mt-1">
+                            {start ? start.toLocaleDateString('en-GB', { day: '2-digit' }) : '—'}
+                          </p>
+                          <p className="text-[0.625rem] uppercase tracking-[0.1em] text-ink-400">
+                            {start ? start.toLocaleDateString('en-GB', { weekday: 'short' }) : ''}
+                          </p>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-[1.0625rem] font-semibold text-ink-950 group-hover:text-brand-800">
+                              {event.title}
+                            </h3>
+                            <Badge tone={event.rsvp.state === 'open' ? 'green' : 'neutral'}>
+                              {event.rsvp.state === 'open' ? 'Registration open' : 'Registration closed'}
+                            </Badge>
+                          </div>
+                          <p className="mt-1 text-[0.75rem] text-ink-500">
+                            {[timeOf(event), event.venue ?? 'Venue to be announced', labelOf(event.category)]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </p>
+                          <p className="mt-2 max-w-[58ch] text-[0.8125rem] leading-6 text-ink-600">{event.description}</p>
+                        </div>
+                        <div className="sm:col-start-2 lg:self-center">
+                          <ButtonLink to={`/events/${event.id}/rsvp`} size="sm" variant="outline">
+                            Register
+                          </ButtonLink>
+                        </div>
+                      </article>
+                    )
+                  })
                 ) : (
                   <EmptyState
                     icon={<CalendarX2 className="h-4 w-4" aria-hidden />}

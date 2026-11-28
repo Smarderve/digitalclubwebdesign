@@ -1,13 +1,11 @@
 import { ArrowRight, BookOpen, Layers } from 'lucide-react'
 import { LEARNING_PATHS, SKILL_CATEGORIES } from '../../data/site'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
-import { PageHero, media } from '../../components/site/hero'
+import { TopicsMasthead } from '../../components/site/mastheads'
 import { Alert } from '../../components/ui'
 import { ButtonLink } from '../../components/ui/button'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi } from '../../lib/publicApi'
-
-const topicsHero = media('/images/topics/server-room', 'Network and server racks in a data centre')
 
 export function Topics() {
   const { data, loading, error } = usePublicData(() => publicApi.topics(), [])
@@ -16,24 +14,7 @@ export function Topics() {
 
   return (
     <>
-      <PageHero
-        layout="overlay"
-        eyebrow="Topics & learning paths"
-        title="Topics we cover"
-        description="Master the technologies and skills driving the digital future through the club's learning programmes, sessions and projects."
-        media={topicsHero}
-        actions={
-          <ButtonLink to="/learn" size="md" variant="brandSoft" className="bg-brand-500 text-ink-950 hover:bg-brand-400">
-            Open the learning library
-          </ButtonLink>
-        }
-        aside={
-          <p className="text-[0.8125rem] leading-6 text-white/70">
-            Learning paths and skill categories are the club's programme. The topic and technology lists below are read
-            from the club database.
-          </p>
-        }
-      />
+      <TopicsMasthead />
 
       <section className="section border-b border-line" data-reveal>
         <div className="container-editorial">

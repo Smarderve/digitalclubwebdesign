@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, GraduationCap, Search, UserRound, Users } from 'lucide-react'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
-import { PageHero, clubMedia } from '../../components/site/hero'
+import { DirectoryMasthead, MembersMasthead } from '../../components/site/mastheads'
 import { Alert, Badge, EmptyState } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
 import { Input, Select } from '../../components/ui/field'
@@ -10,10 +10,6 @@ import { LeaderCard } from '../../components/site/cards'
 import { Avatar } from '../../components/ui/misc'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi, type PublicMember } from '../../lib/publicApi'
-
-const membersHero = clubMedia('/images/club/devfest-team', 'KIUT Digital Club members together')
-const studentsHero = clubMedia('/images/club/devfest-tall', 'Club members gathered at a club event')
-const alumniHero = clubMedia('/images/club/devfest-students', 'KIUT Digital Club students at DevFest')
 
 function MemberCard({ member }: { member: PublicMember }) {
   return (
@@ -51,25 +47,7 @@ export function Members() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Community"
-        title="Members"
-        description="The students, alumni and leaders who make up KIUT Digital Club — a community of IT and computer science students learning technology together."
-        media={membersHero}
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-4 lg:max-w-[320px]">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Membership</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              Free for all KIUT students. Register with your student email, then attend an orientation session to get started.
-            </p>
-            <div className="mt-3">
-              <ButtonLink to="/auth/register" size="sm">
-                Join the club
-              </ButtonLink>
-            </div>
-          </div>
-        }
-      />
+      <MembersMasthead />
 
       <section className="section border-b border-line" data-reveal>
         <div className="container-editorial">
@@ -332,16 +310,12 @@ function MemberDirectory({ status }: { status: 'student' | 'alumni' }) {
 export function Students() {
   return (
     <>
-      <PageHero
+      <DirectoryMasthead
+        scene="study"
         eyebrow="Student directory"
         title="Our students"
         description="Current KIUT students across web, mobile, AI, data and cybersecurity interests. Profiles appear when a member completes their details and the club publishes them."
-        media={studentsHero}
-        aside={
-          <p className="text-[0.75rem] leading-5 text-ink-500">
-            Only approved members with a published profile appear here. Nothing is filled in with invented records.
-          </p>
-        }
+        aside="Only approved members with a published profile appear here. Nothing is filled in with invented records."
       />
       <section className="section">
         <div className="container-editorial">
@@ -355,23 +329,18 @@ export function Students() {
 export function Alumni() {
   return (
     <>
-      <PageHero
+      <DirectoryMasthead
+        scene="campus"
         eyebrow="Alumni network"
         title="Our alumni"
         description="Graduates who remain part of the Digital Club community — mentoring members, reviewing projects and sharing what they learned in the industry."
-        media={alumniHero}
         aside={
-          <div className="rounded-lg border border-line bg-canvas p-4 lg:max-w-[320px]">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Stay connected</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              Alumni can mentor current members or speak at a session. Get in touch with the club to take part.
-            </p>
-            <div className="mt-3">
-              <ButtonLink to="/contact?topic=mentor" variant="outline" size="sm">
-                Volunteer as a mentor
-              </ButtonLink>
-            </div>
-          </div>
+          <>
+            Alumni can mentor current members or speak at a session. Get in touch with the club to take part.{' '}
+            <ButtonLink to="/contact?topic=mentor" variant="outline" size="sm" className="mt-3">
+              Volunteer as a mentor
+            </ButtonLink>
+          </>
         }
       />
       <section className="section">

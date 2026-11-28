@@ -76,15 +76,11 @@ export function Register() {
       <div className="mt-7">
         <AuthHeading
           align="left"
-          label="Join the club"
-          title="Create your member account"
-          description="Membership is free for KIUT students. Register with your student email, then attend an orientation session to get started."
+          label="Registration"
+          title="Create your account"
+          description="Use the email address you want to sign in with."
         />
       </div>
-
-      <Alert tone="success" className="mt-5" title="Sign in immediately">
-        Your account is activated as soon as you register — there is no approval step. You can sign in right away.
-      </Alert>
 
       <form
         className="mt-7"
@@ -246,12 +242,8 @@ export function Register() {
           </Section>
         </div>
 
-        <div className="mt-6 rounded-md border border-line bg-canvas/70 p-3.5">
-          <p className="text-[0.75rem] font-medium text-ink-800">Verification</p>
-          <p className="mt-1 text-[0.6875rem] leading-5 text-ink-500">
-            Your account is active immediately after registration. Complete the human verification to continue.
-          </p>
-          <label className="mt-3 flex items-start gap-2 text-[0.75rem] leading-5 text-ink-600">
+        <div className="mt-6">
+          <label className="flex items-start gap-2 text-[0.75rem] leading-5 text-ink-600">
             <input
               type="checkbox"
               className="mt-0.5 h-4 w-4 shrink-0 accent-brand-700"

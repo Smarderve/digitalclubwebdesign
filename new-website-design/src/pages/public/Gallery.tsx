@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ImageIcon, Images, Upload } from 'lucide-react'
 import { SectionHead } from '../../components/site/primitives'
-import { PageHero } from '../../components/site/hero'
+import { GalleryMasthead } from '../../components/site/mastheads'
 import { Alert, Badge, EmptyState } from '../../components/ui'
 import { ButtonLink } from '../../components/ui/button'
 import { usePublicData } from '../../lib/usePublicData'
@@ -22,17 +22,7 @@ export function Gallery() {
 
   return (
     <>
-      <PageHero
-        layout="type"
-        eyebrow="Gallery"
-        title="Visual memories"
-        description="Photographs and videos from club workshops, competitions and project showcases."
-        actions={
-          <ButtonLink to="/contact?topic=media" size="md" variant="brandSoft" className="bg-brand-500 text-ink-950 hover:bg-brand-400">
-            Send club photographs
-          </ButtonLink>
-        }
-      />
+      <GalleryMasthead />
 
       <section className="section border-b border-line" data-reveal>
         <div className="container-editorial">
@@ -68,9 +58,9 @@ export function Gallery() {
                 Loading media…
               </p>
             ) : shown.length ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {shown.map((item) => (
-                  <figure key={item.id} className="overflow-hidden rounded-lg border border-line bg-surface">
+              <div className="columns-2 gap-3 sm:gap-4 lg:columns-3 [&>*]:mb-3 sm:[&>*]:mb-4">
+                {shown.map((item, index) => (
+                  <figure key={item.id} className="break-inside-avoid overflow-hidden border border-line bg-surface">
                     {item.category === 'video' ? (
                       <video src={item.image_url ?? undefined} controls className="aspect-[4/3] w-full bg-ink-950 object-cover" />
                     ) : (
@@ -78,12 +68,15 @@ export function Gallery() {
                         src={item.thumb_url ?? item.image_url ?? ''}
                         alt={item.title || 'Club media'}
                         loading="lazy"
-                        className="aspect-[4/3] w-full object-cover"
+                        className={cn(
+                          'w-full object-cover transition-transform duration-500 ease-smooth hover:scale-[1.02]',
+                          index % 3 === 0 ? 'aspect-[4/5]' : index % 3 === 1 ? 'aspect-square' : 'aspect-[4/3]',
+                        )}
                       />
                     )}
-                    <figcaption className="flex items-start justify-between gap-3 p-4">
+                    <figcaption className="flex items-start justify-between gap-3 p-3">
                       <div>
-                        <p className="text-[0.875rem] font-medium text-ink-900">{item.title || 'Club media'}</p>
+                        <p className="text-[0.8125rem] font-medium text-ink-900">{item.title || 'Club media'}</p>
                         <p className="mt-0.5 text-[0.6875rem] text-ink-400">
                           {item.captured_at ? formatDate(item.captured_at, { day: 'numeric', month: 'short', year: 'numeric' }) : ''}
                         </p>

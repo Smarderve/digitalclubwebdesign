@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Clock, Mail, MapPin, MessageSquare, Phone, Send, Users } from 'lucide-react'
 import { SITE } from '../../data/site'
 import { SectionHead } from '../../components/site/primitives'
-import { PageHero, clubMedia } from '../../components/site/hero'
+import { ContactMasthead } from '../../components/site/mastheads'
 import { Alert, Badge } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
 import { Field, Input, Select, Textarea } from '../../components/ui/field'
@@ -12,8 +12,6 @@ import { usePublicData } from '../../lib/usePublicData'
 import { publicApi } from '../../lib/publicApi'
 
 type ContactValues = { name: string; email: string; subject: string; message: string }
-
-const contactHero = clubMedia('/images/club/devfest-students', 'KIUT Digital Club students at DevFest')
 
 const subjects = [
   { value: 'general', label: 'General enquiry' },
@@ -53,33 +51,7 @@ export function Contact() {
 
   return (
     <>
-      <PageHero
-        layout="overlay"
-        eyebrow="Contact"
-        title="Contact us"
-        description="Get in touch with Digital Club — KIUT. We're here to answer your questions, collaborate on projects, and help you grow in technology."
-        media={contactHero}
-        actions={
-          <a
-            href={`mailto:${email}`}
-            className="inline-flex h-10 items-center gap-2 rounded-sm bg-brand-500 px-4 text-[0.875rem] font-medium text-ink-950 transition-colors hover:bg-brand-400"
-          >
-            Email the club
-          </a>
-        }
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-4 lg:max-w-[360px]">
-            <p className="flex items-center gap-2 text-[0.8125rem] font-medium text-ink-900">
-              <Clock className="h-4 w-4 text-brand-700" aria-hidden />
-              {SITE.responseTime}
-            </p>
-            <p className="mt-2 text-[0.75rem] leading-5 text-ink-500">
-              For urgent event issues, call the club phone during meeting hours.
-            </p>
-            {loading ? <p className="mt-2 text-[0.625rem] text-ink-400">Loading club contact details…</p> : null}
-          </div>
-        }
-      />
+      <ContactMasthead email={email} phone={phone} />
 
       <section className="section border-b border-line">
         <div className="container-editorial grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">

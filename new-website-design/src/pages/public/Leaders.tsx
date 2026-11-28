@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Search, ShieldCheck, Users } from 'lucide-react'
 import { LEADERSHIP_STRUCTURE } from '../../data/site'
 import { JoinBand, SectionHead } from '../../components/site/primitives'
-import { PageHero, clubMedia } from '../../components/site/hero'
+import { LeadersMasthead } from '../../components/site/mastheads'
 import { Alert, EmptyState } from '../../components/ui'
 import { Input } from '../../components/ui/field'
 import { Button } from '../../components/ui/button'
@@ -10,8 +10,6 @@ import { LeaderCard } from '../../components/site/cards'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi } from '../../lib/publicApi'
 import { cn } from '../../lib/utils'
-
-const leadersHero = clubMedia('/images/club/devfest-crowd', 'Club members at a DevFest event')
 
 const electionPrinciples = [
   { title: 'Democratic process' },
@@ -49,30 +47,7 @@ export function Leaders() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Leadership"
-        title="Our leadership team"
-        description="Meet the students leading Digital Club and driving innovation at KIUT. The team is elected annually by club members."
-        media={leadersHero}
-        aside={
-          <dl className="grid gap-3 rounded-lg border border-line bg-canvas p-4 sm:grid-cols-3">
-            <div>
-              <dt className="text-[0.625rem] uppercase tracking-[0.1em] text-ink-400">Team size</dt>
-              <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">
-                {loading ? '—' : `${leaders.length} published profiles`}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-[0.625rem] uppercase tracking-[0.1em] text-ink-400">Term</dt>
-              <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">Elected annually</dd>
-            </div>
-            <div>
-              <dt className="text-[0.625rem] uppercase tracking-[0.1em] text-ink-400">Structure</dt>
-              <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">Board, technical, departments</dd>
-            </div>
-          </dl>
-        }
-      />
+      <LeadersMasthead />
 
       <section className="section border-b border-line" data-reveal>
         <div className="container-editorial">

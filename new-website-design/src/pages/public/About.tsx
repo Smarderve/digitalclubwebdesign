@@ -1,7 +1,8 @@
 import { ArrowRight, ArrowUpRight, Award, Handshake } from 'lucide-react'
 import { ABOUT, ACHIEVEMENTS, LEADERSHIP_STRUCTURE, PARTNERS } from '../../data/site'
 import { JoinBand, LinkArrow, SectionHead } from '../../components/site/primitives'
-import { EditorialFigure, PageHero, media, clubMedia } from '../../components/site/hero'
+import { EditorialFigure, clubMedia } from '../../components/site/hero'
+import { AboutMasthead } from '../../components/site/mastheads'
 import { Accordion } from '../../components/ui/accordion'
 import { Alert, Badge } from '../../components/ui'
 import { ButtonLink } from '../../components/ui/button'
@@ -9,7 +10,6 @@ import { LeaderCard } from '../../components/site/cards'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi } from '../../lib/publicApi'
 
-const aboutHero = clubMedia('/images/club/devfest-portrait', 'Club members together after a DevFest session')
 const aboutLibrary = clubMedia('/images/club/devfest-group-wide', 'KIUT Digital Club members at a DevFest gathering')
 const aboutWorkshop = clubMedia('/images/club/devfest-steps', 'Club members gathered after a DevFest event')
 
@@ -31,39 +31,7 @@ export function About() {
 
   return (
     <>
-      <PageHero
-        eyebrow="About the club"
-        title={ABOUT.title}
-        description={ABOUT.description}
-        media={aboutHero}
-        actions={
-          <ButtonLink to="/auth/register" size="md" iconRight={<ArrowRight className="h-3.5 w-3.5" />}>
-            Join the club
-          </ButtonLink>
-        }
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-5">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">At a glance</p>
-            <dl className="mt-3 space-y-3">
-              <div>
-                <dt className="text-[0.6875rem] text-ink-500">University</dt>
-                <dd className="text-[0.8125rem] font-medium text-ink-900">Kampala International University in Tanzania</dd>
-              </div>
-              <div>
-                <dt className="text-[0.6875rem] text-ink-500">Membership</dt>
-                <dd className="text-[0.8125rem] font-medium text-ink-900">Free for KIUT students</dd>
-              </div>
-              <div>
-                <dt className="text-[0.6875rem] text-ink-500">Based in</dt>
-                <dd className="text-[0.8125rem] font-medium text-ink-900">Gongo la Mboto, Dar es Salaam</dd>
-              </div>
-            </dl>
-            <div className="mt-4 border-t border-line pt-3">
-              <LinkArrow to="/contact">Visit or contact the club</LinkArrow>
-            </div>
-          </div>
-        }
-      />
+      <AboutMasthead />
 
       <section className="section border-b border-line">
         <div className="container-editorial">

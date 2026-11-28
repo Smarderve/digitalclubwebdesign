@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowUpRight, PenLine, Search } from 'lucide-react'
 import type { Article } from '../../data/site'
 import { POPULAR_TOPICS } from '../../data/site'
 import { PageNotFoundInline, TypeCover } from '../../components/site/primitives'
-import { PageHero, clubMedia } from '../../components/site/hero'
+import { BlogsMasthead } from '../../components/site/mastheads'
 import { Alert, Badge, EmptyState, Pagination } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
 import { Input } from '../../components/ui/field'
@@ -14,8 +14,6 @@ import { publicApi, type PublicBlog } from '../../lib/publicApi'
 import { cn, formatDate } from '../../lib/utils'
 
 const PER_PAGE = 6
-const blogsHero = clubMedia('/images/club/devfest-crowd', 'Club members talking together at a DevFest event')
-
 function asArticle(blog: PublicBlog): Article {
   return {
     slug: blog.slug,
@@ -51,25 +49,7 @@ export function Blogs() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Blog"
-        title="Digital Club blog"
-        description="Explore tech insights, tutorials and stories from our community of developers and innovators."
-        media={blogsHero}
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-4 lg:max-w-[300px]">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Write with the club</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              Members and mentors contribute tutorials and technical notes. Pitch an article to the communications team.
-            </p>
-            <div className="mt-3">
-              <ButtonLink to="/contact?topic=blog" variant="outline" size="sm" iconRight={<PenLine className="h-3.5 w-3.5" />}>
-                Pitch an article
-              </ButtonLink>
-            </div>
-          </div>
-        }
-      />
+      <BlogsMasthead />
 
       {error ? (
         <div className="container-editorial py-10">

@@ -1,15 +1,13 @@
 import { useMemo, useState } from 'react'
 import { FolderGit2, Search, SlidersHorizontal } from 'lucide-react'
 import { JoinBand, LinkArrow } from '../../components/site/primitives'
-import { PageHero, media } from '../../components/site/hero'
+import { ProjectsMasthead } from '../../components/site/mastheads'
 import { Alert, Badge, EmptyState } from '../../components/ui'
 import { Button } from '../../components/ui/button'
 import { Input, Select } from '../../components/ui/field'
 import { TypeCover } from '../../components/site/primitives'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi } from '../../lib/publicApi'
-
-const projectsHero = media('/images/projects/phone-ui', 'A phone screen showing an app interface')
 
 export function Projects() {
   const [query, setQuery] = useState('')
@@ -40,30 +38,7 @@ export function Projects() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Projects"
-        title="Our projects"
-        description="Discover solutions built by club members using the technologies they are learning. Published records show the stack and, where available, the outcomes."
-        media={projectsHero}
-        actions={
-          <Button variant="outline" size="md" onClick={() => document.getElementById('project-catalogue')?.scrollIntoView({ behavior: 'smooth' })}>
-            Browse the catalogue
-          </Button>
-        }
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-5">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Build with the club</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              Have an idea? Join to collaborate with like-minded students, access mentorship and turn concepts into real
-              solutions.
-            </p>
-            <div className="mt-3 flex flex-col gap-2">
-              <LinkArrow to="/auth/register">Join to start a project</LinkArrow>
-              <LinkArrow to="/contact?topic=project-idea">Submit a project idea</LinkArrow>
-            </div>
-          </div>
-        }
-      />
+      <ProjectsMasthead />
 
       {error ? (
         <div className="container-editorial py-8">

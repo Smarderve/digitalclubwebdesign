@@ -1,13 +1,11 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Newspaper } from 'lucide-react'
 import { PageNotFoundInline, SectionHead } from '../../components/site/primitives'
-import { PageHero, clubMedia } from '../../components/site/hero'
+import { NewsMasthead } from '../../components/site/mastheads'
 import { Alert, Badge, EmptyState } from '../../components/ui'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi } from '../../lib/publicApi'
 import { formatDate } from '../../lib/utils'
-
-const newsHero = clubMedia('/images/club/api-audience', 'Club members at the API Conference 2026')
 
 export function News() {
   const { data, loading, error } = usePublicData(() => publicApi.news({ per_page: 50 }), [])
@@ -15,21 +13,7 @@ export function News() {
 
   return (
     <>
-      <PageHero
-        eyebrow="News & updates"
-        title="Club news"
-        description="Announcements, results and notices from KIUT Digital Club, published by the club office."
-        media={newsHero}
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-4 lg:max-w-[300px]">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Live records</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              These notices are read from the club database. Only published records appear; nothing is filled in with
-              sample copy.
-            </p>
-          </div>
-        }
-      />
+      <NewsMasthead />
 
       <section className="section" data-reveal>
         <div className="container-editorial">
@@ -45,29 +29,49 @@ export function News() {
                 Loading news…
               </p>
             ) : items.length ? (
-              <div className="divide-y divide-line border-y border-line">
-                {items.map((item) => (
-                  <article key={item.id} className="grid gap-3 py-6 sm:grid-cols-[120px_1fr_auto] sm:items-start">
-                    <div className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">
-                      <Badge tone="green">Published</Badge>
-                      <p className="mt-2">{item.published_at ? formatDate(item.published_at) : ''}</p>
-                    </div>
-                    <div>
-                      <h2 className="text-[1.0625rem] font-semibold text-ink-950">
+              <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+                <article className="border-t-2 border-ink-900/70 pt-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone="green">Lead notice</Badge>
+                    <span className="font-mono text-[0.625rem] uppercase tracking-[0.1em] text-ink-400">
+                      {items[0].published_at ? formatDate(items[0].published_at) : ''}
+                    </span>
+                  </div>
+                  <h2 className="mt-3 max-w-[22ch] text-h1 text-ink-950">
+                    <Link to={`/news/${items[0].id}`} className="hover:text-brand-800">
+                      {items[0].title}
+                    </Link>
+                  </h2>
+                  <p className="mt-3 max-w-[62ch] text-[0.9375rem] leading-7 text-ink-600">{items[0].summary}</p>
+                  <Link
+                    to={`/news/${items[0].id}`}
+                    className="mt-4 inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-brand-800 underline decoration-brand-300 underline-offset-4 hover:decoration-brand-700"
+                  >
+                    Read the notice
+                  </Link>
+                </article>
+
+                <div className="border-t border-line">
+                  {items.slice(1).map((item) => (
+                    <article key={item.id} className="grid gap-1 border-b border-line py-4">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className="font-mono text-[0.5625rem] uppercase tracking-[0.1em] text-ink-400">
+                          {item.published_at ? formatDate(item.published_at) : ''}
+                        </p>
+                        <span className="text-[0.625rem] text-ink-300">Notice</span>
+                      </div>
+                      <h3 className="text-[0.9375rem] font-semibold leading-6 text-ink-950">
                         <Link to={`/news/${item.id}`} className="hover:text-brand-800">
                           {item.title}
                         </Link>
-                      </h2>
-                      <p className="mt-1.5 max-w-[72ch] text-[0.8125rem] leading-6 text-ink-500">{item.summary}</p>
-                    </div>
-                    <Link
-                      to={`/news/${item.id}`}
-                      className="self-start text-[0.75rem] font-semibold text-brand-800 underline decoration-brand-300 underline-offset-4 hover:decoration-brand-700"
-                    >
-                      Read notice
-                    </Link>
-                  </article>
-                ))}
+                      </h3>
+                      <p className="text-[0.75rem] leading-5 text-ink-500">{item.summary}</p>
+                    </article>
+                  ))}
+                  {items.length === 1 ? (
+                    <p className="py-4 text-[0.75rem] text-ink-400">No further notices have been published.</p>
+                  ) : null}
+                </div>
               </div>
             ) : (
               <EmptyState

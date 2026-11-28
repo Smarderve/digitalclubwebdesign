@@ -2,14 +2,12 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarCheck, CheckCircle2, FileCheck2, ShieldCheck, Vote } from 'lucide-react'
 import { LEADERSHIP_STRUCTURE } from '../../data/site'
 import { PageNotFoundInline, SectionHead } from '../../components/site/primitives'
-import { PageHero, clubMedia } from '../../components/site/hero'
+import { ElectionsMasthead } from '../../components/site/mastheads'
 import { Alert, Badge, EmptyState } from '../../components/ui'
 import { ButtonLink } from '../../components/ui/button'
 import { usePublicData } from '../../lib/usePublicData'
 import { publicApi } from '../../lib/publicApi'
 import { formatDate } from '../../lib/utils'
-
-const electionsHero = clubMedia('/images/club/devfest-tall', 'Club members gathered at a club event')
 
 const phases = [
   { title: 'Nominations', description: 'Members apply for published positions with a manifesto and passport photograph.', icon: FileCheck2 },
@@ -29,29 +27,7 @@ export function Elections() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Club elections"
-        title="Leadership elections"
-        description="Digital Club leadership is elected democratically by members each year. Public pages show the election timeline and candidate records once the club releases them."
-        media={electionsHero}
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-4 lg:max-w-[320px]">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Current status</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              {loading
-                ? 'Loading published elections…'
-                : elections.length
-                  ? `${elections.length} published ${elections.length === 1 ? 'election' : 'elections'}.`
-                  : 'No public election is currently published. Sign in to see elections you are eligible for.'}
-            </p>
-            <div className="mt-3">
-              <ButtonLink to="/auth/login" variant="outline" size="sm">
-                Member sign in
-              </ButtonLink>
-            </div>
-          </div>
-        }
-      />
+      <ElectionsMasthead />
 
       <section className="section border-b border-line" data-reveal>
         <div className="container-editorial">

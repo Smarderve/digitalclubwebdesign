@@ -2,13 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, BookMarked, FileText, Github, Library, MonitorPlay, Search, Wrench } from 'lucide-react'
 import { SectionHead } from '../../components/site/primitives'
-import { PageHero, media } from '../../components/site/hero'
+import { LearnMasthead } from '../../components/site/mastheads'
 import { EmptyState } from '../../components/ui'
 import { Button, ButtonLink } from '../../components/ui/button'
 import { Input, Select } from '../../components/ui/field'
 import { POPULAR_TOPICS } from '../../data/site'
-
-const learnHero = media('/images/learning/developer-desk', 'A laptop showing code in a shared workspace')
 
 const resources = [
   {
@@ -56,26 +54,7 @@ export function Learn() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Learning library"
-        title="Learn with material from the club"
-        description="Published notes and warmup resources from club sessions. Filter by field of study or topic to find the material that matches your learning path."
-        media={learnHero}
-        actions={
-          <ButtonLink to="/topics" size="md">
-            Browse learning paths
-          </ButtonLink>
-        }
-        aside={
-          <div className="rounded-lg border border-line bg-canvas p-4 lg:max-w-[320px]">
-            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">Who publishes notes</p>
-            <p className="mt-2 text-[0.8125rem] leading-6 text-ink-600">
-              Quizmasters upload notes to a quiz and release them when the quiz is published. Member-only quizzes appear
-              in the Warmup area after signing in.
-            </p>
-          </div>
-        }
-      />
+      <LearnMasthead />
 
       <section className="section border-b border-line" data-reveal>
         <div className="container-editorial">
